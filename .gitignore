@@ -1,0 +1,6 @@
+# Ignoring some files
+build/
+dist/
+__pycache__/
+*.xml
+*.exe
