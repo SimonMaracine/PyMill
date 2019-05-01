@@ -1,5 +1,6 @@
-from states import *
-import morris
+import os
+from src.states_id import *
+from src.states import morris
 
 control = {"state": GAME_STATE, "running": True}
 
@@ -13,7 +14,3 @@ def main():
             morris.run(control)
         elif current_state == OPTIONS_STATE:
             pass
-
-
-if __name__ == "__main__":
-    main()

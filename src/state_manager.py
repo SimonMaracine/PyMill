@@ -14,3 +14,6 @@ class State:
 
     def set_frame_rate(self, fps):
         self.fps = fps
+
+    def tick(self):
+        self.clock.tick(self.fps)
