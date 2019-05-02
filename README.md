@@ -1,3 +1,3 @@
 Simon's-Morris
 
-A hotseat or online multiplayer game.
+A hotseat and online multiplayer game.
