@@ -47,7 +47,26 @@ class Table:
         self.faze = FAZE1
         self.picked_up_piece = None  # has picked up a piece
         self.node_taken_piece = None
-        # self.faze2_now()
+        self.windmills = (
+            (self.nodes[0], self.nodes[1], self.nodes[2]),
+            (self.nodes[0], self.nodes[9], self.nodes[21]),
+            (self.nodes[21], self.nodes[22], self.nodes[23]),
+            (self.nodes[23], self.nodes[14], self.nodes[2]),
+            (self.nodes[3], self.nodes[4], self.nodes[5]),
+            (self.nodes[3], self.nodes[10], self.nodes[18]),
+            (self.nodes[18], self.nodes[19], self.nodes[20]),
+            (self.nodes[20], self.nodes[13], self.nodes[5]),
+            (self.nodes[6], self.nodes[7], self.nodes[8]),
+            (self.nodes[6], self.nodes[11], self.nodes[15]),
+            (self.nodes[15], self.nodes[16], self.nodes[17]),
+            (self.nodes[17], self.nodes[12], self.nodes[8]),
+            (self.nodes[1], self.nodes[4], self.nodes[7]),
+            (self.nodes[9], self.nodes[10], self.nodes[11]),
+            (self.nodes[22], self.nodes[19], self.nodes[16]),
+            (self.nodes[12], self.nodes[13], self.nodes[14]),
+        )
+        self.must_pick_up_piece = False
+        self.faze2_now()
 
     def render(self, surface):
         # Drawing three rectangles...
@@ -84,14 +103,27 @@ class Table:
 
         if self.faze == FAZE2:
             if mouse_pressed[0]:
-                for node in self.nodes:
-                    if node.highlight and node.piece and not self.picked_up_piece:
-                        if node.piece.pick_up(self.turn):
-                            for n in node.search_neighbors(self.nodes, self.DIV):
-                                n.change_color((0, 255, 0))
-                            self.node_taken_piece = node
-                            self.picked_up_piece = node.piece
-                        break
+                if not self.must_pick_up_piece:
+                    for node in self.nodes:
+                        if node.highlight and node.piece and not self.picked_up_piece:
+                            if node.piece.pick_up(self.turn):
+                                for n in node.search_neighbors(self.nodes, self.DIV):
+                                    n.change_color((0, 255, 0))
+                                self.node_taken_piece = node
+                                self.picked_up_piece = node.piece
+                            break
+                else:
+                    for node in self.nodes:
+                        if self.turn == PLAYER1:
+                            if node.highlight and node.piece and node.piece.color == BLACK:
+                                node.take_piece()
+                                self.must_pick_up_piece = False
+                                self.switch_turn()
+                        else:
+                            if node.highlight and node.piece and node.piece.color == WHITE:
+                                node.take_piece()
+                                self.must_pick_up_piece = False
+                                self.switch_turn()
             else:
                 if self.picked_up_piece:
                     for node in self.node_taken_piece.search_neighbors(self.nodes, self.DIV):
@@ -103,7 +135,11 @@ class Table:
                             self.node_taken_piece.take_piece()
                             self.node_taken_piece = None
                             self.picked_up_piece = None
-                            self.switch_turn()
+                            if not self.check_windmills(WHITE if self.turn == PLAYER1 else BLACK, node):
+                                self.switch_turn()
+                            else:
+                                self.must_pick_up_piece = True
+                                print("Remove piece")
                     if self.picked_up_piece:
                         for n in self.node_taken_piece.search_neighbors(self.nodes, self.DIV):
                             n.change_color((0, 0, 0))
@@ -144,8 +180,24 @@ class Table:
         else:
             self.turn = PLAYER1
 
-    def check_windmills(self):
-        pass
+    def check_windmills(self, color: tuple, node_put_piece: Node) -> bool:
+        def check_nodes() -> bool:
+            nodes = []
+            for n in windmill:
+                if n.piece and n.piece.color == color:
+                    nodes.append(True)
+                else:
+                    nodes.append(False)
+            if all(nodes) and any(map(lambda node: node == node_put_piece, windmill)):
+                return True
+            else:
+                return False
+
+        for i, windmill in enumerate(self.windmills):
+            if check_nodes():
+                print("{} windmill: {}".format(color, i))
+                return True
+        return False
 
     def faze2_now(self):  # automatically put all pieces; developer only
         w = True

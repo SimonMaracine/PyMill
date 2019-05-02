@@ -45,12 +45,12 @@ class Node:
             for node in nodes:
                 if search_east:
                     if (x + div * i, y) == (node.x, node.y):
-                        print("Found node on the E. Distance = {} DIVs".format(i))
+                        # print("Found node on the E. Distance = {} DIVs".format(i))
                         neighbor_nodes.append(node)
                         search_east = 0
                 if search_south:
                     if (x, y + div * i) == (node.x, node.y):
-                        print("Found node on the S. Distance = {} DIVs".format(i))
+                        # print("Found node on the S. Distance = {} DIVs".format(i))
                         neighbor_nodes.append(node)
                         search_south = 0
 
@@ -61,12 +61,12 @@ class Node:
             for node in nodes:
                 if search_west:
                     if (x - div * i, y) == (node.x, node.y):
-                        print("Found node on the W. Distance = {} DIVs".format(i))
+                        # print("Found node on the W. Distance = {} DIVs".format(i))
                         neighbor_nodes.append(node)
                         search_west = 0
                 if search_north:
                     if (x, y - div * i) == (node.x, node.y):
-                        print("Found node on the N. Distance = {} DIVs".format(i))
+                        # print("Found node on the N. Distance = {} DIVs".format(i))
                         neighbor_nodes.append(node)
                         search_north = 0
 
