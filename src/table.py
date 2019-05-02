@@ -1,8 +1,8 @@
-from math import sqrt
 import pygame
 from src.display import WIDTH, HEIGHT
 from src.piece import Piece
 from src.node import Node
+from src.constants import *
 
 
 class Table:
@@ -37,10 +37,18 @@ class Table:
             Node(self.x + self.DIV * 3, self.y + self.DIV * 6),
             Node(self.x + self.DIV * 6, self.y + self.DIV * 6)  # line
         ]
-        for node in self.nodes:  # correct the position of each node
+        for node in self.nodes:  # Correct the position of each node.
             node.x += 1
             node.y += 1
-        self.pieces = []
+        self.turn = PLAYER1
+        self.white_pieces = 9
+        self.black_pieces = 9
+        self.font = pygame.font.SysFont("calibri", 30, True)
+        self.faze = FAZE1
+        self.picked_up_piece = None  # has picked up a piece
+        self.node_taken_piece = None
+        # self.player_indicator =
+        # self.faze2_now()
 
     def render(self, surface):
         # Drawing three rectangles...
@@ -61,23 +69,89 @@ class Table:
 
         for node in self.nodes:
             node.render(surface)
+            if node.piece:
+                node.piece.render(surface)
 
-        for piece in self.pieces:
-            piece.render(surface)
+        self.show_player_pieces(surface)
+        self.show_player_indicator(surface)
 
-    def update(self, mouse: tuple):
+    def update(self, mouse: tuple, mouse_pressed: tuple):
         mouse_x = mouse[0]
         mouse_y = mouse[1]
         for node in self.nodes:
-            distance = sqrt(((mouse_x - node.x) ** 2 + (mouse_y - node.y) ** 2))
-            if distance <= node.radius:
-                node.highlight = True
+            node.update(mouse_x, mouse_y)
+            if node.piece:
+                node.piece.update(mouse_x, mouse_y)
+
+        if self.faze == FAZE2:
+            if mouse_pressed[0]:
+                for node in self.nodes:
+                    if node.highlight and node.piece and not self.picked_up_piece:
+                        if node.piece.pick_up(self.turn):
+                            self.node_taken_piece = node
+                            self.picked_up_piece = node.piece
+                        break
             else:
-                node.highlight = False
+                if self.picked_up_piece:
+                    for node in self.nodes:
+                        if node.highlight and not node.piece:
+                            node.add_piece(self.picked_up_piece)
+                            self.node_taken_piece.piece.release(node)
+                            self.node_taken_piece.take_piece()
+                            self.node_taken_piece = None
+                            self.picked_up_piece = None
+                            self.switch_turn()
+                    if self.picked_up_piece:
+                        self.picked_up_piece.release(self.node_taken_piece)
+                        self.picked_up_piece = None
 
     def put_new_piece(self):
         for node in self.nodes:
-            if node.highlight and not node.has_piece:
-                self.pieces.append(Piece(node.x, node.y, (255, 255, 255)))
-                node.has_piece = True
+            if node.highlight and not node.piece:
+                if self.turn == PLAYER1 and self.white_pieces > 0:
+                    new_piece = Piece(node.x, node.y, WHITE)
+                    node.add_piece(new_piece)
+                    self.white_pieces -= 1
+                    self.switch_turn()
+                elif self.turn == PLAYER2 and self.black_pieces > 0:
+                    new_piece = Piece(node.x, node.y, BLACK)
+                    node.add_piece(new_piece)
+                    self.black_pieces -= 1
+                    self.switch_turn()
                 break
+        if (self.white_pieces + self.black_pieces) == 0:
+            self.faze = FAZE2
+            print("FAZE2")
+
+    def show_player_pieces(self, surface):
+        player1_text = self.font.render("x {}".format(self.white_pieces), True, (0, 0, 0))
+        player2_text = self.font.render("x {}".format(self.black_pieces), True, (0, 0, 0))
+        surface.blit(player1_text, (20, HEIGHT//2 - 30))
+        surface.blit(player2_text, (WIDTH - 20 - player2_text.get_width(), HEIGHT // 2 - 30))
+
+    def show_player_indicator(self, surface):
+        text = self.font.render("Player: {}".format(self.turn), True, (0, 0, 0))
+        surface.blit(text, (5, 60))
+
+    def switch_turn(self):
+        if self.turn == PLAYER1:
+            self.turn = PLAYER2
+        else:
+            self.turn = PLAYER1
+
+    def faze2_now(self):  # automatically put all pieces
+        w = True
+        for node in self.nodes:
+            if not node.piece and (self.white_pieces + self.black_pieces) > 0:
+                if w:
+                    new_piece = Piece(node.x, node.y, WHITE)
+                    node.add_piece(new_piece)
+                    self.switch_turn()
+                    self.white_pieces -= 1
+                    w = not w
+                else:
+                    new_piece = Piece(node.x, node.y, BLACK)
+                    node.add_piece(new_piece)
+                    self.switch_turn()
+                    self.black_pieces -= 1
+                    w = not w

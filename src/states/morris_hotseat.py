@@ -2,7 +2,7 @@ import pygame
 from src import display
 from src import state_manager
 from src.table import Table
-from src.piece import Piece
+from src.constants import *
 
 
 def init(*args):
@@ -10,7 +10,6 @@ def init(*args):
     morris = state_manager.State(1, display.clock)
     window = display.window
     morris.set_frame_rate(60)
-
     table = Table()
 
 
@@ -19,17 +18,18 @@ def render():
 
 
 def update(control):
+    global table
     mouse = pygame.mouse.get_pos()
     mouse_pressed = pygame.mouse.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             morris.exit()
             control["running"] = False
-        elif event.type == pygame.MOUSEBUTTONUP:
+        elif event.type == pygame.MOUSEBUTTONUP and table.faze == FAZE1:
             if mouse_pressed[0]:
                 table.put_new_piece()
 
-    table.update(mouse)
+    table.update(mouse, mouse_pressed)
 
 
 def run(control, *args):
@@ -39,5 +39,6 @@ def run(control, *args):
         window.fill((160, 15, 160))
         update(control)
         render()
+        morris.show_fps(window)
         pygame.display.flip()
         morris.tick()
