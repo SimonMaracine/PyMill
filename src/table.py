@@ -94,7 +94,7 @@ class Table:
                         break
             else:
                 if self.picked_up_piece:
-                    for node in self.nodes:
+                    for node in self.node_taken_piece.search_neighbors(self.nodes, self.DIV):
                         if node.highlight and not node.piece:
                             node.add_piece(self.picked_up_piece)
                             for n in self.node_taken_piece.search_neighbors(self.nodes, self.DIV):
