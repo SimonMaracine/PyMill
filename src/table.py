@@ -11,32 +11,32 @@ class Table:
         self.x = (WIDTH - self.width) // 2
         self.y = (HEIGHT - self.width) // 2
         self.DIV = self.width // 6
-        self.nodes = [
-            Node(self.x, self.y),
-            Node(self.x + self.DIV * 3, self.y),
-            Node(self.x + self.DIV * 6, self.y),  # line
-            Node(self.x + self.DIV, self.y + self.DIV),
-            Node(self.x + self.DIV * 3, self.y + self.DIV),
-            Node(self.x + self.DIV * 5, self.y + self.DIV),  # line
-            Node(self.x + self.DIV * 2, self.y + self.DIV * 2),
-            Node(self.x + self.DIV * 3, self.y + self.DIV * 2),
-            Node(self.x + self.DIV * 4, self.y + self.DIV * 2),  # line
-            Node(self.x, self.y + self.DIV * 3),
-            Node(self.x + self.DIV, self.y + self.DIV * 3),
-            Node(self.x + self.DIV * 2, self.y + self.DIV * 3),  # line
-            Node(self.x + self.DIV * 4, self.y + self.DIV * 3),
-            Node(self.x + self.DIV * 5, self.y + self.DIV * 3),
-            Node(self.x + self.DIV * 6, self.y + self.DIV * 3),  # line
-            Node(self.x + self.DIV * 2, self.y + self.DIV * 4),
-            Node(self.x + self.DIV * 3, self.y + self.DIV * 4),
-            Node(self.x + self.DIV * 4, self.y + self.DIV * 4),  # line
-            Node(self.x + self.DIV, self.y + self.DIV * 5),
-            Node(self.x + self.DIV * 3, self.y + self.DIV * 5),
-            Node(self.x + self.DIV * 5, self.y + self.DIV * 5),  # line
-            Node(self.x, self.y + self.DIV * 6),
-            Node(self.x + self.DIV * 3, self.y + self.DIV * 6),
-            Node(self.x + self.DIV * 6, self.y + self.DIV * 6)  # line
-        ]
+        self.nodes = (
+            Node(self.x, self.y, (0, 1, 1, 0)),
+            Node(self.x + self.DIV * 3, self.y, (0, 1, 1, 1)),
+            Node(self.x + self.DIV * 6, self.y, (0, 1, 0, 1)),  # line
+            Node(self.x + self.DIV, self.y + self.DIV, (0, 1, 1, 0)),
+            Node(self.x + self.DIV * 3, self.y + self.DIV, (1, 1, 1, 1)),
+            Node(self.x + self.DIV * 5, self.y + self.DIV, (0, 1, 0, 1)),  # line
+            Node(self.x + self.DIV * 2, self.y + self.DIV * 2, (0, 1, 1, 0)),
+            Node(self.x + self.DIV * 3, self.y + self.DIV * 2, (1, 0, 1, 1)),
+            Node(self.x + self.DIV * 4, self.y + self.DIV * 2, (0, 1, 0, 1)),  # line
+            Node(self.x, self.y + self.DIV * 3, (1, 1, 1, 0)),
+            Node(self.x + self.DIV, self.y + self.DIV * 3, (1, 1, 1, 1)),
+            Node(self.x + self.DIV * 2, self.y + self.DIV * 3, (1, 1, 0, 1)),  # line
+            Node(self.x + self.DIV * 4, self.y + self.DIV * 3, (1, 1, 1, 0)),
+            Node(self.x + self.DIV * 5, self.y + self.DIV * 3, (1, 1, 1, 1)),
+            Node(self.x + self.DIV * 6, self.y + self.DIV * 3, (1, 1, 0, 1)),  # line
+            Node(self.x + self.DIV * 2, self.y + self.DIV * 4, (1, 0, 1, 0)),
+            Node(self.x + self.DIV * 3, self.y + self.DIV * 4, (0, 1, 1, 1)),
+            Node(self.x + self.DIV * 4, self.y + self.DIV * 4, (1, 0, 0, 1)),  # line
+            Node(self.x + self.DIV, self.y + self.DIV * 5, (1, 0, 1, 0)),
+            Node(self.x + self.DIV * 3, self.y + self.DIV * 5, (1, 1, 1, 1)),
+            Node(self.x + self.DIV * 5, self.y + self.DIV * 5, (1, 0, 0, 1)),  # line
+            Node(self.x, self.y + self.DIV * 6, (1, 0, 1, 0)),
+            Node(self.x + self.DIV * 3, self.y + self.DIV * 6, (1, 0, 1, 1)),
+            Node(self.x + self.DIV * 6, self.y + self.DIV * 6, (1, 0, 0, 1))  # line
+        )
         for node in self.nodes:  # Correct the position of each node.
             node.x += 1
             node.y += 1
@@ -47,7 +47,6 @@ class Table:
         self.faze = FAZE1
         self.picked_up_piece = None  # has picked up a piece
         self.node_taken_piece = None
-        # self.player_indicator =
         # self.faze2_now()
 
     def render(self, surface):
@@ -88,6 +87,8 @@ class Table:
                 for node in self.nodes:
                     if node.highlight and node.piece and not self.picked_up_piece:
                         if node.piece.pick_up(self.turn):
+                            for n in node.search_neighbors(self.nodes, self.DIV):
+                                n.change_color((0, 255, 0))
                             self.node_taken_piece = node
                             self.picked_up_piece = node.piece
                         break
@@ -96,12 +97,16 @@ class Table:
                     for node in self.nodes:
                         if node.highlight and not node.piece:
                             node.add_piece(self.picked_up_piece)
+                            for n in self.node_taken_piece.search_neighbors(self.nodes, self.DIV):
+                                n.change_color((0, 0, 0))
                             self.node_taken_piece.piece.release(node)
                             self.node_taken_piece.take_piece()
                             self.node_taken_piece = None
                             self.picked_up_piece = None
                             self.switch_turn()
                     if self.picked_up_piece:
+                        for n in self.node_taken_piece.search_neighbors(self.nodes, self.DIV):
+                            n.change_color((0, 0, 0))
                         self.picked_up_piece.release(self.node_taken_piece)
                         self.picked_up_piece = None
 
@@ -139,7 +144,10 @@ class Table:
         else:
             self.turn = PLAYER1
 
-    def faze2_now(self):  # automatically put all pieces
+    def check_windmills(self):
+        pass
+
+    def faze2_now(self):  # automatically put all pieces; developer only
         w = True
         for node in self.nodes:
             if not node.piece and (self.white_pieces + self.black_pieces) > 0:
