@@ -36,7 +36,7 @@ def run(control, *args):
     init()
 
     while morris.run:
-        window.fill((160, 15, 160))
+        window.fill((180, 16, 180))
         update(control)
         render()
         morris.show_fps(window)

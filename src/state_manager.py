@@ -8,7 +8,7 @@ class State:
         self.run = True
         self.clock = clock
         self.fps = 60
-        self.fps_font = pygame.font.SysFont("calibri", 20, True)
+        self.fps_font = pygame.font.SysFont("calibri", 18, True)
 
     def exit(self):
         self.run = False
@@ -24,5 +24,5 @@ class State:
         self.clock.tick(self.fps)
 
     def show_fps(self, surface):
-        text = self.fps_font.render("FPS: " + str(int(self.clock.get_fps())), True, (255, 255, 80))
-        surface.blit(text, (8, HEIGHT - 23))
+        text = self.fps_font.render("FPS: " + str(int(self.clock.get_fps())), True, (255, 255, 16))
+        surface.blit(text, (7, HEIGHT - 22))
