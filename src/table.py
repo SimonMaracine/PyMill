@@ -1,3 +1,4 @@
+import sys
 import pygame
 from src.display import WIDTH, HEIGHT
 from src.piece import Piece
@@ -63,34 +64,21 @@ class Table:
             (self.nodes[1], self.nodes[4], self.nodes[7]),
             (self.nodes[9], self.nodes[10], self.nodes[11]),
             (self.nodes[22], self.nodes[19], self.nodes[16]),
-            (self.nodes[12], self.nodes[13], self.nodes[14]),
+            (self.nodes[12], self.nodes[13], self.nodes[14])
         )
-        self.must_pick_up_piece = False
-        self.faze2_now()
+        self.must_remove_piece = False
+        self.can_jump = {PLAYER1: False, PLAYER2: False}
+        self.node_pressed = False  # if a node is clicked
+        # self.faze2_now()
 
     def render(self, surface):
-        # Drawing three rectangles...
-        pygame.draw.rect(surface, (0, 0, 0), (self.x, self.y, self.width, self.width), 2)
-        pygame.draw.rect(surface, (0, 0, 0), (self.x + self.DIV, self.y + self.DIV,
-                                              self.width - self.DIV * 2, self.width - self.DIV * 2), 2)
-        pygame.draw.rect(surface, (0, 0, 0), (self.x + self.DIV * 2, self.y + self.DIV * 2,
-                                              self.width - self.DIV * 4, self.width - self.DIV * 4), 2)
-        # ... and four middle lines.
-        pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 3, self.y),
-                         (self.x + self.DIV * 3, self.y + self.DIV * 2), 2)
-        pygame.draw.line(surface, (0, 0, 0), (self.x, self.y + self.DIV * 3),
-                         (self.x + self.DIV * 2, self.y + self.DIV * 3), 2)
-        pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 3, self.y + self.DIV * 6),
-                         (self.x + self.DIV * 3, self.y + self.DIV * 4), 2)
-        pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 6, self.y + self.DIV * 3),
-                         (self.x + self.DIV * 4, self.y + self.DIV * 3), 2)
-
+        self.show_table(surface)
         for node in self.nodes:
             node.render(surface)
             if node.piece:
                 node.piece.render(surface)
-
-        self.show_player_pieces(surface)
+        if self.faze == FAZE1:
+            self.show_player_pieces(surface)
         self.show_player_indicator(surface)
 
     def update(self, mouse: tuple, mouse_pressed: tuple):
@@ -102,67 +90,114 @@ class Table:
                 node.piece.update(mouse_x, mouse_y)
 
         if self.faze == FAZE2:
-            if mouse_pressed[0]:
-                if not self.must_pick_up_piece:
-                    for node in self.nodes:
-                        if node.highlight and node.piece and not self.picked_up_piece:
-                            if node.piece.pick_up(self.turn):
-                                for n in node.search_neighbors(self.nodes, self.DIV):
-                                    n.change_color((0, 255, 0))
-                                self.node_taken_piece = node
-                                self.picked_up_piece = node.piece
-                            break
-                else:
-                    for node in self.nodes:
-                        if self.turn == PLAYER1:
-                            if node.highlight and node.piece and node.piece.color == BLACK:
-                                node.take_piece()
-                                self.must_pick_up_piece = False
-                                self.switch_turn()
-                        else:
-                            if node.highlight and node.piece and node.piece.color == WHITE:
-                                node.take_piece()
-                                self.must_pick_up_piece = False
-                                self.switch_turn()
-            else:
-                if self.picked_up_piece:
-                    for node in self.node_taken_piece.search_neighbors(self.nodes, self.DIV):
-                        if node.highlight and not node.piece:
-                            node.add_piece(self.picked_up_piece)
-                            for n in self.node_taken_piece.search_neighbors(self.nodes, self.DIV):
-                                n.change_color((0, 0, 0))
-                            self.node_taken_piece.piece.release(node)
-                            self.node_taken_piece.take_piece()
-                            self.node_taken_piece = None
-                            self.picked_up_piece = None
-                            if not self.check_windmills(WHITE if self.turn == PLAYER1 else BLACK, node):
-                                self.switch_turn()
-                            else:
-                                self.must_pick_up_piece = True
-                                print("Remove piece")
-                    if self.picked_up_piece:
-                        for n in self.node_taken_piece.search_neighbors(self.nodes, self.DIV):
-                            n.change_color((0, 0, 0))
-                        self.picked_up_piece.release(self.node_taken_piece)
-                        self.picked_up_piece = None
+            pass
+        else:
+            pass
 
     def put_new_piece(self):
         for node in self.nodes:
             if node.highlight and not node.piece:
-                if self.turn == PLAYER1 and self.white_pieces > 0:
+                if self.turn == PLAYER1:
                     new_piece = Piece(node.x, node.y, WHITE)
                     node.add_piece(new_piece)
                     self.white_pieces -= 1
-                    self.switch_turn()
-                elif self.turn == PLAYER2 and self.black_pieces > 0:
+                    if not self.check_windmills(WHITE, node):
+                        self.switch_turn()
+                    else:
+                        self.must_remove_piece = True
+                        print("Remove a piece!")
+                else:
                     new_piece = Piece(node.x, node.y, BLACK)
                     node.add_piece(new_piece)
                     self.black_pieces -= 1
-                    self.switch_turn()
+                    if not self.check_windmills(BLACK, node):
+                        self.switch_turn()
+                    else:
+                        self.must_remove_piece = True
+                        print("Remove a piece!")
                 break
         if (self.white_pieces + self.black_pieces) == 0:
             self.faze = FAZE2
             print("FAZE2")
+
+    def pick_up_piece(self):
+        for node in self.nodes:
+            if node.highlight and node.piece and not self.picked_up_piece:
+                if node.piece.pick_up(self.turn):
+                    for n in node.search_neighbors(self.nodes, self.DIV):
+                        n.change_color((0, 255, 0))
+                    self.node_taken_piece = node
+                    self.picked_up_piece = node.piece
+                break
+
+    def remove_opponent_piece(self):
+        for node in self.nodes:
+            if self.turn == PLAYER1:
+                if node.highlight and node.piece and node.piece.color == BLACK:
+                    if not self.check_windmills(BLACK, node):
+                        node.take_piece()
+                        self.must_remove_piece = False
+                        self.check_player_pieces(BLACK)
+                        self.switch_turn()
+                    else:
+                        print("You cannot take piece from windmill!")
+            else:
+                if node.highlight and node.piece and node.piece.color == WHITE:
+                    if not self.check_windmills(WHITE, node):
+                        node.take_piece()
+                        self.must_remove_piece = False
+                        self.check_player_pieces(WHITE)
+                        self.switch_turn()
+                    else:
+                        print("You cannot take piece from windmill!")
+
+    def put_down_piece(self):
+        if self.picked_up_piece:
+            for node in (self.node_taken_piece.search_neighbors(self.nodes, self.DIV) if self.turn == PLAYER1 and not self.can_jump[PLAYER1] or
+                                                                                         self.turn == PLAYER2 and not self.can_jump[PLAYER2] else self.nodes):
+                if node.highlight and not node.piece:
+                    node.add_piece(self.picked_up_piece)
+                    for n in self.node_taken_piece.search_neighbors(self.nodes, self.DIV):
+                        n.change_color((0, 0, 0))
+                    self.node_taken_piece.piece.release(node)
+                    self.node_taken_piece.take_piece()
+                    self.node_taken_piece = None
+                    self.picked_up_piece = None
+                    if not self.check_windmills(WHITE if self.turn == PLAYER1 else BLACK, node):
+                        self.switch_turn()
+                    else:
+                        self.must_remove_piece = True
+                        print("Remove a piece!")
+
+        # Release piece if player released the left button.
+        if self.picked_up_piece:
+            for n in self.node_taken_piece.search_neighbors(self.nodes, self.DIV):
+                n.change_color((0, 0, 0))
+            self.picked_up_piece.release(self.node_taken_piece)
+            self.picked_up_piece = None
+
+    def clicked_on_node(self) -> bool:
+        for node in self.nodes:
+            if node.highlight:
+                return True
+        return False
+
+    def show_table(self, surface):
+        # Drawing three rectangles...
+        pygame.draw.rect(surface, (0, 0, 0), (self.x, self.y, self.width, self.width), 2)
+        pygame.draw.rect(surface, (0, 0, 0), (self.x + self.DIV, self.y + self.DIV,
+                                              self.width - self.DIV * 2, self.width - self.DIV * 2), 2)
+        pygame.draw.rect(surface, (0, 0, 0), (self.x + self.DIV * 2, self.y + self.DIV * 2,
+                                              self.width - self.DIV * 4, self.width - self.DIV * 4), 2)
+        # ...and four middle lines.
+        pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 3, self.y),
+                         (self.x + self.DIV * 3, self.y + self.DIV * 2), 2)
+        pygame.draw.line(surface, (0, 0, 0), (self.x, self.y + self.DIV * 3),
+                         (self.x + self.DIV * 2, self.y + self.DIV * 3), 2)
+        pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 3, self.y + self.DIV * 6),
+                         (self.x + self.DIV * 3, self.y + self.DIV * 4), 2)
+        pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 6, self.y + self.DIV * 3),
+                         (self.x + self.DIV * 4, self.y + self.DIV * 3), 2)
 
     def show_player_pieces(self, surface):
         player1_text = self.font.render("x {}".format(self.white_pieces), True, (0, 0, 0))
@@ -180,24 +215,44 @@ class Table:
         else:
             self.turn = PLAYER1
 
-    def check_windmills(self, color: tuple, node_put_piece: Node) -> bool:
-        def check_nodes() -> bool:
-            nodes = []
-            for n in windmill:
-                if n.piece and n.piece.color == color:
-                    nodes.append(True)
-                else:
-                    nodes.append(False)
-            if all(nodes) and any(map(lambda node: node == node_put_piece, windmill)):
-                return True
+    @staticmethod
+    def check_nodes(w_mill: tuple, color: tuple) -> bool:
+        nodes = []
+        for n in w_mill:
+            if n.piece and n.piece.color == color:
+                nodes.append(True)
             else:
-                return False
+                nodes.append(False)
+        if all(nodes):
+            return True
+        else:
+            return False
 
+    def check_windmills(self, color: tuple, node: Node) -> bool:
         for i, windmill in enumerate(self.windmills):
-            if check_nodes():
+            if self.check_nodes(windmill, color) and any(map(lambda n: n == node, windmill)):
                 print("{} windmill: {}".format(color, i))
                 return True
         return False
+
+    def count_pieces(self, color: tuple) -> int:
+        pieces = 0
+        for node in self.nodes:
+            if node.piece and node.piece.color == color:
+                pieces += 1
+        print(pieces)
+        return pieces
+
+    def check_player_pieces(self, color):
+        player = "player1" if color == WHITE else "player2"
+        pieces_left = self.count_pieces(color)
+
+        if self.faze == FAZE2:
+            if pieces_left == 3:
+                self.can_jump[player] = True
+            elif pieces_left == 2:
+                print("Game is over.")
+                sys.exit()
 
     def faze2_now(self):  # automatically put all pieces; developer only
         w = True

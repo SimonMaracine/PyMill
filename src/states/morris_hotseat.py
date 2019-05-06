@@ -18,16 +18,30 @@ def render():
 
 
 def update(control):
-    global table
     mouse = pygame.mouse.get_pos()
     mouse_pressed = pygame.mouse.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             morris.exit()
             control["running"] = False
-        elif event.type == pygame.MOUSEBUTTONUP and table.faze == FAZE1:
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if not mouse_pressed[0]:
+                if table.clicked_on_node():
+                    table.node_pressed = True
+                if not table.must_remove_piece:
+                    if table.faze == FAZE2:
+                        table.pick_up_piece()
+                else:
+                    table.remove_opponent_piece()
+            # print(table.node_pressed)
+        elif event.type == pygame.MOUSEBUTTONUP:
             if mouse_pressed[0]:
-                table.put_new_piece()
+                if table.faze == FAZE1:
+                    if table.node_pressed:
+                        table.put_new_piece()
+                else:
+                    table.put_down_piece()
+            table.node_pressed = False
 
     table.update(mouse, mouse_pressed)
 
