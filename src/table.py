@@ -124,7 +124,7 @@ class Table:
         for node in self.nodes:
             if node.highlight and node.piece and not self.picked_up_piece:
                 if node.piece.pick_up(self.turn):
-                    for n in node.search_neighbors(self.nodes, self.DIV):
+                    for n in self.where_can_go(node):
                         n.change_color((0, 255, 0))
                     self.node_taken_piece = node
                     self.picked_up_piece = node.piece
@@ -150,14 +150,14 @@ class Table:
                         self.switch_turn()
                     else:
                         print("You cannot take piece from windmill!")
+        self.node_pressed = False
 
     def put_down_piece(self):
         if self.picked_up_piece:
-            for node in (self.node_taken_piece.search_neighbors(self.nodes, self.DIV) if self.turn == PLAYER1 and not self.can_jump[PLAYER1] or
-                                                                                         self.turn == PLAYER2 and not self.can_jump[PLAYER2] else self.nodes):
+            for node in self.where_can_go(self.node_taken_piece):
                 if node.highlight and not node.piece:
                     node.add_piece(self.picked_up_piece)
-                    for n in self.node_taken_piece.search_neighbors(self.nodes, self.DIV):
+                    for n in self.where_can_go(self.node_taken_piece):
                         n.change_color((0, 0, 0))
                     self.node_taken_piece.piece.release(node)
                     self.node_taken_piece.take_piece()
@@ -171,7 +171,7 @@ class Table:
 
         # Release piece if player released the left button.
         if self.picked_up_piece:
-            for n in self.node_taken_piece.search_neighbors(self.nodes, self.DIV):
+            for n in self.where_can_go(self.node_taken_piece):
                 n.change_color((0, 0, 0))
             self.picked_up_piece.release(self.node_taken_piece)
             self.picked_up_piece = None
@@ -244,7 +244,7 @@ class Table:
         return pieces
 
     def check_player_pieces(self, color):
-        player = "player1" if color == WHITE else "player2"
+        player = PLAYER1 if color == WHITE else PLAYER2
         pieces_left = self.count_pieces(color)
 
         if self.faze == FAZE2:
@@ -253,6 +253,14 @@ class Table:
             elif pieces_left == 2:
                 print("Game is over.")
                 sys.exit()
+
+    def where_can_go(self, node) -> tuple:
+        if self.turn == PLAYER1 and not self.can_jump[PLAYER1] or self.turn == PLAYER2 and not self.can_jump[PLAYER2]:
+            return node.search_neighbors(self.nodes, self.DIV)
+        else:
+            new_nodes = list(self.nodes)
+            new_nodes.remove(node)
+            return tuple(new_nodes)
 
     def faze2_now(self):  # automatically put all pieces; developer only
         w = True
