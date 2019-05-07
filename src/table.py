@@ -89,11 +89,6 @@ class Table:
             if node.piece:
                 node.piece.update(mouse_x, mouse_y)
 
-        if self.faze == FAZE2:
-            pass
-        else:
-            pass
-
     def put_new_piece(self):
         for node in self.nodes:
             if node.highlight and not node.piece:
@@ -134,7 +129,8 @@ class Table:
         for node in self.nodes:
             if self.turn == PLAYER1:
                 if node.highlight and node.piece and node.piece.color == BLACK:
-                    if not self.check_windmills(BLACK, node):
+                    if not self.check_windmills(BLACK, node) or \
+                            self.number_pieces_in_windmills(BLACK) == self.count_pieces(BLACK):
                         node.take_piece()
                         self.must_remove_piece = False
                         self.check_player_pieces(BLACK)
@@ -143,7 +139,8 @@ class Table:
                         print("You cannot take piece from windmill!")
             else:
                 if node.highlight and node.piece and node.piece.color == WHITE:
-                    if not self.check_windmills(WHITE, node):
+                    if not self.check_windmills(WHITE, node) or \
+                            self.number_pieces_in_windmills(WHITE) == self.count_pieces(WHITE):
                         node.take_piece()
                         self.must_remove_piece = False
                         self.check_player_pieces(WHITE)
@@ -217,6 +214,16 @@ class Table:
 
     @staticmethod
     def check_nodes(w_mill: tuple, color: tuple) -> bool:
+        """Checks if all nodes within a group of nodes have pieces of the same color.
+
+        Args:
+            w_mill (tuple): The group of nodes to check (a possible windmill).
+            color (tuple): The color that the pieces all need to be.
+
+        Returns:
+            bool: True if the nodes within the windmill actually form a windmill, False otherwise.
+
+        """
         nodes = []
         for n in w_mill:
             if n.piece and n.piece.color == color:
@@ -229,13 +236,32 @@ class Table:
             return False
 
     def check_windmills(self, color: tuple, node: Node) -> bool:
+        """Checks if there is a windmill formed and if node is any of the windmill's nodes.
+
+        Args:
+            color (tuple): The color of the pieces it checks.
+            node (Node): The node to check if is any of windmill's nodes.
+
+        Returns:
+            bool: True if there is a windmill and if node is in there, False otherwise.
+
+        """
         for i, windmill in enumerate(self.windmills):
-            if self.check_nodes(windmill, color) and any(map(lambda n: n == node, windmill)):
+            if self.check_nodes(windmill, color) and any(map(lambda n: n is node, windmill)):
                 print("{} windmill: {}".format(color, i))
                 return True
         return False
 
     def count_pieces(self, color: tuple) -> int:
+        """Counts the number of pieces a player has.
+
+        Args:
+            color (tuple): The color of the pieces it counts.
+
+        Returns:
+            int: The number of pieces a player has.
+
+        """
         pieces = 0
         for node in self.nodes:
             if node.piece and node.piece.color == color:
@@ -243,7 +269,15 @@ class Table:
         print(pieces)
         return pieces
 
-    def check_player_pieces(self, color):
+    def check_player_pieces(self, color: tuple):
+        """Checks the number of pieces of a player.
+
+        If the player has 3 pieces remaining, his/her pieces can go anywhere and if 2 pieces remaining, he/she loses.
+
+        Args:
+            color (tuple): The color of the pieces to check.
+
+        """
         player = PLAYER1 if color == WHITE else PLAYER2
         pieces_left = self.count_pieces(color)
 
@@ -254,7 +288,19 @@ class Table:
                 print("Game is over.")
                 sys.exit()
 
-    def where_can_go(self, node) -> tuple:
+    def where_can_go(self, node: Node) -> tuple:
+        """Decides where a piece can go based on the dictionary Table.can_jump.
+
+        Args:
+            node (Node): The node from where the piece wants to go.
+
+        Returns:
+            tuple: The nodes where the piece can go.
+
+        """
+        if node is None:
+            raise TypeError("Node shouldn't be None...")
+
         if self.turn == PLAYER1 and not self.can_jump[PLAYER1] or self.turn == PLAYER2 and not self.can_jump[PLAYER2]:
             return node.search_neighbors(self.nodes, self.DIV)
         else:
@@ -262,7 +308,25 @@ class Table:
             new_nodes.remove(node)
             return tuple(new_nodes)
 
-    def faze2_now(self):  # automatically put all pieces; developer only
+    def number_pieces_in_windmills(self, color: tuple) -> int:
+        """Counts the number of pieces that are inside of any windmill.
+
+        Args:
+            color (tuple): The color of the pieces to count.
+
+        Returns:
+            int: The number of pieces that are inside windmills.
+
+        """
+        pieces_inside_windmills = set()
+        for windmill in self.windmills:
+            if self.check_nodes(windmill, color):
+                for node in windmill:
+                    pieces_inside_windmills.add(node)
+        return len(pieces_inside_windmills)
+
+    def faze2_now(self):
+        """Automatically puts all pieces. Only for testing purposes."""
         w = True
         for node in self.nodes:
             if not node.piece and (self.white_pieces + self.black_pieces) > 0:
