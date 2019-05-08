@@ -1,4 +1,3 @@
-import sys
 import pygame
 from src.display import WIDTH, HEIGHT
 from src.piece import Piece
@@ -77,6 +76,8 @@ class Table:
             node.render(surface)
             if node.piece:
                 node.piece.render(surface)
+                if node.remove_thingy:
+                    node.render_remove_thingy(surface)
         if self.faze == FAZE1:
             self.show_player_pieces(surface)
         self.show_player_indicator(surface)
@@ -85,7 +86,7 @@ class Table:
         mouse_x = mouse[0]
         mouse_y = mouse[1]
         for node in self.nodes:
-            node.update(mouse_x, mouse_y)
+            node.update(mouse_x, mouse_y, self.must_remove_piece)
             if node.piece:
                 node.piece.update(mouse_x, mouse_y)
 
@@ -96,6 +97,7 @@ class Table:
                     new_piece = Piece(node.x, node.y, WHITE)
                     node.add_piece(new_piece)
                     self.white_pieces -= 1
+                    self.check_player_pieces(WHITE)
                     if not self.check_windmills(WHITE, node):
                         self.switch_turn()
                     else:
@@ -105,6 +107,7 @@ class Table:
                     new_piece = Piece(node.x, node.y, BLACK)
                     node.add_piece(new_piece)
                     self.black_pieces -= 1
+                    self.check_player_pieces(BLACK)
                     if not self.check_windmills(BLACK, node):
                         self.switch_turn()
                     else:
@@ -119,13 +122,18 @@ class Table:
         for node in self.nodes:
             if node.highlight and node.piece and not self.picked_up_piece:
                 if node.piece.pick_up(self.turn):
-                    for n in self.where_can_go(node):
-                        n.change_color((0, 255, 0))
+                    self.change_node_color(node, (0, 255, 0), (255, 0, 0))
                     self.node_taken_piece = node
                     self.picked_up_piece = node.piece
                 break
 
-    def remove_opponent_piece(self):
+    def remove_opponent_piece(self) -> bool:
+        """Removes a piece from opponent.
+
+        Returns:
+            bool: True if self.check_player_pieces() returns True, False otherwise.
+
+        """
         for node in self.nodes:
             if self.turn == PLAYER1:
                 if node.highlight and node.piece and node.piece.color == BLACK:
@@ -133,7 +141,8 @@ class Table:
                             self.number_pieces_in_windmills(BLACK) == self.count_pieces(BLACK):
                         node.take_piece()
                         self.must_remove_piece = False
-                        self.check_player_pieces(BLACK)
+                        if self.check_player_pieces(BLACK):
+                            return True
                         self.switch_turn()
                     else:
                         print("You cannot take piece from windmill!")
@@ -143,19 +152,20 @@ class Table:
                             self.number_pieces_in_windmills(WHITE) == self.count_pieces(WHITE):
                         node.take_piece()
                         self.must_remove_piece = False
-                        self.check_player_pieces(WHITE)
+                        if self.check_player_pieces(WHITE):
+                            return True
                         self.switch_turn()
                     else:
                         print("You cannot take piece from windmill!")
         self.node_pressed = False
+        return False
 
     def put_down_piece(self):
         if self.picked_up_piece:
             for node in self.where_can_go(self.node_taken_piece):
                 if node.highlight and not node.piece:
                     node.add_piece(self.picked_up_piece)
-                    for n in self.where_can_go(self.node_taken_piece):
-                        n.change_color((0, 0, 0))
+                    self.change_node_color(self.node_taken_piece, (0, 0, 0), (0, 0, 0))
                     self.node_taken_piece.piece.release(node)
                     self.node_taken_piece.take_piece()
                     self.node_taken_piece = None
@@ -168,8 +178,7 @@ class Table:
 
         # Release piece if player released the left button.
         if self.picked_up_piece:
-            for n in self.where_can_go(self.node_taken_piece):
-                n.change_color((0, 0, 0))
+            self.change_node_color(self.node_taken_piece, (0, 0, 0), (0, 0, 0))
             self.picked_up_piece.release(self.node_taken_piece)
             self.picked_up_piece = None
 
@@ -269,24 +278,33 @@ class Table:
         print(pieces)
         return pieces
 
-    def check_player_pieces(self, color: tuple):
-        """Checks the number of pieces of a player.
+    def check_player_pieces(self, color: tuple) -> bool:
+        """Checks the number of pieces of a player and returns when the game is over.
 
         If the player has 3 pieces remaining, his/her pieces can go anywhere and if 2 pieces remaining, he/she loses.
 
         Args:
             color (tuple): The color of the pieces to check.
 
+        Returns:
+            bool: True if the game is over, False otherwise.
+
         """
         player = PLAYER1 if color == WHITE else PLAYER2
         pieces_left = self.count_pieces(color)
 
+        if pieces_left == 3:
+            self.can_jump[player] = True
+        else:
+            self.can_jump[player] = False
+
         if self.faze == FAZE2:
-            if pieces_left == 3:
-                self.can_jump[player] = True
-            elif pieces_left == 2:
+            if pieces_left == 2:
+                message = "White won!" if player is PLAYER2 else "Black won!"
+                print(message)
                 print("Game is over.")
-                sys.exit()
+                return True
+        return False
 
     def where_can_go(self, node: Node) -> tuple:
         """Decides where a piece can go based on the dictionary Table.can_jump.
@@ -324,6 +342,28 @@ class Table:
                 for node in windmill:
                     pieces_inside_windmills.add(node)
         return len(pieces_inside_windmills)
+
+    def change_node_color(self, node: Node, color1: tuple, color2: tuple):
+        """Changes color of other nodes based on where the piece can go.
+
+        Args:
+            node (Node): The node where the piece currently sits.
+            color1 (tuple): The color to change the nodes where the piece can go.
+            color2 (tuple): The color to change the nodes where the piece cannot go.
+
+        """
+        for n in self.where_can_go(node):
+            n.change_color(color1)
+
+        nodes_copy = list(self.nodes)
+        for i in self.nodes:
+            for j in self.where_can_go(node):
+                if i is j:
+                    nodes_copy.remove(i)
+        nodes_copy.remove(node)
+
+        for n in nodes_copy:
+            n.change_color(color2)
 
     def faze2_now(self):
         """Automatically puts all pieces. Only for testing purposes."""

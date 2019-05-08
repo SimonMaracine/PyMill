@@ -9,9 +9,10 @@ class Node:
         self.search = search
         self.radius = 29
         self.highlight = False
-        self.highlight_color = (16, 200, 15)
+        self.highlight_color = (180, 170, 190)
         self.color = (0, 0, 0)
         self.piece = None
+        self.remove_thingy = False
 
     def render(self, surface):
         pygame.draw.circle(surface, self.color, (self.x, self.y), 11)
@@ -19,12 +20,24 @@ class Node:
             pygame.draw.ellipse(surface, self.highlight_color,
                                 (self.x - self.radius, self.y - self.radius, self.radius * 2, self.radius * 2), 3)
 
-    def update(self, mouse_x, mouse_y):
+    def update(self, mouse_x, mouse_y, must_remove_piece):
         distance = sqrt(((mouse_x - self.x) ** 2 + (mouse_y - self.y) ** 2))
         if distance <= self.radius:
             self.highlight = True
         else:
             self.highlight = False
+
+        if must_remove_piece:
+            self.remove_thingy = True
+        else:
+            self.remove_thingy = False
+
+    def render_remove_thingy(self, surface):
+        if self.highlight and self.remove_thingy:
+            pygame.draw.line(surface, self.highlight_color, (self.x - self.radius//2, self.y - self.radius//2),
+                             (self.x + self.radius//2, self.y + self.radius//2), 3)
+            pygame.draw.line(surface, self.highlight_color, (self.x + self.radius//2, self.y - self.radius//2),
+                             (self.x - self.radius//2, self.y + self.radius//2), 3)
 
     def add_piece(self, piece):
         self.piece = piece
