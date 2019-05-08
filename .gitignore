@@ -5,3 +5,5 @@ __pycache__/
 *.xml
 *.iml
 *.exe
+*.spec
+Simons-Morris_temp.py
