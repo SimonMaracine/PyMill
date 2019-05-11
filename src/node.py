@@ -7,12 +7,15 @@ class Node:
         self.x = x
         self.y = y
         self.search = search
-        self.radius = 29
+        self.radius = 30
         self.highlight = False
         self.highlight_color = (180, 170, 190)
         self.color = (0, 0, 0)
         self.piece = None
         self.remove_thingy = False
+
+    def __repr__(self):
+        return "[{}, {}; {}]".format(self.x // 90, self.y // 90, True if self.piece else False)
 
     def render(self, surface):
         pygame.draw.circle(surface, self.color, (self.x, self.y), 11)

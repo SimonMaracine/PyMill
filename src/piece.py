@@ -7,7 +7,7 @@ class Piece:
         self.x = x
         self.y = y
         self.color = color
-        self.radius = 23
+        self.radius = 24
         self.picked_up = False
 
     def render(self, surface):

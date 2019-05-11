@@ -7,7 +7,7 @@ from src.constants import *
 
 class Table:
     def __init__(self):
-        self.width = HEIGHT - 40
+        self.width = HEIGHT - 60
         self.x = (WIDTH - self.width) // 2
         self.y = (HEIGHT - self.width) // 2
         self.DIV = self.width // 6
@@ -90,14 +90,15 @@ class Table:
             if node.piece:
                 node.piece.update(mouse_x, mouse_y)
 
-    def put_new_piece(self):
+    def put_new_piece(self) -> bool:
         for node in self.nodes:
             if node.highlight and not node.piece:
                 if self.turn == PLAYER1:
                     new_piece = Piece(node.x, node.y, WHITE)
                     node.add_piece(new_piece)
                     self.white_pieces -= 1
-                    self.check_player_pieces(WHITE)
+                    if self.check_player_pieces(BLACK):
+                        return True
                     if not self.check_windmills(WHITE, node):
                         self.switch_turn()
                     else:
@@ -107,7 +108,8 @@ class Table:
                     new_piece = Piece(node.x, node.y, BLACK)
                     node.add_piece(new_piece)
                     self.black_pieces -= 1
-                    self.check_player_pieces(BLACK)
+                    if self.check_player_pieces(WHITE):
+                        return True
                     if not self.check_windmills(BLACK, node):
                         self.switch_turn()
                     else:
@@ -117,6 +119,7 @@ class Table:
         if (self.white_pieces + self.black_pieces) == 0:
             self.faze = FAZE2
             print("FAZE2")
+        return False
 
     def pick_up_piece(self):
         for node in self.nodes:
@@ -160,11 +163,12 @@ class Table:
         self.node_pressed = False
         return False
 
-    def put_down_piece(self):
+    def put_down_piece(self) -> bool:
         if self.picked_up_piece:
             for node in self.where_can_go(self.node_taken_piece):
                 if node.highlight and not node.piece:
                     node.add_piece(self.picked_up_piece)
+                    print(node.piece)
                     self.change_node_color(self.node_taken_piece, (0, 0, 0), (0, 0, 0))
                     self.node_taken_piece.piece.release(node)
                     self.node_taken_piece.take_piece()
@@ -181,6 +185,12 @@ class Table:
             self.change_node_color(self.node_taken_piece, (0, 0, 0), (0, 0, 0))
             self.picked_up_piece.release(self.node_taken_piece)
             self.picked_up_piece = None
+
+        if self.check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK because turn
+            if not self.must_remove_piece:                                      # was already switched
+                return True
+
+        return False
 
     def clicked_on_node(self) -> bool:
         for node in self.nodes:
@@ -293,17 +303,26 @@ class Table:
         player = PLAYER1 if color == WHITE else PLAYER2
         pieces_left = self.count_pieces(color)
 
-        if pieces_left == 3:
-            self.can_jump[player] = True
-        else:
-            self.can_jump[player] = False
-
         if self.faze == FAZE2:
+            if pieces_left == 3:
+                self.can_jump[player] = True
+            else:
+                self.can_jump[player] = False
+
             if pieces_left == 2:
-                message = "White won!" if player is PLAYER2 else "Black won!"
-                print(message)
+                win = "White won!" if player is PLAYER2 else "Black won!"
+                print(win)
                 print("Game is over.")
                 return True
+
+        pieces_to_check = (self.black_pieces < 2) if player is PLAYER2 else (self.white_pieces < 2)
+        if pieces_to_check:
+            if self.is_opponent_blocked(player):
+                win = "White won!" if player is PLAYER2 else "Black won!"
+                print(win)
+                print("Game is over.")
+                return True
+
         return False
 
     def where_can_go(self, node: Node) -> tuple:
@@ -364,6 +383,42 @@ class Table:
 
         for n in nodes_copy:
             n.change_color(color2)
+
+    def is_opponent_blocked(self, player: int) -> bool:
+        """Checks if a player has any legal moves to do.
+
+        Args:
+            player (int): The player whose pieces to check.
+
+        Returns:
+            bool: True if the player is blocked, False otherwise.
+
+        """
+        if player == PLAYER1:
+            color = WHITE
+        else:
+            color = BLACK
+
+        print("Player " + str(player))
+        player_nodes = [node for node in self.nodes if node.piece and node.piece.color == color]
+        num_of_player_nodes = len(player_nodes)
+
+        for node in player_nodes:
+            where_can_go = self.where_can_go(node)
+            num_of_nodes_can_go = len(where_can_go)
+            # print(where_can_go)
+            for n in where_can_go:
+                if n.piece:
+                    num_of_nodes_can_go -= 1
+
+            if not num_of_nodes_can_go:
+                num_of_player_nodes -= 1
+
+        if not num_of_player_nodes:
+            print("Player {} is blocked!".format(player))
+            return True
+        else:
+            return False
 
     def faze2_now(self):
         """Automatically puts all pieces. Only for testing purposes."""

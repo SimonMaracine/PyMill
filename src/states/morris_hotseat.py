@@ -38,9 +38,11 @@ def update(control):
             if mouse_pressed[0]:
                 if table.faze == FAZE1:
                     if table.node_pressed:
-                        table.put_new_piece()
+                        if table.put_new_piece():
+                            morris.switch_state(GAME_STATE, control)
                 else:
-                    table.put_down_piece()
+                    if table.put_down_piece():
+                        morris.switch_state(GAME_STATE, control)
             table.node_pressed = False
 
     table.update(mouse, mouse_pressed)
