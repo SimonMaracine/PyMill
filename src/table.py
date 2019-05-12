@@ -44,7 +44,7 @@ class Table:
         self.white_pieces = 9
         self.black_pieces = 9
         self.font = pygame.font.SysFont("calibri", 30, True)
-        self.faze = FAZE1
+        self.phase = PHASE1
         self.picked_up_piece = None  # has picked up a piece
         self.node_taken_piece = None
         self.windmills = (
@@ -68,7 +68,7 @@ class Table:
         self.must_remove_piece = False
         self.can_jump = {PLAYER1: False, PLAYER2: False}
         self.node_pressed = False  # if a node is clicked
-        # self.faze2_now()
+        # self.phase2_now()
 
     def render(self, surface):
         self.show_table(surface)
@@ -78,7 +78,7 @@ class Table:
                 node.piece.render(surface)
                 if node.remove_thingy:
                     node.render_remove_thingy(surface)
-        if self.faze == FAZE1:
+        if self.phase == PHASE1:
             self.show_player_pieces(surface)
         self.show_player_indicator(surface)
 
@@ -117,8 +117,8 @@ class Table:
                         print("Remove a piece!")
                 break
         if (self.white_pieces + self.black_pieces) == 0:
-            self.faze = FAZE2
-            print("FAZE2")
+            self.phase = PHASE2
+            print("PHASE2")
         return False
 
     def pick_up_piece(self):
@@ -303,7 +303,7 @@ class Table:
         player = PLAYER1 if color == WHITE else PLAYER2
         pieces_left = self.count_pieces(color)
 
-        if self.faze == FAZE2:
+        if self.phase == PHASE2:
             if pieces_left == 3:
                 self.can_jump[player] = True
             else:
@@ -420,7 +420,7 @@ class Table:
         else:
             return False
 
-    def faze2_now(self):
+    def phase2_now(self):
         """Automatically puts all pieces. Only for testing purposes."""
         w = True
         for node in self.nodes:

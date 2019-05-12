@@ -29,14 +29,14 @@ def update(control):
                 if table.clicked_on_node():
                     table.node_pressed = True
                 if not table.must_remove_piece:
-                    if table.faze == FAZE2:
+                    if table.phase == PHASE2:
                         table.pick_up_piece()
                 else:
                     if table.remove_opponent_piece():
                         morris.switch_state(GAME_STATE, control)
         elif event.type == pygame.MOUSEBUTTONUP:
             if mouse_pressed[0]:
-                if table.faze == FAZE1:
+                if table.phase == PHASE1:
                     if table.node_pressed:
                         if table.put_new_piece():
                             morris.switch_state(GAME_STATE, control)
