@@ -2,19 +2,25 @@ import pygame
 from src import display
 from src import state_manager
 from src.table import Table
+from src.button import Button
 from src.constants import *
 
 
 def init(*args):
-    global morris, window, table
-    morris = state_manager.State(1, display.clock)
-    window = display.window
+    global morris, window, table, buttons, button
+    morris = state_manager.State(4, display.clock)
     morris.set_frame_rate(60)
+    window = display.window
     table = Table()
+    button_font = pygame.font.SysFont("calibri", 36)
+    button = Button(16, 16, "BACK", button_font, (255, 0, 0))
+    buttons = (button,)
 
 
 def render():
     table.render(window)
+    for btn in buttons:
+        btn.render(window)
 
 
 def update(control):
@@ -31,21 +37,27 @@ def update(control):
                 if not table.must_remove_piece:
                     if table.phase == PHASE2:
                         table.pick_up_piece()
-                else:
-                    if table.remove_opponent_piece():
-                        morris.switch_state(GAME_STATE, control)
         elif event.type == pygame.MOUSEBUTTONUP:
             if mouse_pressed[0]:
+                if table.must_remove_piece:
+                    if table.node_pressed:
+                        if table.remove_opponent_piece():
+                            morris.switch_state(MORRIS_HOTSEAT_STATE, control)
                 if table.phase == PHASE1:
                     if table.node_pressed:
                         if table.put_new_piece():
-                            morris.switch_state(GAME_STATE, control)
+                            morris.switch_state(MORRIS_HOTSEAT_STATE, control)
                 else:
                     if table.put_down_piece():
-                        morris.switch_state(GAME_STATE, control)
+                        morris.switch_state(MORRIS_HOTSEAT_STATE, control)
             table.node_pressed = False
 
+            if button.pressed(mouse, mouse_pressed):
+                morris.switch_state(MENU_STATE, control)
+
     table.update(mouse, mouse_pressed)
+    for btn in buttons:
+        btn.update(mouse)
 
 
 def run(control, *args):
