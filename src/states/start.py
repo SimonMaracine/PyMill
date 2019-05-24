@@ -1,13 +1,19 @@
 import pygame
 from src import display
 from src import state_manager
+from src.button import Button
 from src.constants import *
 
 
 def init(*args):
-    global start, window, table
+    global start, window, buttons
     start = state_manager.State(2, display.clock)
     window = display.window
+
+    button1 = Button()
+    button2 = Button()
+    button3 = Button()
+    buttons = (button1, button2, button3)
 
 
 def render():

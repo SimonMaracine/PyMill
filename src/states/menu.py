@@ -1,17 +1,20 @@
 import pygame
 from src import display
+from src.display import WIDTH, HEIGHT
 from src import state_manager
 from src.button import Button
 from src.constants import *
 
 
 def init(*args):
-    global menu, window, buttons, button
+    global menu, window, buttons
     menu = state_manager.State(1, display.clock)
     window = display.window
-    button_font = pygame.font.SysFont("calibri", 40)
-    button = Button(40, 40, "PLAY", button_font, (255, 0, 0))
-    buttons = (button,)
+    button_font = pygame.font.SysFont("calibri", 50, True)
+    button1 = Button(WIDTH//2, HEIGHT//2 - 75, "PLAY", button_font, (255, 0, 0)).offset(0)
+    button2 = Button(WIDTH//2, HEIGHT//2 - 25, "OPTIONS", button_font, (255, 0, 0)).offset(0)
+    button3 = Button(WIDTH//2, HEIGHT//2 + 25, "QUIT", button_font, (255, 0, 0)).offset(0)
+    buttons = (button1, button2, button3)
 
 
 def render():
@@ -27,10 +30,17 @@ def update(control):
             menu.exit()
             control["running"] = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            pass
+            if any(map(lambda button: button.hovered(mouse), buttons)):
+                Button.button_down = True
         elif event.type == pygame.MOUSEBUTTONUP:
-            if button.pressed(mouse, mouse_pressed):
+            if buttons[0].pressed(mouse, mouse_pressed):
                 menu.switch_state(MORRIS_HOTSEAT_STATE, control)
+            elif buttons[1].pressed(mouse, mouse_pressed):
+                pass
+            elif buttons[2].pressed(mouse, mouse_pressed):
+                menu.exit()
+                control["running"] = False
+            Button.button_down = False
 
     for btn in buttons:
         btn.update(mouse)

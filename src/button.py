@@ -2,6 +2,8 @@ import pygame
 
 
 class Button:
+    button_down = False
+
     def __init__(self, x: float, y: float, text: str, font, text_color: tuple):
         self.x = x
         self.y = y
@@ -19,19 +21,26 @@ class Button:
     def update(self, mouse: tuple):
         x = mouse[0]
         y = mouse[1]
-        if self.x + self.text_width > x > self.x:
-            if self.y + self.text_height > y > self.y:
-                self.text_color = (0, 0, 255)
-            else:
-                self.text_color = (255, 0, 0)
+        if self.hovered(mouse):
+            self.text_color = (0, 0, 255)
         else:
             self.text_color = (255, 0, 0)
 
+    def hovered(self, mouse: tuple) -> bool:
+        x = mouse[0]
+        y = mouse[1]
+        if self.x + self.text_width > x > self.x:
+            if self.y + self.text_height > y > self.y:
+                return True
+        return False
+
     def pressed(self, mouse: tuple, mouse_pressed: tuple) -> bool:
-        if mouse_pressed[0]:
-            x = mouse[0]
-            y = mouse[1]
-            if self.x + self.text_width > x > self.x:
-                if self.y + self.text_height > y > self.y:
-                    return True
-            return False
+        if mouse_pressed[0] and self.button_down:
+            if self.hovered(mouse):
+                return True
+        return False
+
+    def offset(self, mode: int):
+        if mode == 0:
+            self.x -= self.text_width // 2
+        return self

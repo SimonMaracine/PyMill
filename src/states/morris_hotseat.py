@@ -7,14 +7,14 @@ from src.constants import *
 
 
 def init(*args):
-    global morris, window, table, buttons, button
+    global morris, window, table, buttons
     morris = state_manager.State(4, display.clock)
     morris.set_frame_rate(60)
     window = display.window
     table = Table()
-    button_font = pygame.font.SysFont("calibri", 36)
-    button = Button(16, 16, "BACK", button_font, (255, 0, 0))
-    buttons = (button,)
+    button_font = pygame.font.SysFont("calibri", 36, True)
+    button1 = Button(16, 16, "BACK", button_font, (255, 0, 0))
+    buttons = (button1,)
 
 
 def render():
@@ -37,6 +37,8 @@ def update(control):
                 if not table.must_remove_piece:
                     if table.phase == PHASE2:
                         table.pick_up_piece()
+            if any(map(lambda button: button.hovered(mouse), buttons)):
+                Button.button_down = True
         elif event.type == pygame.MOUSEBUTTONUP:
             if mouse_pressed[0]:
                 if table.must_remove_piece:
@@ -52,7 +54,7 @@ def update(control):
                         morris.switch_state(MORRIS_HOTSEAT_STATE, control)
             table.node_pressed = False
 
-            if button.pressed(mouse, mouse_pressed):
+            if buttons[0].pressed(mouse, mouse_pressed):
                 morris.switch_state(MENU_STATE, control)
 
     table.update(mouse, mouse_pressed)
