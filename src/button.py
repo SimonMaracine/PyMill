@@ -4,33 +4,27 @@ import pygame
 class Button:
     button_down = False
 
-    def __init__(self, x: float, y: float, text: str, font, text_color: tuple):
+    def __init__(self, x: int, y: int, width: int, height: int):
         self.x = x
         self.y = y
-        self.text = text
-        self.font = font
-        self.text_color = text_color
-        text_size = font.size(self.text)
-        self.text_width = text_size[0]
-        self.text_height = text_size[1]
+        self.width = width
+        self.height = height
+        self.color = (255, 255, 255)
 
     def render(self, surface):
-        text = self.font.render(self.text, True, self.text_color)
-        surface.blit(text, (self.x, self.y))
+        pygame.draw.rect(surface, self.color, (self.x, self.y, self.width, self.height))
 
     def update(self, mouse: tuple):
-        x = mouse[0]
-        y = mouse[1]
         if self.hovered(mouse):
-            self.text_color = (0, 0, 255)
+            self.color = (16, 16, 16)
         else:
-            self.text_color = (255, 0, 0)
+            self.color = (255, 255, 255)
 
     def hovered(self, mouse: tuple) -> bool:
         x = mouse[0]
         y = mouse[1]
-        if self.x + self.text_width > x > self.x:
-            if self.y + self.text_height > y > self.y:
+        if self.x + self.width > x > self.x:
+            if self.y + self.height > y > self.y:
                 return True
         return False
 
@@ -42,5 +36,44 @@ class Button:
 
     def offset(self, mode: int):
         if mode == 0:
-            self.x -= self.text_width // 2
+            self.x -= self.width // 2
         return self
+
+
+class TextButton(Button):
+    def __init__(self, x: int, y: int, text: str, font: pygame.font, text_color: tuple):
+        self.text = text
+        self.font = font
+        self.text_color = text_color
+        text_size = font.size(self.text)
+        self.text_width = text_size[0]
+        self.text_height = text_size[1]
+        super().__init__(x, y, self.text_width, self.text_height)
+
+        self.render_background = False
+
+    def render(self, surface):
+        if self.render_background:
+            super().render(surface)
+        text = self.font.render(self.text, True, self.text_color)
+        surface.blit(text, (self.x, self.y))
+
+    def update(self, mouse: tuple):
+        if self.hovered(mouse):
+            self.text_color = (0, 0, 255)
+        else:
+            self.text_color = (255, 0, 0)
+
+
+class ImageButton(Button):
+    def __init__(self,  x: int, y: int, image: pygame.Surface):
+        self.image = image
+        self.image_width = image.get_width()
+        self.image_height = image.get_height()
+        super().__init__(x, y, self.image_width, self.image_height)
+
+    def render(self, surface):
+        surface.blit((self.x, self.y), self.image)
+
+    def update(self, mouse: tuple):
+        pass
