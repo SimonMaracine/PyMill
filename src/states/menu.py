@@ -16,7 +16,7 @@ def init(*args):
     button3 = TextButton(WIDTH//2, HEIGHT//2 + 25, "QUIT", button_font, (255, 0, 0)).offset(0)
     buttons = (button1, button2, button3)
     # for btn in buttons:
-    #     btn.render_background = True
+    #     btn.render_background = True  # todo work on this
 
 
 def render():

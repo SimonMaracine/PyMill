@@ -66,10 +66,11 @@ class TextButton(Button):
 
 
 class ImageButton(Button):
-    def __init__(self,  x: int, y: int, image: pygame.Surface):
+    def __init__(self,  x: int, y: int, width: int, height: int, image: pygame.Surface):
         self.image = image
-        self.image_width = image.get_width()
-        self.image_height = image.get_height()
+        self.scale_image(width,  height)
+        self.image_width = self.image.get_width()
+        self.image_height = self.image.get_height()
         super().__init__(x, y, self.image_width, self.image_height)
 
     def render(self, surface):
@@ -77,3 +78,6 @@ class ImageButton(Button):
 
     def update(self, mouse: tuple):
         pass
+
+    def scale_image(self, width: int, height: int):
+        pygame.transform.scale(self.image, (width, height))
