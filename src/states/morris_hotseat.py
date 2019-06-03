@@ -11,7 +11,7 @@ def init():
     global table, buttons
     table = Table()
     button_font = pygame.font.SysFont("calibri", 36, True)
-    button1 = TextButton(16, 16, "BACK", button_font, (255, 0, 0))
+    button1 = TextButton(4, 16, "PAUSE", button_font, (255, 0, 0))
     buttons = (button1,)
 
 
@@ -27,8 +27,7 @@ def update(control):
     mouse_pressed = pygame.mouse.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            morris.exit()
-            control["running"] = False
+            morris.switch_state(EXIT, control)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if not mouse_pressed[0]:
                 if table.clicked_on_node():
@@ -54,11 +53,11 @@ def update(control):
             table.node_pressed = False
 
             if buttons[0].pressed(mouse, mouse_pressed):
-                morris.switch_state(MENU_STATE, control)
+                pause.run(control, display.window.copy())
             TextButton.button_down = False
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_ESCAPE:
-                pause.run(control)
+                pause.run(control, display.window.copy())
 
     table.update(mouse, mouse_pressed)
     for btn in buttons:
@@ -67,6 +66,6 @@ def update(control):
 
 def run(control):
     global morris
-    morris = state_manager.State(4, init, update, render, display.clock)
+    morris = state_manager.State(400, init, update, render, display.clock)
     morris.show_fps = True
     morris.run(control, display.window)

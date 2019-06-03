@@ -27,8 +27,7 @@ def update(control):
     mouse_pressed = pygame.mouse.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            menu.exit()
-            control["running"] = False
+            menu.switch_state(EXIT, control)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if any(map(lambda button: button.hovered(mouse), buttons)):
                 TextButton.button_down = True
@@ -38,8 +37,7 @@ def update(control):
             elif buttons[1].pressed(mouse, mouse_pressed):
                 menu.switch_state(OPTIONS_STATE, control)
             elif buttons[2].pressed(mouse, mouse_pressed):
-                menu.exit()
-                control["running"] = False
+                menu.switch_state(EXIT, control)
             TextButton.button_down = False
 
     for btn in buttons:
@@ -48,5 +46,5 @@ def update(control):
 
 def run(control):
     global menu
-    menu = state_manager.State(1, init, update, render, display.clock)
+    menu = state_manager.State(100, init, update, render, display.clock)
     menu.run(control, display.window)

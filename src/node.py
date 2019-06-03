@@ -7,7 +7,7 @@ class Node:
         self.x = x
         self.y = y
         self.search = search
-        self.radius = 30
+        self.radius = 34
         self.highlight = False
         self.highlight_color = (180, 170, 190)
         self.color = (0, 0, 0)

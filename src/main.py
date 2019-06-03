@@ -1,5 +1,5 @@
 import os
-from src.states import morris_hotseat, menu, start, options
+from src.states import morris_hotseat, menu, start, options, exit, online_start
 from src.constants import *
 
 control = {"state": MENU_STATE, "running": True}
@@ -18,3 +18,7 @@ def main():
             morris_hotseat.run(control)
         elif current_state == MORRIS_ONLINE_STATE:
             pass
+        elif current_state == ONLINE_START:
+            online_start.run(control)
+        elif current_state == EXIT:
+            exit.run(control)

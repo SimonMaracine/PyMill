@@ -25,8 +25,7 @@ def update(control):
     mouse_pressed = pygame.mouse.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            start.exit()
-            control["running"] = False
+            start.switch_state(EXIT, control)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if any(map(lambda button: button.hovered(mouse), buttons)):
                 Button.button_down = True
@@ -35,7 +34,7 @@ def update(control):
             if buttons[0].pressed(mouse, mouse_pressed):
                 start.switch_state(MORRIS_HOTSEAT_STATE, control)
             elif buttons[1].pressed(mouse, mouse_pressed):
-                pass
+                start.switch_state(ONLINE_START, control)
             elif buttons[2].pressed(mouse, mouse_pressed):
                 start.switch_state(MENU_STATE, control)
             Button.button_down = False
@@ -47,5 +46,5 @@ def update(control):
 
 def run(control):
     global start
-    start = state_manager.State(2, init, update, render, display.clock)
+    start = state_manager.State(200, init, update, render, display.clock)
     start.run(control, display.window)

@@ -9,10 +9,7 @@ from src.constants import *
 def init():
     global buttons
     button_font = pygame.font.SysFont("calibri", 50, True)
-    button1 = TextButton(WIDTH // 2, HEIGHT // 2 - 75, "CHANGE THEME", button_font, (255, 0, 0)).offset(0)
-    button2 = TextButton(WIDTH // 2, HEIGHT // 2 - 25, "CREDITS", button_font, (255, 0, 0)).offset(0)
-    button3 = TextButton(WIDTH // 2, HEIGHT // 2 + 25, "BACK", button_font, (255, 0, 0)).offset(0)
-    buttons = (button1, button2, button3)
+    buttons = ()
 
 
 def render(surface):
@@ -25,18 +22,18 @@ def update(control):
     mouse_pressed = pygame.mouse.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            options.switch_state(EXIT, control)
+            online_start.switch_state(EXIT, control)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if any(map(lambda button: button.hovered(mouse), buttons)):
                 Button.button_down = True
                 TextButton.button_down = True
         elif event.type == pygame.MOUSEBUTTONUP:
-            if buttons[0].pressed(mouse, mouse_pressed):
-                pass
-            elif buttons[1].pressed(mouse, mouse_pressed):
-                pass
-            elif buttons[2].pressed(mouse, mouse_pressed):
-                options.switch_state(MENU_STATE, control)
+            # if buttons[0].pressed(mouse, mouse_pressed):
+            #     pass
+            # elif buttons[1].pressed(mouse, mouse_pressed):
+            #     pass
+            # elif buttons[2].pressed(mouse, mouse_pressed):
+            #     pass
             Button.button_down = False
             TextButton.button_down = False
 
@@ -45,6 +42,6 @@ def update(control):
 
 
 def run(control):
-    global options
-    options = state_manager.State(300, init, update, render, display.clock)
-    options.run(control, display.window)
+    global online_start
+    online_start = state_manager.State(600, init, update, render, display.clock)
+    online_start.run(control, display.window)

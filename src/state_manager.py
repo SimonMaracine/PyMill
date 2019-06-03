@@ -1,10 +1,12 @@
 import pygame
 from src.display import HEIGHT, window
 
+states = []
+
 
 class State:
-    def __init__(self, index: int, init, update, render, clock):
-        self.index = index
+    def __init__(self, id_: int, init, update, render, clock):
+        self._id = id_
         self._init = init
         self._update = update
         self._render = render
@@ -13,12 +15,13 @@ class State:
         self._fps = 60
         self.show_fps = False
         self.fps_font = pygame.font.SysFont("calibri", 18, True)
+        states.append(self)
 
     def run(self, control, surface):
         self._init()
         while self._running:
-            window.fill((0, 0, 0))
             self._update(control)
+            window.fill((0, 0, 0))
             self._render(surface)
             if self.show_fps:
                 self._show_fps(surface)
@@ -29,6 +32,9 @@ class State:
         self._running = False
 
     def switch_state(self, to_state: int, control: dict):
+        for state in states:
+            if state.get_id() is not to_state:
+                state.exit()
         self.exit()
         control["state"] = to_state
 
@@ -42,8 +48,5 @@ class State:
         text = self.fps_font.render("FPS: " + str(int(self._clock.get_fps())), True, (255, 255, 16))
         surface.blit(text, (7, HEIGHT - 22))
 
-    def get_mouse(self):
-        return self._mouse
-
-    def get_mouse_pressed(self):
-        return self._mouse_pressed
+    def get_id(self):
+        return self._id
