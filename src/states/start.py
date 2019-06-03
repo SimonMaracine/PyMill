@@ -13,7 +13,7 @@ def init(*args):
     button_font = pygame.font.SysFont("calibri", 50, True)
     button1 = Button(110, 100, 250, 300)
     button2 = Button(430, 100, 250, 300)
-    button3 = TextButton(WIDTH//2, HEIGHT - 70, "BACK", button_font, (255, 0, 0)).offset(0)
+    button3 = TextButton(WIDTH // 2, HEIGHT - 70, "BACK", button_font, (255, 0, 0)).offset(0)
     buttons = (button1, button2, button3)
 
 
