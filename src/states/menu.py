@@ -23,25 +23,27 @@ def render(surface):
 
 
 def update(control):
+    mouse = pygame.mouse.get_pos()
+    mouse_pressed = pygame.mouse.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             menu.exit()
             control["running"] = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            if any(map(lambda button: button.hovered(menu.get_mouse()), buttons)):
+            if any(map(lambda button: button.hovered(mouse), buttons)):
                 TextButton.button_down = True
         elif event.type == pygame.MOUSEBUTTONUP:
-            if buttons[0].pressed(menu.get_mouse(), menu.get_mouse_pressed()):
+            if buttons[0].pressed(mouse, mouse_pressed):
                 menu.switch_state(START_STATE, control)
-            elif buttons[1].pressed(menu.get_mouse(), menu.get_mouse_pressed()):
+            elif buttons[1].pressed(mouse, mouse_pressed):
                 menu.switch_state(OPTIONS_STATE, control)
-            elif buttons[2].pressed(menu.get_mouse(), menu.get_mouse_pressed()):
+            elif buttons[2].pressed(mouse, mouse_pressed):
                 menu.exit()
                 control["running"] = False
             TextButton.button_down = False
 
     for btn in buttons:
-        btn.update(menu.get_mouse())
+        btn.update(mouse)
 
 
 def run(control):

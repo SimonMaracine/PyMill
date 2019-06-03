@@ -11,19 +11,17 @@ class State:
         self._clock = clock
         self._running = True
         self._fps = 60
+        self.show_fps = False
         self.fps_font = pygame.font.SysFont("calibri", 18, True)
-
-        self._mouse = ()
-        self._mouse_pressed = ()
 
     def run(self, control, surface):
         self._init()
         while self._running:
-            self._mouse = pygame.mouse.get_pos()
-            self._mouse_pressed = pygame.mouse.get_pressed()
             window.fill((0, 0, 0))
             self._update(control)
             self._render(surface)
+            if self.show_fps:
+                self._show_fps(surface)
             pygame.display.flip()
             self.tick()
 
@@ -40,7 +38,7 @@ class State:
     def tick(self):
         self._clock.tick(self._fps)
 
-    def show_fps(self, surface):
+    def _show_fps(self, surface):
         text = self.fps_font.render("FPS: " + str(int(self._clock.get_fps())), True, (255, 255, 16))
         surface.blit(text, (7, HEIGHT - 22))
 

@@ -6,10 +6,8 @@ from src.button import Button, TextButton
 from src.constants import *
 
 
-def init(*args):
-    global pause, window, buttons
-    pause = state_manager.State(6, display.clock)
-    window = display.window
+def init():
+    global buttons
     button_font = pygame.font.SysFont("calibri", 50, True)
     button1 = TextButton(WIDTH // 2, HEIGHT // 2 - 75, "OPTIONS", button_font, (255, 0, 0)).offset(0)
     button2 = TextButton(WIDTH // 2, HEIGHT // 2 - 25, "EXIT TO MENU", button_font, (255, 0, 0)).offset(0)
@@ -17,9 +15,9 @@ def init(*args):
     buttons = (button1, button2, button3)
 
 
-def render():
+def render(surface):
     for btn in buttons:
-        btn.render(window)
+        btn.render(surface)
 
 
 def update(control):
@@ -47,12 +45,7 @@ def update(control):
         btn.update(mouse)
 
 
-def run(control, *args):
-    init()
-
-    while pause.run:
-        # window.fill((0, 0, 0))
-        update(control)
-        render()
-        pygame.display.flip()
-        pause.tick()
+def run(control):
+    global pause
+    pause = state_manager.State(6, init, update, render, display.clock)
+    pause.run(control, display.window)

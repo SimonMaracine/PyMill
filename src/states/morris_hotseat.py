@@ -7,21 +7,19 @@ from src.constants import *
 from src.states import pause
 
 
-def init(*args):
-    global morris, window, table, buttons
-    morris = state_manager.State(4, display.clock)
-    morris.set_frame_rate(60)
-    window = display.window
+def init():
+    global table, buttons
     table = Table()
     button_font = pygame.font.SysFont("calibri", 36, True)
     button1 = TextButton(16, 16, "BACK", button_font, (255, 0, 0))
     buttons = (button1,)
 
 
-def render():
-    table.render(window)
+def render(surface):
+    surface.fill((180, 16, 180))
+    table.render(surface)
     for btn in buttons:
-        btn.render(window)
+        btn.render(surface)
 
 
 def update(control):
@@ -67,13 +65,8 @@ def update(control):
         btn.update(mouse)
 
 
-def run(control, *args):
-    init()
-
-    while morris.run:
-        window.fill((180, 16, 180))
-        update(control)
-        render()
-        morris.show_fps(window)
-        pygame.display.flip()
-        morris.tick()
+def run(control):
+    global morris
+    morris = state_manager.State(4, init, update, render, display.clock)
+    morris.show_fps = True
+    morris.run(control, display.window)
