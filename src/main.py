@@ -1,5 +1,5 @@
 import os
-from src.states import morris_hotseat, menu, start, options, exit, online_start
+from src.states import morris_hotseat, menu, start, options, exit, online_start, morris_online
 from src.constants import *
 
 control = {"state": MENU_STATE, "running": True}

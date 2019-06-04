@@ -34,7 +34,8 @@ def update(control):
             if buttons[0].pressed(mouse, mouse_pressed):
                 start.switch_state(MORRIS_HOTSEAT_STATE, control)
             elif buttons[1].pressed(mouse, mouse_pressed):
-                start.switch_state(ONLINE_START, control)
+                # start.switch_state(ONLINE_START, control)
+                pass
             elif buttons[2].pressed(mouse, mouse_pressed):
                 start.switch_state(MENU_STATE, control)
             Button.button_down = False
