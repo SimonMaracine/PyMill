@@ -16,6 +16,7 @@ def init():
 
 
 def render(surface):
+    surface.fill(BACKGROUND_COLOR)
     for btn in buttons:
         btn.render(surface)
 

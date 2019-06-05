@@ -18,7 +18,8 @@ class State:
         states.append(self)
 
     def run(self, control, surface):
-        self._init()
+        self._init(*control["args"])
+        control["args"] = tuple()
         while self._running:
             self._update(control)
             window.fill((0, 0, 0))
@@ -30,13 +31,15 @@ class State:
 
     def exit(self):
         self._running = False
+        states.remove(self)
 
-    def switch_state(self, to_state: int, control: dict):
+    def switch_state(self, to_state: int, control: dict, *args):
         for state in states:
-            if state.get_id() is not to_state:
+            if state.get_id() != to_state and state.get_id() != self.get_id():
                 state.exit()
         self.exit()
         control["state"] = to_state
+        control["args"] = args
 
     def set_frame_rate(self, fps):
         self._fps = fps

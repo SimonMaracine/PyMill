@@ -11,11 +11,12 @@ def init():
     button_font = pygame.font.SysFont("calibri", 50, True)
     button1 = Button(110, 100, 250, 300)
     button2 = Button(430, 100, 250, 300)
-    button3 = TextButton(WIDTH // 2, HEIGHT - 70, "BACK", button_font, (255, 0, 0)).offset(0)
+    button3 = TextButton(WIDTH // 2 + 200, HEIGHT - 80, "BACK", button_font, (255, 0, 0)).offset(0)
     buttons = (button1, button2, button3)
 
 
 def render(surface):
+    surface.fill(BACKGROUND_COLOR)
     for btn in buttons:
         btn.render(surface)
 
@@ -34,8 +35,7 @@ def update(control):
             if buttons[0].pressed(mouse, mouse_pressed):
                 start.switch_state(MORRIS_HOTSEAT_STATE, control)
             elif buttons[1].pressed(mouse, mouse_pressed):
-                # start.switch_state(ONLINE_START, control)
-                pass
+                start.switch_state(ONLINE_START, control)
             elif buttons[2].pressed(mouse, mouse_pressed):
                 start.switch_state(MENU_STATE, control)
             Button.button_down = False

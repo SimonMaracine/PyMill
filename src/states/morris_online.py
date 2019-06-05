@@ -7,12 +7,17 @@ from src.constants import *
 from src.states import pause
 
 
-def init():
-    global table, buttons
+def init(*args):
+    global table, buttons, server, client
     table = Table()
     button_font = pygame.font.SysFont("calibri", 36, True)
     button1 = TextButton(4, 16, "PAUSE", button_font, (255, 0, 0))
     buttons = (button1,)
+
+    if args[0] == "host":
+        pass
+    elif args[0] == "client":
+        pass
 
 
 def render(surface):

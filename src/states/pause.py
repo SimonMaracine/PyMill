@@ -14,6 +14,7 @@ def init():
     button3 = TextButton(WIDTH // 2, HEIGHT // 2 + 25, "BACK", button_font, (255, 0, 0)).offset(0)
     buttons = (button1, button2, button3)
     background = pygame.Surface((WIDTH // 2, HEIGHT // 2))
+    background.fill(BACKGROUND_COLOR)
 
 
 def render(surface):
