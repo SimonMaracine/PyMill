@@ -8,19 +8,24 @@ class Client:
         self.server_address = (self.server_host, self.server_port)
         self.connected_to_server = False
 
-    def run(self):
+    def run(self) -> bool:
         print("Connecting to {}.\n".format(self.server_address))
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            self.connect_to_server(sock)
+            if self.connect_to_server(sock):
+                return True
+            else:
+                return False
 
-    def connect_to_server(self, sock):
+    def connect_to_server(self, sock) -> bool:
         try:
             sock.connect(self.server_address)
         except ConnectionRefusedError:
             print("Couldn't connect to server {}.".format(self.server_address))
+            return False
         else:
             print("Connected to server {}.".format(self.server_address))
             self.connected_to_server = True
+            return True
 
     @staticmethod
     def send(sock, data: bytes):
