@@ -25,8 +25,8 @@ def init():
 
     ipv4_address = socket.gethostbyname(socket.gethostname())
     # print(ipv4_address)
-    host = Server(ipv4_address, 5555)
-    client = Client("192.168.56.1", 5555)
+    host = Server(ipv4_address, 5555)  # todo get port from settings.ini
+    client = Client("", 5555)  # todo get host from that button...
     mode = int
     started_game = Boolean(False)
     client_started = False

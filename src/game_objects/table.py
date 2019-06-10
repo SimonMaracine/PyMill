@@ -3,8 +3,7 @@ from src.display import WIDTH, HEIGHT
 from src.game_objects.piece import Piece
 from src.game_objects.node import Node
 from src.constants import *
-
-font = pygame.font.SysFont("calibri", 30, True)
+from src.fonts import table_font
 
 
 class Table:
@@ -80,8 +79,8 @@ class Table:
                 if node.remove_thingy:
                     node.render_remove_thingy(surface)
         if self.phase == PHASE1:
-            self.show_player_pieces(surface, font)
-        self.show_player_indicator(surface, font)
+            self.show_player_pieces(surface, table_font)
+        self.show_player_indicator(surface, table_font)
 
     def update(self, mouse: tuple, mouse_pressed: tuple):
         mouse_x = mouse[0]

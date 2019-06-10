@@ -12,7 +12,7 @@ def init():
     button1 = TextButton(WIDTH // 2, HEIGHT // 2 - 75, "CHANGE THEME", button_font, (255, 0, 0)).offset(0)
     button2 = TextButton(WIDTH // 2, HEIGHT // 2 - 25, "CREDITS", button_font, (255, 0, 0)).offset(0)
     button3 = TextButton(WIDTH // 2, HEIGHT // 2 + 25, "NETWORKING", button_font, (255, 0, 0)).offset(0)
-    button4 = TextButton(WIDTH // 2, HEIGHT // 2 + 50, "BACK", button_font, (255, 0, 0)).offset(0)
+    button4 = TextButton(WIDTH // 2 + 200, HEIGHT - 80, "BACK", button_font, (255, 0, 0)).offset(0)
     buttons = (button1, button2, button3, button4)
 
 
@@ -38,7 +38,7 @@ def update(control):
             elif buttons[1].pressed(mouse, mouse_pressed):
                 pass
             elif buttons[2].pressed(mouse, mouse_pressed):
-                pass
+                options.switch_state(NETSETTINGS, control)
             elif buttons[3].pressed(mouse, mouse_pressed):
                 options.switch_state(MENU_STATE, control)
             Button.button_down = False

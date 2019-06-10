@@ -1,10 +1,9 @@
 import pygame
 from src.constants import *
+from src.fonts import connstatus_font
 
 
 class ConnStatus:
-    font = pygame.font.SysFont("calibri", 30, True)
-
     def __init__(self, x: int, y: int, host, client):
         self.x = x
         self.y = y
@@ -39,23 +38,23 @@ class ConnStatus:
         self.timer = timer
 
     def show_connection_host(self, surface):
-        text1 = ConnStatus.font.render("Client is connected" if self.host.connection is not None else "",
+        text1 = connstatus_font.render("Client is connected" if self.host.connection is not None else "",
                                        True, (0, 0, 0))
-        text2 = ConnStatus.font.render("Client is ready to start the game: {}".format(self.client_started_game), True, (0, 0, 0))
+        text2 = connstatus_font.render("Client is ready to start the game: {}".format(self.client_started_game), True, (0, 0, 0))
 
         surface.blit(text1, (self.x + 15, self.y + 15))
         if self.host.hosting:
             surface.blit(text2, (self.x + 15, self.y + 65))
 
     def show_connection_client(self, surface):
-        text1 = ConnStatus.font.render("Connected to host" if self.client.connected else "",
+        text1 = connstatus_font.render("Connected to host" if self.client.connected else "",
                                        True, (0, 0, 0))
-        text2 = ConnStatus.font.render("Host is ready to start the game: {}".format(self.host_started_game), True, (0, 0, 0))
+        text2 = connstatus_font.render("Host is ready to start the game: {}".format(self.host_started_game), True, (0, 0, 0))
 
         surface.blit(text1, (self.x + 15, self.y + 15))
         surface.blit(text2, (self.x + 15, self.y + 65))
 
     def show_host_timer(self, surface):
         t = self.timer.get_time()
-        text = ConnStatus.font.render("Waiting for connection... " + str(t), True, (0, 0, 0))
+        text = connstatus_font.render("Waiting for connection... " + str(t), True, (0, 0, 0))
         surface.blit(text, (self.x + 15, self.y + 15))

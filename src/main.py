@@ -1,12 +1,14 @@
 import os
 import pygame
-from src.states import morris_hotseat, menu, start, options, exit, online_start, morris_online
+from src.states import morris_hotseat, menu, start, options, exit, online_start, morris_online, netsettings
 from src.constants import *
 
 control = {"state": MENU_STATE, "running": True, "args": tuple()}
 
 
 def main():
+    pygame.init()
+
     while control["running"]:
         current_state = control["state"]
         if current_state == MENU_STATE:
@@ -21,6 +23,8 @@ def main():
             morris_online.run(control)
         elif current_state == ONLINE_START:
             online_start.run(control)
+        elif current_state == NETSETTINGS:
+            netsettings.run(control)
         elif current_state == EXIT:
             exit.run(control)
 
