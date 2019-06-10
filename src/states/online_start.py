@@ -3,21 +3,23 @@ import pygame
 from src import display
 from src.display import WIDTH, HEIGHT
 from src import state_manager
-from src.button import Button, TextButton
+from src.gui.button import Button, TextButton
 from src.constants import *
 from src.networking.client import Client
 from src.networking.server import Server
 from src.timer import Timer
+from ..helpers import Boolean, serialize, deserialize
+from ..gui.conn_status import ConnStatus
 
 
 def init():
-    global buttons, host, client, timer_font, timer, mode
+    global buttons, host, client, timer_font, timer, mode, started_game, client_started, host_started, conn
     timer_font = pygame.font.SysFont("calibri", 28, True)
     button_font = pygame.font.SysFont("calibri", 50, True)
-    button1 = TextButton(120, 200, "HOST A GAME", button_font, (255, 0, 0))
-    button2 = TextButton(120, 250, "CONNECT TO HOST", button_font, (255, 0, 0))
+    button1 = TextButton(120, 50, "HOST A GAME", button_font, (255, 0, 0))
+    button2 = TextButton(120, 100, "CONNECT TO HOST", button_font, (255, 0, 0))
     button3 = TextButton(WIDTH // 2 + 200, HEIGHT - 80, "BACK", button_font, (255, 0, 0)).offset(0)
-    button4 = TextButton(120, 320, "START GAME", button_font, (255, 0, 0))
+    button4 = TextButton(120, 170, "START GAME", button_font, (255, 0, 0))
     button4.lock()
     buttons = (button1, button2, button3, button4)
 
@@ -25,21 +27,23 @@ def init():
     # print(ipv4_address)
     host = Server(ipv4_address, 5555)
     client = Client("192.168.56.1", 5555)
-    mode = "host"
-    timer = Timer(5)
+    mode = int
+    started_game = Boolean(False)
+    client_started = False
+    host_started = False
+    timer = Timer(61)
+    conn = ConnStatus(120, 270, host, client)
 
 
 def render(surface):
     surface.fill(BACKGROUND_COLOR)
     for btn in buttons:
         btn.render(surface)
-
-    if host.waiting_for_conn:
-        show_host_timer(surface)
+    conn.render(surface)
 
 
 def update(control):
-    # global start_game
+    global started_game, client_started, host_started
     mouse = pygame.mouse.get_pos()
     mouse_pressed = pygame.mouse.get_pressed()
     for event in pygame.event.get():
@@ -56,36 +60,58 @@ def update(control):
                 connect_to_host()
             elif buttons[2].pressed(mouse, mouse_pressed):
                 online_start.switch_state(START_STATE, control)
+                host.disconnect = True
+                client.disconnect = True
                 if host.sock:
                     host.sock.close()
             elif buttons[3].pressed(mouse, mouse_pressed):
-                if mode == "host":
-                    online_start.switch_state(MORRIS_ONLINE_STATE, control, host)
-                elif mode == "client":
-                    online_start.switch_state(MORRIS_ONLINE_STATE, control, client)
-                else:
-                    print("There is no one to play with.")
+                if mode == HOST:
+                    started_game.set(True)
+                elif mode == CLIENT:
+                    started_game.set(True)
             Button.button_down = False
             TextButton.button_down = False
 
     for btn in buttons:
         btn.update(mouse)
 
-    if host.thread and timer.thread and not host.thread.is_alive() and not timer.thread.is_alive():
+    if not host.waiting_for_conn and timer.thread and not timer.thread.is_alive() \
+            and not host.hosting:
         buttons[0].unlock()
         buttons[1].unlock()
 
-    if host.connection is not None or client.connected_to_server:
-        buttons[3].unlock()
+    if client.connected:
         buttons[0].lock()
         buttons[1].lock()
 
-    # print("host: " + str(host.hosting))
-    # print("client " + str(client))
+    if host.hosting or client.connected:
+        buttons[3].unlock()
+
+    # print("hosting: " + str(host.hosting))
     # if host.thread:
     #     print(host.thread.is_alive())
     # if timer.thread:
     #     print(timer.thread.is_alive())
+
+    conn.update(host, client, host_started, client_started, mode, timer)
+
+    host.send(serialize(started_game))
+    client.send(serialize(started_game))
+
+    try:
+        client_started = deserialize(host.receive()).get()
+        host_started = deserialize(client.receive()).get()
+    except EOFError:
+        pass
+
+    if mode == HOST:
+        if client_started and started_game.get():
+            print("Starting game")
+            online_start.switch_state(MORRIS_ONLINE_STATE, control, HOST, host, client)
+    elif mode == CLIENT:
+        if host_started and started_game.get():
+            print("Starting game")
+            online_start.switch_state(MORRIS_ONLINE_STATE, control, CLIENT, host, client)
 
 
 def run(control):
@@ -97,7 +123,7 @@ def run(control):
 
 def host_game():
     global host, mode
-    mode = "host"
+    mode = HOST
     host.run()
     timer.start()
     buttons[0].lock()
@@ -106,11 +132,5 @@ def host_game():
 
 def connect_to_host():
     global client, mode
-    mode = "client"
+    mode = CLIENT
     client.run()
-
-
-def show_host_timer(surface):
-    t = timer.get_time()
-    text = timer_font.render("Waiting for connection... " + str(t), True, (0, 0, 0))
-    surface.blit(text, (100, 420))

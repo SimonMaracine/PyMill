@@ -1,4 +1,5 @@
 import os
+import pygame
 from src.states import morris_hotseat, menu, start, options, exit, online_start, morris_online
 from src.constants import *
 
@@ -22,3 +23,5 @@ def main():
             online_start.run(control)
         elif current_state == EXIT:
             exit.run(control)
+
+    pygame.quit()

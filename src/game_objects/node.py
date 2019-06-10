@@ -18,7 +18,7 @@ class Node:
         return "[{}, {}; {}]".format(self.x // 90, self.y // 90, True if self.piece else False)
 
     def render(self, surface):
-        pygame.draw.circle(surface, self.color, (self.x, self.y), 11)
+        pygame.draw.circle(surface, self.color, (self.x, self.y), 13)
         if self.highlight:
             pygame.draw.ellipse(surface, self.highlight_color,
                                 (self.x - self.radius, self.y - self.radius, self.radius * 2, self.radius * 2), 3)

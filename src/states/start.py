@@ -2,7 +2,7 @@ import pygame
 from src import display
 from src.display import WIDTH, HEIGHT
 from src import state_manager
-from src.button import Button, TextButton
+from src.gui.button import Button, TextButton
 from src.constants import *
 
 

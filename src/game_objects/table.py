@@ -1,8 +1,10 @@
 import pygame
 from src.display import WIDTH, HEIGHT
-from src.piece import Piece
-from src.node import Node
+from src.game_objects.piece import Piece
+from src.game_objects.node import Node
 from src.constants import *
+
+font = pygame.font.SysFont("calibri", 30, True)
 
 
 class Table:
@@ -43,7 +45,6 @@ class Table:
         self.turn = PLAYER1
         self.white_pieces = 9
         self.black_pieces = 9
-        self.font = pygame.font.SysFont("calibri", 30, True)
         self.phase = PHASE1
         self.picked_up_piece = None  # has picked up a piece
         self.node_taken_piece = None
@@ -79,8 +80,8 @@ class Table:
                 if node.remove_thingy:
                     node.render_remove_thingy(surface)
         if self.phase == PHASE1:
-            self.show_player_pieces(surface)
-        self.show_player_indicator(surface)
+            self.show_player_pieces(surface, font)
+        self.show_player_indicator(surface, font)
 
     def update(self, mouse: tuple, mouse_pressed: tuple):
         mouse_x = mouse[0]
@@ -215,14 +216,14 @@ class Table:
         pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 6, self.y + self.DIV * 3),
                          (self.x + self.DIV * 4, self.y + self.DIV * 3), 2)
 
-    def show_player_pieces(self, surface):
-        player1_text = self.font.render("x {}".format(self.white_pieces), True, (0, 0, 0))
-        player2_text = self.font.render("x {}".format(self.black_pieces), True, (0, 0, 0))
+    def show_player_pieces(self, surface, font):
+        player1_text = font.render("x {}".format(self.white_pieces), True, (0, 0, 0))
+        player2_text = font.render("x {}".format(self.black_pieces), True, (0, 0, 0))
         surface.blit(player1_text, (20, HEIGHT//2 - 30))
         surface.blit(player2_text, (WIDTH - 20 - player2_text.get_width(), HEIGHT // 2 - 30))
 
-    def show_player_indicator(self, surface):
-        text = self.font.render("Player: {}".format(self.turn), True, (0, 0, 0))
+    def show_player_indicator(self, surface, font):
+        text = font.render("Player: {}".format(self.turn), True, (0, 0, 0))
         surface.blit(text, (5, 60))
 
     def switch_turn(self):

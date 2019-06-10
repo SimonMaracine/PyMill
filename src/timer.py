@@ -1,5 +1,5 @@
 import time
-import threading
+from src.helpers import create_thread
 
 
 class Timer:
@@ -26,7 +26,7 @@ class Timer:
         if not self.ticking:
             self.ticking = True
             self.restart()
-            self.thread = self._create_new_thread()
+            self.thread = create_thread(target=self._run)
             self.thread.start()
         else:
             print("Timer already running.")
@@ -36,6 +36,3 @@ class Timer:
 
     def restart(self):
         self._time = self._COUNT
-
-    def _create_new_thread(self) -> threading.Thread:
-        return threading.Thread(target=self._run, daemon=True)

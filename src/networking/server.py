@@ -1,70 +1,94 @@
 import socket
-import threading
+from ..helpers import create_thread, create_socket, Boolean, serialize
 
 
 class Server:
-    def __init__(self, host, port):
+    def __init__(self, host: str, port: int):
         self.host = host
         self.port = port
-        self.address = (self.host, self.port)
-        self.sock = None
         self.connection = None
-        self.hosting = False
         self.waiting_for_conn = False
+        self.disconnect = False
+        self.hosting = False
+        self.sock = None
         self.thread = None
 
+        self.to_send: bytes = b"Hallo!"
+        self.to_be_received: bytes = serialize(Boolean(False))
+
+    def prepare(self):
+        self.sock = create_socket()
+        self.bind()
+        self.sock.settimeout(61)
+        self.sock.listen(3)
+        print("Server started. Waiting for connection...\n")
+
     def run(self):
-        if not self.hosting:
-            self.sock = self._create_new_socket()
-            self.thread = self._create_thread()
+        if not self.waiting_for_conn or self.hosting:
+            self.prepare()
+            self.thread = create_thread(target=self.wait_for_conns)
             self.thread.start()
-            self.hosting = True
             self.waiting_for_conn = True
         else:
-            print("Already hosting.")
+            print("Server already running")
 
-    @staticmethod
-    def send(sock, data: bytes):
-        sock.send(data)
-
-    @staticmethod
-    def receive(sock, amount: int) -> bytes:
+    def wait_for_conns(self):
         try:
-            data = sock.recv(amount)
-        except ConnectionResetError as e:
-            print(e)
-        else:
-            return data
-        return bytes()
-
-    def _listen_for_connection(self):
-        connection = None
-        with self.sock as sock:
-            try:
-                sock.bind(self.address)
-            except (OSError, Exception) as e:
-                print(e)
-            else:
-                sock.settimeout(5)
-                sock.listen(3)
-                print("Server started. Waiting for connection...\n")
-                try:
-                    connection, address = sock.accept()
-                    print("Connected by client {}.".format(self.address))
-                except OSError:
-                    print("Server closed.")
+            connection, address = self.sock.accept()
+            print("Connected by {}".format(address))
+        except OSError:
+            connection = None
+        except socket.timeout:
+            print("Socket timed out")
+            connection = None
 
         self.connection = connection
+
+        if connection is not None:
+            create_thread(target=self.client).start()
+            self.hosting = True
+        else:
+            print("No connection returned")
+
         self.waiting_for_conn = False
-        if self.connection is None:
-            self.hosting = False
-            print("Hosting stopped.")
+        self.sock.close()
+        print("Socket closed")
 
-    def _create_thread(self) -> threading.Thread:
-        if self.thread and self.thread.is_alive():
-            raise RuntimeError("Current thread is alive.")
-        return threading.Thread(target=self._listen_for_connection, daemon=True)
+    def bind(self):
+        self.sock.bind((self.host, self.port))
 
-    @staticmethod
-    def _create_new_socket() -> socket.SocketIO:
-        return socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def client(self):
+        with self.connection as conn:
+            while not self.disconnect:
+                try:
+                    conn.send(self.to_send)
+                    # print("Sent: {}".format(self.to_send))
+
+                    data: bytes = conn.recv(16384)
+                    # try:
+                    #     print("Received: {}".format(deserialize(data)))
+                    # except EOFError:
+                    #     pass
+                    self.to_be_received = data
+
+                    if not data:
+                        print("Client sent nothing")
+                        break
+                except ConnectionAbortedError:
+                    print("Client has closed the connection")
+                    break
+                except ConnectionResetError:
+                    print("Client has probably closed the connection")
+                    break
+                # except ConnectionError:
+                #     print("An unexpected error occurred")
+                #     break
+
+        self.hosting = False
+        print("Hosting aborted")
+
+    def send(self, data: bytes):
+        self.to_send = data
+
+    def receive(self) -> bytes:
+        return self.to_be_received
