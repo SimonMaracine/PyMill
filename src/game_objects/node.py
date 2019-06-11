@@ -3,11 +3,13 @@ import pygame
 
 
 class Node:
+    radius = 34
+    dot_radius = 15
+
     def __init__(self, x, y, search: tuple):
         self.x = x
         self.y = y
         self.search = search
-        self.radius = 34
         self.highlight = False
         self.highlight_color = (180, 170, 190)
         self.color = (0, 0, 0)
@@ -18,7 +20,7 @@ class Node:
         return "[{}, {}; {}]".format(self.x // 90, self.y // 90, True if self.piece else False)
 
     def render(self, surface):
-        pygame.draw.circle(surface, self.color, (self.x, self.y), 13)
+        pygame.draw.circle(surface, self.color, (self.x, self.y), self.dot_radius)
         if self.highlight:
             pygame.draw.ellipse(surface, self.highlight_color,
                                 (self.x - self.radius, self.y - self.radius, self.radius * 2, self.radius * 2), 3)

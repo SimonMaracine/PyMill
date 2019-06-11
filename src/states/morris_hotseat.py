@@ -1,4 +1,3 @@
-import sys
 import pygame
 from src import display
 from src import state_manager
@@ -11,7 +10,6 @@ from src.states import pause
 def init():
     global table, buttons
     table = Table()
-    # print(sys.getsizeof(table))
     button_font = pygame.font.SysFont("calibri", 36, True)
     button1 = TextButton(4, 16, "PAUSE", button_font, (255, 0, 0))
     buttons = (button1,)

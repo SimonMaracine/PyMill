@@ -1,19 +1,22 @@
 import socket
+import configparser
 import pygame
 from src import display
 from src.display import WIDTH, HEIGHT
 from src import state_manager
 from src.gui.button import Button, TextButton
+from src.gui.text_entry import TextEntry
 from src.constants import *
 from src.networking.client import Client
 from src.networking.server import Server
 from src.timer import Timer
 from ..helpers import Boolean, serialize, deserialize
 from ..gui.conn_status import ConnStatus
+# from src.file_io import read_file
 
 
 def init():
-    global buttons, host, client, timer_font, timer, mode, started_game, client_started, host_started, conn
+    global buttons, host, client, timer_font, timer, mode, started_game, client_started, host_started, conn, host_entry
     timer_font = pygame.font.SysFont("calibri", 28, True)
     button_font = pygame.font.SysFont("calibri", 50, True)
     button1 = TextButton(120, 50, "HOST A GAME", button_font, (255, 0, 0))
@@ -22,11 +25,18 @@ def init():
     button4 = TextButton(120, 170, "START GAME", button_font, (255, 0, 0))
     button4.lock()
     buttons = (button1, button2, button3, button4)
+    host_entry = TextEntry(120 + button2.width + 10, 100, 240)
+
+    config = configparser.ConfigParser()
+    config.read("data\\settings.ini")
+    # print(config.sections())
+    port = int(config.get("networking", "port"))
 
     ipv4_address = socket.gethostbyname(socket.gethostname())
     # print(ipv4_address)
-    host = Server(ipv4_address, 5555)  # todo get port from settings.ini
-    client = Client("", 5555)  # todo get host from that button...
+
+    host = Server(ipv4_address, port)
+    client = Client("", port)  # todo get host from that button...
     mode = int
     started_game = Boolean(False)
     client_started = False
@@ -40,6 +50,7 @@ def render(surface):
     for btn in buttons:
         btn.render(surface)
     conn.render(surface)
+    host_entry.render(surface)
 
 
 def update(control):
@@ -131,6 +142,9 @@ def host_game():
 
 
 def connect_to_host():
-    global client, mode
+    global client, mode, host_entry
     mode = CLIENT
+    # host_entry.text = ["1", "9", "2", ".", "1", "6", "8", ".", "5", "6", ".", "1"]
+    client.host = host_entry.get_text()
+    assert client.host, "Client's host is not set"
     client.run()

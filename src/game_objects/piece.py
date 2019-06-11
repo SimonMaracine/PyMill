@@ -3,11 +3,12 @@ from src.constants import *
 
 
 class Piece:
+    radius = 28
+
     def __init__(self, x, y, color):
         self.x = x
         self.y = y
         self.color = color
-        self.radius = 28
         self.picked_up = False
 
     def render(self, surface):
