@@ -1,3 +1,4 @@
+import socket
 from ..helpers import create_thread, create_socket, serialize, Boolean
 
 
@@ -35,6 +36,9 @@ class Client:
             self.sock.connect((self.host, self.port))
             print("Connected to server")
             return True
+        except socket.gaierror:
+            print("Invalid IP address")
+            return False
         except ConnectionRefusedError:
             print("Could not connect to server")
             return False

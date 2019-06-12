@@ -13,6 +13,7 @@ from src.timer import Timer
 from ..helpers import Boolean, serialize, deserialize
 from ..gui.conn_status import ConnStatus
 # from src.file_io import read_file
+from src.clipboard import get_clipboard
 
 
 def init():
@@ -54,7 +55,7 @@ def render(surface):
 
 
 def update(control):
-    global started_game, client_started, host_started
+    global started_game, client_started, host_started, host_entry
     mouse = pygame.mouse.get_pos()
     mouse_pressed = pygame.mouse.get_pressed()
     for event in pygame.event.get():
@@ -82,6 +83,10 @@ def update(control):
                     started_game.set(True)
             Button.button_down = False
             TextButton.button_down = False
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_c:
+                text = get_clipboard()
+                host_entry.text = list(text)
 
     for btn in buttons:
         btn.update(mouse)
@@ -144,7 +149,9 @@ def host_game():
 def connect_to_host():
     global client, mode, host_entry
     mode = CLIENT
-    # host_entry.text = ["1", "9", "2", ".", "1", "6", "8", ".", "5", "6", ".", "1"]
-    client.host = host_entry.get_text()
-    assert client.host, "Client's host is not set"
+    # host_entry.text = ["7", "1", "2", ".", ".", "4", "6", ".", "0", "."]
+    client.host = host_entry.get_text()[:-1]
+    if not client.host:
+        print("IP address not inserted")
+        return
     client.run()
