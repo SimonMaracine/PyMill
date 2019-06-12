@@ -68,6 +68,7 @@ class Table:
         self.must_remove_piece = False
         self.can_jump = {PLAYER1: False, PLAYER2: False}
         self.node_pressed = False  # if a node is clicked
+        self.game_over = False
         # self.phase2_now()
 
     def render(self, surface):
@@ -90,7 +91,7 @@ class Table:
             if node.piece:
                 node.piece.update(mouse_x, mouse_y)
 
-    def put_new_piece(self) -> bool:
+    def put_new_piece(self):
         for node in self.nodes:
             if node.highlight and not node.piece:
                 if self.turn == PLAYER1:
@@ -98,7 +99,7 @@ class Table:
                     node.add_piece(new_piece)
                     self.white_pieces -= 1
                     if self.check_player_pieces(BLACK):
-                        return True
+                        self.game_over = True  # game is over
                     if not self.check_windmills(WHITE, node):
                         self.switch_turn()
                     else:
@@ -109,7 +110,7 @@ class Table:
                     node.add_piece(new_piece)
                     self.black_pieces -= 1
                     if self.check_player_pieces(WHITE):
-                        return True
+                        self.game_over = True  # game is over
                     if not self.check_windmills(BLACK, node):
                         self.switch_turn()
                     else:
@@ -119,7 +120,6 @@ class Table:
         if (self.white_pieces + self.black_pieces) == 0:
             self.phase = PHASE2
             print("PHASE2")
-        return False
 
     def pick_up_piece(self):
         for node in self.nodes:
@@ -130,13 +130,8 @@ class Table:
                     self.picked_up_piece = node.piece
                 break
 
-    def remove_opponent_piece(self) -> bool:
-        """Removes a piece from opponent.
-
-        Returns:
-            bool: True if self.check_player_pieces() returns True, False otherwise.
-
-        """
+    def remove_opponent_piece(self):
+        """Removes a piece from opponent."""
         for node in self.nodes:
             if self.turn == PLAYER1:
                 if node.highlight and node.piece and node.piece.color == BLACK:
@@ -145,7 +140,7 @@ class Table:
                         node.take_piece()
                         self.must_remove_piece = False
                         if self.check_player_pieces(BLACK):
-                            return True
+                            self.game_over = True  # game is over
                         self.switch_turn()
                     else:
                         print("You cannot take piece from windmill!")
@@ -156,14 +151,13 @@ class Table:
                         node.take_piece()
                         self.must_remove_piece = False
                         if self.check_player_pieces(WHITE):
-                            return True
+                            self.game_over = True  # game is over
                         self.switch_turn()
                     else:
                         print("You cannot take piece from windmill!")
         self.node_pressed = False
-        return False
 
-    def put_down_piece(self) -> bool:
+    def put_down_piece(self):
         if self.picked_up_piece:
             for node in self.where_can_go(self.node_taken_piece):
                 if node.highlight and not node.piece:
@@ -188,9 +182,7 @@ class Table:
 
         if self.check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK because turn
             if not self.must_remove_piece:                                      # was already switched
-                return True
-
-        return False
+                self.game_over = True  # game is over
 
     def clicked_on_node(self) -> bool:
         for node in self.nodes:
@@ -414,7 +406,7 @@ class Table:
             if not num_of_nodes_can_go:
                 num_of_player_nodes -= 1
 
-        if not num_of_player_nodes:
+        if not num_of_player_nodes and self.count_pieces(color) > 3:
             print("Player {} is blocked!".format(player))
             return True
         else:

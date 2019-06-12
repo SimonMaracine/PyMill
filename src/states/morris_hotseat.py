@@ -41,15 +41,12 @@ def update(control):
             if mouse_pressed[0]:
                 if table.must_remove_piece:
                     if table.node_pressed:
-                        if table.remove_opponent_piece():
-                            morris.switch_state(MORRIS_HOTSEAT_STATE, control)
+                        table.remove_opponent_piece()
                 if table.phase == PHASE1:
                     if table.node_pressed:
-                        if table.put_new_piece():
-                            morris.switch_state(MORRIS_HOTSEAT_STATE, control)
+                        table.put_new_piece()
                 else:
-                    if table.put_down_piece():
-                        morris.switch_state(MORRIS_HOTSEAT_STATE, control)
+                    table.put_down_piece()
             table.node_pressed = False
 
             if buttons[0].pressed(mouse, mouse_pressed):
@@ -62,6 +59,9 @@ def update(control):
     table.update(mouse, mouse_pressed)
     for btn in buttons:
         btn.update(mouse)
+
+    if table.game_over:
+        morris.switch_state(MORRIS_HOTSEAT_STATE, control)
 
 
 def run(control):
