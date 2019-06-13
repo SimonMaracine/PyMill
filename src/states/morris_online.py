@@ -58,17 +58,14 @@ def update(control):
                 if mouse_pressed[0]:
                     if table.must_remove_piece:
                         if table.node_pressed:
-                            if table.remove_opponent_piece():
-                                morris_ol.switch_state(MORRIS_HOTSEAT_STATE, control)
+                            table.remove_opponent_piece()
                             change_turn = True
                     if table.phase == PHASE1:
                         if table.node_pressed:
-                            if table.put_new_piece():
-                                morris_ol.switch_state(MORRIS_HOTSEAT_STATE, control)
+                            table.put_new_piece()
                             change_turn = True
                     else:
-                        if table.put_down_piece():
-                            morris_ol.switch_state(MORRIS_HOTSEAT_STATE, control)
+                        table.put_down_piece()
                         change_turn = True
                 table.node_pressed = False
 
@@ -82,6 +79,9 @@ def update(control):
         table.update(mouse, mouse_pressed)
         for btn in buttons:
             btn.update(mouse)
+
+        if table.game_over:
+            morris_ol.switch_state(MORRIS_HOTSEAT_STATE, control)
     else:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
