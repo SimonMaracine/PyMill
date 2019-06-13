@@ -42,6 +42,9 @@ class Client:
         except ConnectionRefusedError:
             print("Could not connect to server")
             return False
+        except TimeoutError:
+            print("Connection attempt failed (timeout)")
+            return False
 
     def server(self):
         with self.sock as sock:
