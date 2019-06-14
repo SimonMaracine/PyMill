@@ -61,6 +61,14 @@ def update(control):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             online_start.switch_state(EXIT, control)
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_BACKSPACE:
+                host_entry.backspace()
+            elif event.key == pygame.K_RETURN:
+                connect_to_host()
+            else:
+                if event.unicode not in ("", "\x1b", "\t"):
+                    host_entry.insert_character(event.unicode)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if any(map(lambda button: button.hovered(mouse), buttons)):
                 Button.button_down = True
@@ -81,6 +89,10 @@ def update(control):
                     started_game.set(True)
                 elif mode == CLIENT:
                     started_game.set(True)
+            if host_entry.pressed(mouse, mouse_pressed):
+                host_entry.focus = True
+            else:
+                host_entry.focus = False
             Button.button_down = False
             TextButton.button_down = False
         elif event.type == pygame.KEYUP:
@@ -95,13 +107,16 @@ def update(control):
             and not host.hosting:
         buttons[0].unlock()
         buttons[1].unlock()
+        host_entry.unlock()
 
     if client.connected:
         buttons[0].lock()
         buttons[1].lock()
+        host_entry.lock()
 
     if host.hosting or client.connected:
         buttons[3].unlock()
+        host_entry.unlock()
 
     # print("hosting: " + str(host.hosting))
     # if host.thread:
@@ -110,6 +125,7 @@ def update(control):
     #     print(timer.thread.is_alive())
 
     conn.update(host, client, host_started, client_started, mode, timer)
+    host_entry.update(mouse, mouse_pressed)
 
     host.send(serialize(started_game))
     client.send(serialize(started_game))
@@ -144,13 +160,14 @@ def host_game():
     timer.start()
     buttons[0].lock()
     buttons[1].lock()
+    host_entry.lock()
 
 
 def connect_to_host():
     global client, mode, host_entry
     mode = CLIENT
     # host_entry.text = ["7", "1", "2", ".", ".", "4", "6", ".", "0", "."]
-    client.host = host_entry.get_text()[:-1]
+    client.host = host_entry.get_text()
     if not client.host:
         print("IP address not inserted")
         return

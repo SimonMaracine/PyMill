@@ -22,7 +22,7 @@ class Button:
             else:
                 self.color = (255, 255, 255)
         else:
-            self.color = (100, 100, 100)
+            self.color = (60, 60, 60)
 
     def hovered(self, mouse: tuple) -> bool:
         x = mouse[0]
