@@ -26,18 +26,16 @@ def init():
     button4 = TextButton(120, 170, "START GAME", button_font, (255, 0, 0))
     button4.lock()
     buttons = (button1, button2, button3, button4)
-    host_entry = TextEntry(120 + button2.width + 10, 100, 240)
+    host_entry = TextEntry(120 + button2.width + 10, 100, 220)
 
     config = configparser.ConfigParser()
     config.read("data\\settings.ini")
     # print(config.sections())
     port = int(config.get("networking", "port"))
-
-    ipv4_address = socket.gethostbyname(socket.gethostname())
-    # print(ipv4_address)
+    ipv4_address = config.get("networking", "host")
 
     host = Server(ipv4_address, port)
-    client = Client("", port)  # todo get host from that button...
+    client = Client("", port)
     mode = int
     started_game = Boolean(False)
     client_started = False
@@ -90,9 +88,9 @@ def update(control):
                 elif mode == CLIENT:
                     started_game.set(True)
             if host_entry.pressed(mouse, mouse_pressed):
-                host_entry.focus = True
+                host_entry.set_focus(True)
             else:
-                host_entry.focus = False
+                host_entry.set_focus(False)
             Button.button_down = False
             TextButton.button_down = False
         elif event.type == pygame.KEYUP:

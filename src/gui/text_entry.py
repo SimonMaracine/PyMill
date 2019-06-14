@@ -20,7 +20,7 @@ class TextEntry:
     def render(self, surface):
         pygame.draw.rect(surface, self.color, (self.x, self.y, self.width, self.height), 4)
         if self.focus:
-            pygame.draw.rect(surface, self.focus_color, (self.x + 2, self.y + 2, self.width - 4, self.height - 4), 3)
+            pygame.draw.rect(surface, self.focus_color, (self.x + 2, self.y + 2, self.width - 3, self.height - 3), 3)
         self.text = self.font.render(self.get_text(), True, self.color)
         surface.blit(self.text, (self.x + 7, self.y + 7))
 
@@ -55,15 +55,26 @@ class TextEntry:
         if self.focus and not self.locked:
             if len(self.text_array) < 21:
                 self.text_array.append(character)
-                print(self.text_array)
+                # print(self.text_array)
                 self.caret.move(1, character)
 
     def backspace(self):
         if self.focus and not self.locked:
             if self.text_array:
                 character = self.text_array.pop()
-                print(self.text_array)
+                # print(self.text_array)
                 self.caret.move(-1, character)
+
+    def insert_text(self, text: str):
+        self.text_array.clear()
+        self.caret.x = self.x + 7
+        if len(self.text_array) < 21:
+            for ch in text:
+                self.text_array.append(ch)
+                self.caret.move(1, ch)
+
+    def set_focus(self, focus: bool):
+        self.focus = focus
 
     def lock(self):
         self.locked = True
