@@ -31,3 +31,12 @@ def serialize(obj) -> bytes:
 
 def deserialize(obj):
     return pickle.loads(obj)
+
+
+def str_to_tuple(string: str) -> tuple:
+    elements = string[1:-1].split(", ")
+    t = []
+    for i in elements:
+        i = int(i)
+        t.append(i)
+    return tuple(t)

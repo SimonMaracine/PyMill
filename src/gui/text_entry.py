@@ -33,7 +33,7 @@ class TextEntry:
 
         self.caret.render(surface)
 
-    def update(self, mouse: tuple, mouse_pressed: tuple):
+    def update(self):
         if self.locked:
             self.color = (60, 60, 60)
         else:
@@ -57,7 +57,7 @@ class TextEntry:
     def pressed(self, mouse: tuple, mouse_pressed: tuple) -> bool:
         if self.locked:
             return False
-        if mouse_pressed[0]:  # and self.button_down:
+        if mouse_pressed[0]:
             if self.hovered(mouse):
                 return True
         return False

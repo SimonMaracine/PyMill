@@ -83,8 +83,8 @@ def update(control):
     buttons[0].update(mouse)
     buttons[3].update(mouse)
 
-    port_entry.update(mouse, mouse_pressed)
-    host_entry.update(mouse, mouse_pressed)
+    port_entry.update()
+    host_entry.update()
 
 
 def run(control):

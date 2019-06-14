@@ -1,4 +1,5 @@
 import time
+import configparser
 import pygame
 from src import display
 from src import state_manager
@@ -6,11 +7,11 @@ from src.game_objects.table import Table
 from src.gui.button import TextButton
 from src.constants import *
 from src.states import pause
-from ..helpers import serialize, deserialize
+from ..helpers import serialize, deserialize, str_to_tuple
 
 
 def init(*args):
-    global table, buttons, mode, host, client, turn, change_turn
+    global table, buttons, mode, host, client, turn, change_turn, bg_color
     mode = args[0]
     host = args[1]
     client = args[2]
@@ -29,9 +30,14 @@ def init(*args):
     button1 = TextButton(4, 16, "PAUSE", button_font, (255, 0, 0))
     buttons = (button1,)
 
+    config = configparser.ConfigParser()
+    config.read("data\\settings.ini")
+    bg_color = config.get("theme", "bgcolor")
+    bg_color = str_to_tuple(bg_color)
+
 
 def render(surface):
-    surface.fill((180, 16, 180))
+    surface.fill(bg_color)
     table.render(surface)
     for btn in buttons:
         btn.render(surface)

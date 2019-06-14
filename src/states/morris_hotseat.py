@@ -1,3 +1,4 @@
+import configparser
 import pygame
 from src import display
 from src import state_manager
@@ -5,18 +6,24 @@ from src.game_objects.table import Table
 from src.gui.button import TextButton
 from src.constants import *
 from src.states import pause
+from src.helpers import str_to_tuple
 
 
 def init():
-    global table, buttons
+    global table, buttons, bg_color
     table = Table()
     button_font = pygame.font.SysFont("calibri", 36, True)
     button1 = TextButton(4, 16, "PAUSE", button_font, (255, 0, 0))
     buttons = (button1,)
 
+    config = configparser.ConfigParser()
+    config.read("data\\settings.ini")
+    bg_color = config.get("theme", "bgcolor")
+    bg_color = str_to_tuple(bg_color)
+
 
 def render(surface):
-    surface.fill((180, 16, 180))
+    surface.fill(bg_color)
     table.render(surface)
     for btn in buttons:
         btn.render(surface)
