@@ -17,8 +17,8 @@ def init():
     button3 = TextButton(WIDTH // 2 - 230, HEIGHT // 2 - 25, "HOST", button_font, (255, 0, 0))
     button4 = TextButton(WIDTH // 2 - 230, HEIGHT // 2 + 50, "RESET", button_font, (255, 0, 0))
     buttons = (button1, button2, button3, button4)
-    port_entry = TextEntry(WIDTH // 2 - 100, HEIGHT // 2 - 75, 120)
-    host_entry = TextEntry(WIDTH // 2 - 100, HEIGHT // 2 - 25, 220)
+    port_entry = TextEntry(WIDTH // 2 - 100, HEIGHT // 2 - 75, 130, 5)
+    host_entry = TextEntry(WIDTH // 2 - 100, HEIGHT // 2 - 25, 240, 15)
 
     config = configparser.ConfigParser()
     config.read("data\\settings.ini")

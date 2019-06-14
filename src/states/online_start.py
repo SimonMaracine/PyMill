@@ -26,7 +26,7 @@ def init():
     button4 = TextButton(120, 170, "START GAME", button_font, (255, 0, 0))
     button4.lock()
     buttons = (button1, button2, button3, button4)
-    host_entry = TextEntry(120 + button2.width + 10, 100, 220)
+    host_entry = TextEntry(120 + button2.width + 10, 100, 240, 15)
 
     config = configparser.ConfigParser()
     config.read("data\\settings.ini")

@@ -1,12 +1,14 @@
 import pygame
 from src.fonts import text_entry_font
+from src.constants import *
 
 
 class TextEntry:
-    def __init__(self, x: int, y: int, width: int):
+    def __init__(self, x: int, y: int, width: int, max_chars: int):
         self.x = x
         self.y = y
         self.width = width
+        self.max_chars = max_chars
         self.height = 40
         self.text_array = []
         self.text = None
@@ -16,13 +18,18 @@ class TextEntry:
         self.color = (0, 0, 0)
         self.caret = Caret(self.x + 7, self.y + 6, 3, 28, self.font)
         self.focus_color = (255, 255, 255)
+        self.surface = pygame.Surface((self.width - 8, self.height - 8))
+        self.surface.set_clip(None)
 
     def render(self, surface):
         pygame.draw.rect(surface, self.color, (self.x, self.y, self.width, self.height), 4)
         if self.focus:
             pygame.draw.rect(surface, self.focus_color, (self.x + 2, self.y + 2, self.width - 3, self.height - 3), 3)
         self.text = self.font.render(self.get_text(), True, self.color)
-        surface.blit(self.text, (self.x + 7, self.y + 7))
+
+        self.surface.fill(BACKGROUND_COLOR)
+        self.surface.blit(self.text, (4, 4))
+        surface.blit(self.surface, (self.x + 4, self.y + 4))
 
         self.caret.render(surface)
 
@@ -36,6 +43,10 @@ class TextEntry:
             self.caret.update()
         else:
             self.caret.visible = False
+
+        if self.text:
+            if self.x + self.text.get_width() + 7 >= self.x + self.width - 7:
+                self.caret.visible = False
 
     def hovered(self, mouse: tuple) -> bool:
         if self.x + self.width >= mouse[0] >= self.x:
@@ -53,7 +64,7 @@ class TextEntry:
 
     def insert_character(self, character: str):
         if self.focus and not self.locked:
-            if len(self.text_array) < 21:
+            if len(self.text_array) < self.max_chars:
                 self.text_array.append(character)
                 # print(self.text_array)
                 self.caret.move(1, character)
@@ -68,7 +79,7 @@ class TextEntry:
     def insert_text(self, text: str):
         self.text_array.clear()
         self.caret.x = self.x + 7
-        if len(self.text_array) < 21:
+        if len(self.text_array) < self.max_chars:
             for ch in text:
                 self.text_array.append(ch)
                 self.caret.move(1, ch)
@@ -112,12 +123,12 @@ class Caret:
             self.updt_count = 0
 
     def move(self, direction: int, character: str):
-        if direction == -1:
+        if direction < 0:
             if character == "j" or character == "f":
                 self.x -= self.font.size(character)[0] - 1
             else:
                 self.x -= self.font.size(character)[0]
-        elif direction == 1:
+        elif direction > 0:
             if character == "j" or character == "f":
                 self.x += self.font.size(character)[0] - 1
             else:
