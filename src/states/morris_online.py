@@ -73,9 +73,9 @@ def update(control):
                             if not board.must_remove_piece:
                                 change_turn = True
                     else:
-                        board.put_down_piece()
-                        if not board.must_remove_piece:
-                            change_turn = True
+                        if board.put_down_piece():  # returns if we must change the turn
+                            if not board.must_remove_piece:
+                                change_turn = True
                 board.node_pressed = False
 
                 if buttons[0].pressed(mouse, mouse_pressed):
