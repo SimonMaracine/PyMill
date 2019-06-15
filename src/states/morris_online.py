@@ -70,10 +70,12 @@ def update(control):
                     if board.phase == PHASE1:
                         if board.node_pressed:
                             board.put_new_piece()
-                            change_turn = True
+                            if not board.must_remove_piece:
+                                change_turn = True
                     else:
                         board.put_down_piece()
-                        change_turn = True
+                        if not board.must_remove_piece:
+                            change_turn = True
                 board.node_pressed = False
 
                 if buttons[0].pressed(mouse, mouse_pressed):

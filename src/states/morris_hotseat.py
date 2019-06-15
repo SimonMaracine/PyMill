@@ -19,7 +19,7 @@ def init():
     config = configparser.ConfigParser()
     config.read("data\\settings.ini")
     bg_color = config.get("theme", "bgcolor")
-    bg_color = str_to_tuple(bg_color)
+    bg_color = str_to_tuple(bg_color)  # todo make fallback color
 
 
 def render(surface):

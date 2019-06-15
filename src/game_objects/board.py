@@ -93,7 +93,14 @@ class Board:
             if node.piece:
                 node.piece.update(mouse_x, mouse_y)
 
-    def put_new_piece(self):
+    def put_new_piece(self) -> bool:
+        """Puts a new piece on the board.
+
+        Returns:
+            bool: True if the turn was changed, False otherwise.
+
+        """
+        changed_turn = False
         for node in self.nodes:
             if node.highlight and not node.piece:
                 if self.turn == PLAYER1:
@@ -104,6 +111,7 @@ class Board:
                         self.game_over = True  # game is over
                     if not self.check_windmills(WHITE, node):
                         self.switch_turn()
+                        changed_turn = True
                     else:
                         self.must_remove_piece = True
                         print("Remove a piece!")
@@ -115,6 +123,7 @@ class Board:
                         self.game_over = True  # game is over
                     if not self.check_windmills(BLACK, node):
                         self.switch_turn()
+                        changed_turn = True
                     else:
                         self.must_remove_piece = True
                         print("Remove a piece!")
@@ -122,6 +131,7 @@ class Board:
         if (self.white_pieces + self.black_pieces) == 0:
             self.phase = PHASE2
             print("PHASE2")
+        return changed_turn
 
     def pick_up_piece(self):
         for node in self.nodes:
