@@ -4,6 +4,8 @@ from src.constants import *
 
 
 class TextEntry:
+    """Class to represent a text input object."""
+
     def __init__(self, x: int, y: int, width: int, max_chars: int):
         self.x = x
         self.y = y
@@ -98,6 +100,8 @@ class TextEntry:
 
 
 class Caret:
+    """Caret object used by the TextEntry class."""
+
     def __init__(self, x: int, y: int, width: int, height: int, font: pygame.font.Font):
         self.x = x
         self.y = y

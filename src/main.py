@@ -1,4 +1,5 @@
-import os
+"""Main game module. It must be imported from the game folder and its main() executed."""
+
 import pygame
 from src.states import morris_hotseat, menu, start, options, exit, online_start, morris_online, netsettings
 from src.constants import *

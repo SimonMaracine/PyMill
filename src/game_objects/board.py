@@ -3,10 +3,12 @@ from src.display import WIDTH, HEIGHT
 from src.game_objects.piece import Piece
 from src.game_objects.node import Node
 from src.constants import *
-from src.fonts import table_font
+from src.fonts import board_font
 
 
-class Table:
+class Board:
+    """Game board object."""
+
     def __init__(self):
         self.width = HEIGHT - 60
         self.x = (WIDTH - self.width) // 2
@@ -72,7 +74,7 @@ class Table:
         # self.phase2_now()
 
     def render(self, surface):
-        self.show_table(surface)
+        self.show_board(surface)
         for node in self.nodes:
             node.render(surface)
             if node.piece:
@@ -80,8 +82,8 @@ class Table:
                 if node.remove_thingy:
                     node.render_remove_thingy(surface)
         if self.phase == PHASE1:
-            self.show_player_pieces(surface, table_font)
-        self.show_player_indicator(surface, table_font)
+            self.show_player_pieces(surface, board_font)
+        self.show_player_indicator(surface, board_font)
 
     def update(self, mouse: tuple, mouse_pressed: tuple):
         mouse_x = mouse[0]
@@ -190,7 +192,7 @@ class Table:
                 return True
         return False
 
-    def show_table(self, surface):
+    def show_board(self, surface):
         # Drawing three rectangles...
         pygame.draw.rect(surface, (0, 0, 0), (self.x, self.y, self.width, self.width), 2)
         pygame.draw.rect(surface, (0, 0, 0), (self.x + self.DIV, self.y + self.DIV,
@@ -318,7 +320,7 @@ class Table:
         return False
 
     def where_can_go(self, node: Node) -> tuple:
-        """Decides where a piece can go based on the dictionary Table.can_jump.
+        """Decides where a piece can go based on the dictionary self.can_jump.
 
         Args:
             node (Node): The node from where the piece wants to go.

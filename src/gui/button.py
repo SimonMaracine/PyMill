@@ -2,6 +2,7 @@ import pygame
 
 
 class Button:
+    """Class representing a simple button object. Can be inherited to make more specialized buttons."""
     button_down = False
 
     def __init__(self, x: int, y: int, width: int, height: int):
@@ -41,6 +42,12 @@ class Button:
         return False
 
     def offset(self, mode: int):
+        """Offset the button's position.
+
+        Args:
+            mode (int): Specifies what offset should the method do.
+
+        """
         if mode == 0:
             self.x -= self.width // 2
         return self

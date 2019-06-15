@@ -2,7 +2,7 @@ import configparser
 import pygame
 from src import display
 from src import state_manager
-from src.game_objects.table import Table
+from src.game_objects.board import Board
 from src.gui.button import TextButton
 from src.constants import *
 from src.states import pause
@@ -10,8 +10,8 @@ from src.helpers import str_to_tuple
 
 
 def init():
-    global table, buttons, bg_color
-    table = Table()
+    global board, buttons, bg_color
+    board = Board()
     button_font = pygame.font.SysFont("calibri", 36, True)
     button1 = TextButton(4, 16, "PAUSE", button_font, (255, 0, 0))
     buttons = (button1,)
@@ -24,7 +24,7 @@ def init():
 
 def render(surface):
     surface.fill(bg_color)
-    table.render(surface)
+    board.render(surface)
     for btn in buttons:
         btn.render(surface)
 
@@ -37,24 +37,24 @@ def update(control):
             morris.switch_state(EXIT, control)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if not mouse_pressed[0]:
-                if table.clicked_on_node():
-                    table.node_pressed = True
-                if not table.must_remove_piece:
-                    if table.phase == PHASE2:
-                        table.pick_up_piece()
+                if board.clicked_on_node():
+                    board.node_pressed = True
+                if not board.must_remove_piece:
+                    if board.phase == PHASE2:
+                        board.pick_up_piece()
             if any(map(lambda button: button.hovered(mouse), buttons)):
                 TextButton.button_down = True
         elif event.type == pygame.MOUSEBUTTONUP:
             if mouse_pressed[0]:
-                if table.must_remove_piece:
-                    if table.node_pressed:
-                        table.remove_opponent_piece()
-                if table.phase == PHASE1:
-                    if table.node_pressed:
-                        table.put_new_piece()
+                if board.must_remove_piece:
+                    if board.node_pressed:
+                        board.remove_opponent_piece()
+                if board.phase == PHASE1:
+                    if board.node_pressed:
+                        board.put_new_piece()
                 else:
-                    table.put_down_piece()
-            table.node_pressed = False
+                    board.put_down_piece()
+            board.node_pressed = False
 
             if buttons[0].pressed(mouse, mouse_pressed):
                 pause.run(control, display.window.copy())
@@ -63,11 +63,11 @@ def update(control):
             if event.key == pygame.K_ESCAPE:
                 pause.run(control, display.window.copy())
 
-    table.update(mouse, mouse_pressed)
+    board.update(mouse, mouse_pressed)
     for btn in buttons:
         btn.update(mouse)
 
-    if table.game_over:
+    if board.game_over:
         morris.switch_state(MORRIS_HOTSEAT_STATE, control)
 
 

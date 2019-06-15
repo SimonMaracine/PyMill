@@ -1,3 +1,5 @@
+"""This module initializes and stores the important WIDTH, HEIGHT, window and clock variables. Can be import anywhere."""
+
 import pygame
 
 WIDTH = 800

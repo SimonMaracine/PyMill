@@ -3,6 +3,8 @@ from src.helpers import create_thread
 
 
 class Timer:
+    """Threaded timer object."""
+
     def __init__(self, count: int):
         self._COUNT = count
         self._time = self._COUNT

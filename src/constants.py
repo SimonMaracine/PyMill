@@ -1,3 +1,5 @@
+"""Constants used by other modules. Can be imported anywhere and can be used the * to import everything."""
+
 MENU_STATE = 100
 START_STATE = 200
 OPTIONS_STATE = 300

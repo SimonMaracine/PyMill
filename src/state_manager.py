@@ -6,6 +6,8 @@ states = []
 
 
 class State:
+    """Class representing a game state."""
+
     def __init__(self, id_: int, init, update, render, clock):
         self._id = id_
         self._init = init

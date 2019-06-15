@@ -4,6 +4,12 @@ pygame.scrap.init()
 
 
 def get_clipboard() -> str:
+    """Gets text from the clipboard if there is any.
+
+    Returns:
+        str: The text found.
+
+    """
     text = ""
     types = pygame.scrap.get_types()
     print(types)
@@ -18,4 +24,4 @@ def get_clipboard() -> str:
             break
     else:
         print("Clipboard doesn't contain text")
-    return text.strip()
+    return text

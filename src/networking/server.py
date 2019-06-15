@@ -3,6 +3,8 @@ from ..helpers import create_thread, create_socket, Boolean, serialize
 
 
 class Server:
+    """Class representing a server object. It communicates with a Client object."""
+
     def __init__(self, host: str, port: int):
         self.host = host
         self.port = port
@@ -58,6 +60,7 @@ class Server:
         self.sock.bind((self.host, self.port))
 
     def client(self):
+        """The send-receive loop with the client."""
         with self.connection as conn:
             while not self.disconnect:
                 try:

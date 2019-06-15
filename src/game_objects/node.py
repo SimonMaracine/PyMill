@@ -3,6 +3,8 @@ import pygame
 
 
 class Node:
+    """Class representing a node object used by the Board."""
+
     radius = 34
     dot_radius = 15
 

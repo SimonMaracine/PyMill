@@ -1,9 +1,12 @@
+"""Some random useful functions and classes."""
+
 import socket
 import threading
 import pickle
 
 
 class Boolean:
+    """Class to represent a boolean value."""
     def __init__(self, value: bool):
         self._value = value
 
@@ -34,6 +37,15 @@ def deserialize(obj):
 
 
 def str_to_tuple(string: str) -> tuple:
+    """Converts a string to a tuple and it's contents to integers.
+
+    Args:
+        string (str): The string to be converted.
+
+    Returns:
+        tuple: The result of conversion.
+
+    """
     elements = string[1:-1].split(", ")
     t = []
     for i in elements:

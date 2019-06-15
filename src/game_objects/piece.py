@@ -3,6 +3,8 @@ from src.constants import *
 
 
 class Piece:
+    """Class representing a piece object used by the Board."""
+
     radius = 28
 
     def __init__(self, x, y, color):

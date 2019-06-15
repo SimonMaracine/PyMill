@@ -1,4 +1,3 @@
-import socket
 import configparser
 import pygame
 from src import display
@@ -123,7 +122,7 @@ def update(control):
     #     print(timer.thread.is_alive())
 
     conn.update(host, client, host_started, client_started, mode, timer)
-    host_entry.update(mouse, mouse_pressed)
+    host_entry.update()
 
     host.send(serialize(started_game))
     client.send(serialize(started_game))
