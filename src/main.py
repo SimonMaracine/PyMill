@@ -4,10 +4,12 @@ import pygame
 from src.states import morris_hotseat, menu, start, options, exit, online_start, morris_online, netsettings
 from src.constants import *
 
+VERSION = "v0.2.0"
 control = {"state": MENU_STATE, "running": True, "args": tuple()}
 
 
 def main():
+    print("Simon's Morris " + VERSION, end="\n\n")
     pygame.init()
 
     while control["running"]:
