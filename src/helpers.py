@@ -6,11 +6,12 @@ import pickle
 
 
 class Boolean:
-    """Class to represent a boolean value."""
+    """Class representing a boolean value."""
+
     def __init__(self, value: bool):
         self._value = value
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return "{}".format(self._value)
 
     def set(self, value: bool):
@@ -32,8 +33,8 @@ def serialize(obj) -> bytes:
     return pickle.dumps(obj)
 
 
-def deserialize(obj):
-    return pickle.loads(obj)
+def deserialize(bytes_obj):
+    return pickle.loads(bytes_obj)
 
 
 def str_to_tuple(string: str) -> tuple:

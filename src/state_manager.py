@@ -29,7 +29,7 @@ class State:
             if self.show_fps:
                 self._show_fps(surface)
             pygame.display.flip()
-            self.tick()
+            self._tick()
 
     def exit(self):
         self._running = False
@@ -46,7 +46,7 @@ class State:
     def set_frame_rate(self, fps):
         self._fps = fps
 
-    def tick(self):
+    def _tick(self):
         self._clock.tick(self._fps)
 
     def _show_fps(self, surface):

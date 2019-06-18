@@ -1,3 +1,3 @@
 Simon's Mill Game
 
-A hotseat and online 2-player game.
+Nine Men's Morris, but on the computer. Play with a friend locally or over the internet.
