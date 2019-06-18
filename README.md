@@ -1,3 +1,3 @@
-Simon's-Morris
+Simon's Mill Game
 
-A hotseat and online multiplayer game.
+A hotseat and online 2-player game.
