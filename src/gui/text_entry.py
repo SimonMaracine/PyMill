@@ -3,7 +3,7 @@ from src.fonts import text_entry_font
 from src.constants import *
 
 
-class TextEntry:
+class TextEntry:  # todo make text y position lower
     """Class to represent a text input object."""
 
     def __init__(self, x: int, y: int, width: int, max_chars: int):

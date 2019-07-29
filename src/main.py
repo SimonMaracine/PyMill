@@ -9,7 +9,7 @@ control = {"state": MENU_STATE, "running": True, "args": tuple()}
 
 
 def main():
-    print("Simon's Mill Game " + VERSION, end="\n\n")
+    print("PyMills " + VERSION, end="\n\n")
     pygame.init()
 
     while control["running"]:
