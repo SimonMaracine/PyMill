@@ -6,6 +6,6 @@ WIDTH = 800
 HEIGHT = 600
 
 window = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("PyMills")
+pygame.display.set_caption("PyMill")
 
 clock = pygame.time.Clock()
