@@ -1,5 +1,7 @@
 import socket
 import configparser
+from os.path import join
+
 import pygame
 from src import display
 from src.display import WIDTH, HEIGHT
@@ -21,7 +23,7 @@ def init():
     host_entry = TextEntry(WIDTH // 2 - 100, HEIGHT // 2 - 25, 240, 15)
 
     config = configparser.ConfigParser()
-    config.read("data\\settings.ini")
+    config.read(join("data", "settings.ini"))
     # print(config.sections())
     port = config.get("networking", "port")
     ipv4_address = config.get("networking", "host")
@@ -95,12 +97,12 @@ def run(control):
 
 def apply_changes():
     config = configparser.ConfigParser()
-    config.read("data\\settings.ini")
+    config.read(join("data", "settings.ini"))
 
     port = port_entry.get_text()
     host = host_entry.get_text()
     config.set("networking", "port", port)
     config.set("networking", "host", host)
 
-    with open("data\\settings.ini", "w") as f:
+    with open(join("data", "settings.ini"), "w") as f:
         config.write(f)

@@ -1,5 +1,6 @@
-# from os import path
 import configparser
+from os.path import join
+
 import pygame
 from src import display
 from src import state_manager
@@ -18,7 +19,7 @@ def init():
     buttons = (button1,)
 
     config = configparser.ConfigParser()
-    config.read("data/settings.ini")
+    config.read(join("data", "settings.ini"))
     bg_color = config.get("theme", "bgcolor")
     bg_color = str_to_tuple(bg_color)  # todo make fallback color
 

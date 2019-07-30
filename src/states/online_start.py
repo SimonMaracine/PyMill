@@ -1,4 +1,6 @@
 import configparser
+from os.path import join
+
 import pygame
 from src import display
 from src.display import WIDTH, HEIGHT
@@ -28,7 +30,7 @@ def init():
     host_entry = TextEntry(120 + button2.width + 10, 100, 240, 15)
 
     config = configparser.ConfigParser()
-    config.read("data\\settings.ini")
+    config.read(join("data", "settings.ini"))
     # print(config.sections())
     port = int(config.get("networking", "port"))
     ipv4_address = config.get("networking", "host")

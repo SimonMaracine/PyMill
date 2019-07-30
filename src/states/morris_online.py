@@ -1,5 +1,6 @@
 import time
 import configparser
+from os.path import join
 
 import pygame
 from src import display
@@ -32,7 +33,7 @@ def init(*args):
     buttons = (button1,)
 
     config = configparser.ConfigParser()
-    config.read("data\\settings.ini")
+    config.read(join("data", "settings.ini"))
     bg_color = config.get("theme", "bgcolor")
     bg_color = str_to_tuple(bg_color)
 
