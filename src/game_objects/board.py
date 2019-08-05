@@ -71,15 +71,16 @@ class Board:
         self.can_jump = {PLAYER1: False, PLAYER2: False}
         self.node_pressed = False  # if a node is clicked
         self.game_over = False
+        self.turns_without_windmills = 0
         # self.phase2_now()
 
-    def render(self, surface):
+    def render(self, surface: pygame.Surface):
         self.show_board(surface)
         for node in self.nodes:
             node.render(surface)
             if node.piece:
                 node.piece.render(surface)
-                if node.remove_thingy:
+                if node.remove_thingy and self.turn_color() != node.piece.color:
                     node.render_remove_thingy(surface)
         if self.phase == PHASE1:
             self.show_player_pieces(surface, board_font)
@@ -90,18 +91,16 @@ class Board:
         mouse_y = mouse[1]
         for node in self.nodes:
             node.update(mouse_x, mouse_y, self.must_remove_piece)
-            if node.piece:
+            if node.piece is not None:
                 node.piece.update(mouse_x, mouse_y)
 
-    def put_new_piece(self) -> bool:
+    def put_new_piece(self):
         for node in self.nodes:
             if node.highlight and not node.piece:
                 if self.turn == PLAYER1:
                     new_piece = Piece(node.x, node.y, WHITE)
                     node.add_piece(new_piece)
                     self.white_pieces -= 1
-                    if self.check_player_pieces(BLACK):
-                        self.game_over = True  # game is over
                     if not self.check_windmills(WHITE, node):
                         self.switch_turn()
                     else:
@@ -111,8 +110,6 @@ class Board:
                     new_piece = Piece(node.x, node.y, BLACK)
                     node.add_piece(new_piece)
                     self.black_pieces -= 1
-                    if self.check_player_pieces(WHITE):
-                        self.game_over = True  # game is over
                     if not self.check_windmills(BLACK, node):
                         self.switch_turn()
                     else:
@@ -271,6 +268,7 @@ class Board:
         for i, windmill in enumerate(self.windmills):
             if self.check_nodes(windmill, color) and any(map(lambda n: n is node, windmill)):
                 print("{} windmill: {}".format(color, i))
+                self.turns_without_windmills = 0
                 return True
         return False
 
@@ -349,7 +347,7 @@ class Board:
             return tuple(new_nodes)
 
     def number_pieces_in_windmills(self, color: tuple) -> int:
-        """Counts the number of pieces that are inside of any windmill.
+        """Counts the number of pieces that are inside of every windmill.
 
         Args:
             color (tuple): The color of the pieces to count.
@@ -422,6 +420,12 @@ class Board:
             return True
         else:
             return False
+
+    def turn_color(self):
+        if self.turn == 1:
+            return WHITE
+        else:
+            return BLACK
 
     def phase2_now(self):
         """Automatically puts all pieces. Only for testing purposes."""

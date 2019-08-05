@@ -9,6 +9,7 @@ from src.gui.button import TextButton
 from src.constants import *
 from src.states import pause
 from src.helpers import str_to_tuple
+from src.states import game_over
 
 
 def init():
@@ -70,11 +71,12 @@ def update(control):
         btn.update(mouse)
 
     if board.game_over:
-        morris.switch_state(MORRIS_HOTSEAT_STATE, control)
+        # morris.switch_state(MORRIS_HOTSEAT_STATE, control)
+        game_over.run(control, display.window.copy())
 
 
 def run(control):
     global morris
-    morris = state_manager.State(400, init, update, render, display.clock)
+    morris = state_manager.State(MORRIS_HOTSEAT_STATE, init, update, render, display.clock)
     morris.show_fps = True
     morris.run(control, display.window)

@@ -91,7 +91,7 @@ def update(control):
 
 def run(control):
     global netsettings
-    netsettings = state_manager.State(700, init, update, render, display.clock)
+    netsettings = state_manager.State(NETSETTINGS_STATE, init, update, render, display.clock)
     netsettings.run(control, display.window)
 
 

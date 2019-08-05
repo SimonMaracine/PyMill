@@ -35,10 +35,11 @@ class State:
         self._running = False
         states.remove(self)
 
-    def switch_state(self, to_state: int, control: dict, *args):
+    def switch_state(self, to_state: int, control: dict, except_self=False, *args):
         for state in states:
-            if state.get_id() != to_state and state.get_id() != self.get_id():
-                state.exit()
+            if state.get_id() != to_state or except_self:
+                if state.get_id() != self.get_id():
+                    state.exit()
         self.exit()
         control["state"] = to_state
         control["args"] = args

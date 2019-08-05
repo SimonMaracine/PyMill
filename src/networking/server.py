@@ -56,6 +56,12 @@ class Server:
         self.sock.close()
         print("Socket closed")
 
+    def stop_sock(self):
+        sock = create_socket()
+        sock.connect((self.host, self.port))
+        sock.close()
+        print("Stopped")
+
     def bind(self):
         self.sock.bind((self.host, self.port))
 

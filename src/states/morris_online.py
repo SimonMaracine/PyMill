@@ -134,7 +134,7 @@ def update(control):
 
 def run(control):
     global morris_ol
-    morris_ol = state_manager.State(400, init, update, render, display.clock)
+    morris_ol = state_manager.State(MORRIS_ONLINE_STATE, init, update, render, display.clock)
     morris_ol.show_fps = True
     morris_ol.set_frame_rate(48)
     morris_ol.run(control, display.window)

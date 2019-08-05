@@ -81,8 +81,8 @@ def update(control):
                 online_start.switch_state(START_STATE, control)
                 host.disconnect = True
                 client.disconnect = True
-                if host.sock:
-                    host.sock.close()
+                if host.sock is not None:
+                    host.stop_sock()
             elif buttons[3].pressed(mouse, mouse_pressed):
                 if mode == HOST:
                     started_game.set(True)
@@ -94,10 +94,10 @@ def update(control):
                 host_entry.set_focus(False)
             Button.button_down = False
             TextButton.button_down = False
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_c:
-                text = get_clipboard()
-                host_entry.text = list(text)
+        # elif event.type == pygame.KEYUP:
+        #     if event.key == pygame.K_c:
+        #         text = get_clipboard()
+        #         host_entry.text = list(text)
 
     for btn in buttons:
         btn.update(mouse)

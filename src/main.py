@@ -24,9 +24,9 @@ def main():
             morris_hotseat.run(control)
         elif current_state == MORRIS_ONLINE_STATE:
             morris_online.run(control)
-        elif current_state == ONLINE_START:
+        elif current_state == ONLINE_START_STATE:
             online_start.run(control)
-        elif current_state == NETSETTINGS:
+        elif current_state == NETSETTINGS_STATE:
             netsettings.run(control)
         elif current_state == EXIT:
             exit.run(control)

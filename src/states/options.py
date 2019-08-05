@@ -38,7 +38,7 @@ def update(control):
             elif buttons[1].pressed(mouse, mouse_pressed):
                 pass
             elif buttons[2].pressed(mouse, mouse_pressed):
-                options.switch_state(NETSETTINGS, control)
+                options.switch_state(NETSETTINGS_STATE, control)
             elif buttons[3].pressed(mouse, mouse_pressed):
                 options.switch_state(MENU_STATE, control)
             Button.button_down = False
@@ -50,5 +50,5 @@ def update(control):
 
 def run(control):
     global options
-    options = state_manager.State(300, init, update, render, display.clock)
+    options = state_manager.State(OPTIONS_STATE, init, update, render, display.clock)
     options.run(control, display.window)

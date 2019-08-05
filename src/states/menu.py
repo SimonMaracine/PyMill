@@ -47,5 +47,5 @@ def update(control):
 
 def run(control):
     global menu
-    menu = state_manager.State(100, init, update, render, display.clock)
+    menu = state_manager.State(MENU_STATE, init, update, render, display.clock)
     menu.run(control, display.window)

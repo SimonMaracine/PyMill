@@ -51,5 +51,5 @@ def update(control):
 def run(control, *args):
     global pause, last_frame
     last_frame = args[0]
-    pause = state_manager.State(700, init, update, render, display.clock)
+    pause = state_manager.State(PAUSE_STATE, init, update, render, display.clock)
     pause.run(control, display.window)
