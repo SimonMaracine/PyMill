@@ -10,13 +10,13 @@ from src.constants import *
 from src.states import pause
 from src.helpers import str_to_tuple
 from src.states import game_over
+from src.fonts import small_button_font
 
 
 def init():
     global board, buttons, bg_color
     board = Board()
-    button_font = pygame.font.SysFont("calibri", 36, True)
-    button1 = TextButton(4, 16, "PAUSE", button_font, (255, 0, 0))
+    button1 = TextButton(4, 16, "PAUSE", small_button_font, (255, 0, 0))
     buttons = (button1,)
 
     config = configparser.ConfigParser()
@@ -71,8 +71,7 @@ def update(control):
         btn.update(mouse)
 
     if board.game_over:
-        # morris.switch_state(MORRIS_HOTSEAT_STATE, control)
-        game_over.run(control, display.window.copy())
+        game_over.run(control, display.window.copy(), board.winner)
 
 
 def run(control):

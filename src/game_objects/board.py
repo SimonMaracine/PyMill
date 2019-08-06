@@ -72,6 +72,7 @@ class Board:
         self.node_pressed = False  # if a node is clicked
         self.game_over = False
         self.turns_without_windmills = 0
+        self.winner = tuple
         # self.phase2_now()
 
     def render(self, surface: pygame.Surface):
@@ -311,9 +312,10 @@ class Board:
                 self.can_jump[player] = False
 
             if pieces_left == 2:
-                win = "White won!" if player is PLAYER2 else "Black won!"
+                win = "White won!" if player == PLAYER2 else "Black won!"
                 print(win)
                 print("Game is over.")
+                self.winner = WHITE if player == PLAYER2 else BLACK
                 return True
 
         pieces_to_check = (self.black_pieces < 2) if player is PLAYER2 else (self.white_pieces < 2)
@@ -322,6 +324,7 @@ class Board:
                 win = "White won!" if player is PLAYER2 else "Black won!"
                 print(win)
                 print("Game is over.")
+                self.winner = WHITE if player == PLAYER2 else BLACK
                 return True
 
         return False
@@ -415,7 +418,8 @@ class Board:
             if not num_of_nodes_can_go:
                 num_of_player_nodes -= 1
 
-        if not num_of_player_nodes and self.count_pieces(color) > 3:
+        if not num_of_player_nodes and self.count_pieces(color) > 3 \
+                and self.white_pieces == 0 if color == WHITE else self.black_pieces == 0:
             print("Player {} is blocked!".format(player))
             return True
         else:

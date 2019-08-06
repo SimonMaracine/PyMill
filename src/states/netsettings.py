@@ -9,11 +9,11 @@ from src import state_manager
 from src.gui.button import Button, TextButton
 from src.gui.text_entry import TextEntry
 from src.constants import *
+from src.fonts import button_font
 
 
 def init():
     global buttons, port_entry, host_entry
-    button_font = pygame.font.SysFont("calibri", 50, True)
     button1 = TextButton(WIDTH // 2 + 200, HEIGHT - 80, "BACK", button_font, (255, 0, 0)).offset(0)
     button2 = TextButton(WIDTH // 2 - 230, HEIGHT // 2 - 75, "PORT", button_font, (255, 0, 0))
     button3 = TextButton(WIDTH // 2 - 230, HEIGHT // 2 - 25, "HOST", button_font, (255, 0, 0))

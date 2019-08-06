@@ -4,15 +4,16 @@ from src.display import WIDTH, HEIGHT
 from src import state_manager
 from src.gui.button import Button, TextButton
 from src.constants import *
+from src.fonts import button_font
 
 
 def init():
     global buttons, background
-    button_font = pygame.font.SysFont("calibri", 50, True)
-    button1 = TextButton(WIDTH // 2, HEIGHT // 2 - 75, "OPTIONS", button_font, (255, 0, 0)).offset(0)
-    button2 = TextButton(WIDTH // 2, HEIGHT // 2 - 25, "EXIT TO MENU", button_font, (255, 0, 0)).offset(0)
-    button3 = TextButton(WIDTH // 2, HEIGHT // 2 + 25, "BACK", button_font, (255, 0, 0)).offset(0)
-    buttons = (button1, button2, button3)
+    button1 = TextButton(WIDTH // 2, HEIGHT // 2 - 100, "OPTIONS", button_font, (255, 0, 0)).offset(0)
+    button2 = TextButton(WIDTH // 2, HEIGHT // 2 - 50, "EXIT TO MENU", button_font, (255, 0, 0)).offset(0)
+    button3 = TextButton(WIDTH // 2, HEIGHT // 2, "RESTART", button_font, (255, 0, 0)).offset(0)
+    button4 = TextButton(WIDTH // 2, HEIGHT // 2 + 50, "BACK", button_font, (255, 0, 0)).offset(0)
+    buttons = (button1, button2, button3, button4)
     background = pygame.Surface((WIDTH // 2, HEIGHT // 2))
     background.fill(BACKGROUND_COLOR)
 
@@ -40,6 +41,8 @@ def update(control):
             elif buttons[1].pressed(mouse, mouse_pressed):
                 pause.switch_state(MENU_STATE, control)
             elif buttons[2].pressed(mouse, mouse_pressed):
+                pause.switch_state(MORRIS_HOTSEAT_STATE, control, True)
+            elif buttons[3].pressed(mouse, mouse_pressed):
                 pause.exit()
             Button.button_down = False
             TextButton.button_down = False

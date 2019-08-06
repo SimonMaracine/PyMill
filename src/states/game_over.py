@@ -4,21 +4,24 @@ from src.display import WIDTH, HEIGHT
 from src import state_manager
 from src.gui.button import Button, TextButton
 from src.constants import *
+from src.fonts import button_font, title_font
 
 
 def init():
-    global buttons, background
-    button_font = pygame.font.SysFont("calibri", 50, True)
-    button1 = TextButton(WIDTH // 2, HEIGHT // 2 - 50, "RESTART", button_font, (255, 0, 0)).offset(0)
-    button2 = TextButton(WIDTH // 2, HEIGHT // 2, "EXIT TO MENU", button_font, (255, 0, 0)).offset(0)
+    global buttons, background, who_won
+    button1 = TextButton(WIDTH // 2, HEIGHT // 2, "PLAY AGAIN", button_font, (255, 0, 0)).offset(0)
+    button2 = TextButton(WIDTH // 2, HEIGHT // 2 + 50, "EXIT TO MENU", button_font, (255, 0, 0)).offset(0)
     buttons = (button1, button2)
     background = pygame.Surface((WIDTH // 2, HEIGHT // 2))
     background.fill(BACKGROUND_COLOR)
+    who_won = title_font.render(f"{'White' if winner == WHITE else 'Black'} won!", True, (0, 0, 0))
+    print(winner)
 
 
 def render(surface):
     surface.blit(last_frame, (0, 0))
     surface.blit(background, (WIDTH // 4, HEIGHT // 4))
+    surface.blit(who_won, (WIDTH // 2 - who_won.get_width() // 2, HEIGHT // 2 - 90))
     for btn in buttons:
         btn.render(surface)
 
@@ -46,7 +49,8 @@ def update(control):
 
 
 def run(control, *args):
-    global game_over, last_frame
+    global game_over, last_frame, winner
     last_frame = args[0]
+    winner = args[1]
     game_over = state_manager.State(GAME_OVER_STATE, init, update, render, display.clock)
     game_over.run(control, display.window)

@@ -4,7 +4,10 @@ import pygame
 
 pygame.font.init()
 
-board_font = pygame.font.SysFont("calibri", 30, True)
-fps_font = pygame.font.SysFont("calibri", 18, True)
-connstatus_font = pygame.font.SysFont("calibri", 30, True)
-text_entry_font = pygame.font.SysFont("calibri", 32, True)
+board_font = pygame.font.SysFont("", 30, True)
+fps_font = pygame.font.SysFont("", 18, True)
+connstatus_font = pygame.font.SysFont("", 30, True)
+text_entry_font = pygame.font.SysFont("", 32, True)
+button_font = pygame.font.SysFont("", 50, True)
+small_button_font = pygame.font.SysFont("", 36, True)
+title_font = pygame.font.SysFont("", 70, True)

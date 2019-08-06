@@ -10,6 +10,7 @@ from src.gui.button import TextButton
 from src.constants import *
 from src.states import pause
 from ..helpers import serialize, deserialize, str_to_tuple
+from src.fonts import small_button_font
 
 
 def init(*args):
@@ -28,8 +29,7 @@ def init(*args):
         board = Board()
         client.send(serialize((board, change_turn)))
 
-    button_font = pygame.font.SysFont("calibri", 36, True)
-    button1 = TextButton(4, 16, "PAUSE", button_font, (255, 0, 0))
+    button1 = TextButton(4, 16, "PAUSE", small_button_font, (255, 0, 0))
     buttons = (button1,)
 
     config = configparser.ConfigParser()

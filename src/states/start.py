@@ -4,11 +4,11 @@ from src.display import WIDTH, HEIGHT
 from src import state_manager
 from src.gui.button import Button, TextButton
 from src.constants import *
+from src.fonts import button_font
 
 
 def init():
     global buttons
-    button_font = pygame.font.SysFont("calibri", 50, True)
     button1 = Button(110, 100, 250, 300)
     button2 = Button(430, 100, 250, 300)
     button3 = TextButton(WIDTH // 2 + 200, HEIGHT - 80, "BACK", button_font, (255, 0, 0)).offset(0)

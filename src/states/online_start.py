@@ -14,7 +14,6 @@ from src.timer import Timer
 from ..helpers import Boolean, serialize, deserialize
 from ..gui.conn_status import ConnStatus
 # from src.file_io import read_file
-from src.clipboard import get_clipboard
 
 
 def init():
@@ -94,10 +93,6 @@ def update(control):
                 host_entry.set_focus(False)
             Button.button_down = False
             TextButton.button_down = False
-        # elif event.type == pygame.KEYUP:
-        #     if event.key == pygame.K_c:
-        #         text = get_clipboard()
-        #         host_entry.text = list(text)
 
     for btn in buttons:
         btn.update(mouse)
