@@ -1,7 +1,7 @@
 """Main game module. It must be imported from the game folder and its main() executed."""
 
 import pygame
-from src.states import morris_hotseat, menu, start, options, exit, online_start, morris_online, netsettings
+from src.states import morris_hotseat, menu, start, options, exit, online_start, morris_net, netsettings
 from src.constants import *
 
 VERSION = "v0.2.0"
@@ -23,7 +23,7 @@ def main():
         elif current_state == MORRIS_HOTSEAT_STATE:
             morris_hotseat.run(control)
         elif current_state == MORRIS_ONLINE_STATE:
-            morris_online.run(control)
+            morris_net.run(control)
         elif current_state == ONLINE_START_STATE:
             online_start.run(control)
         elif current_state == NETSETTINGS_STATE:

@@ -1,9 +1,16 @@
+import logging
+
 import pygame
 from src.display import WIDTH, HEIGHT
 from src.game_objects.piece import Piece
 from src.game_objects.node import Node
 from src.constants import *
 from src.fonts import board_font
+from src.log import stream_handler
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(stream_handler)
 
 
 class Board:
@@ -106,7 +113,7 @@ class Board:
                         self.switch_turn()
                     else:
                         self.must_remove_piece = True
-                        print("Remove a piece!")
+                        logger.info("Remove a piece!")
                 else:
                     new_piece = Piece(node.x, node.y, BLACK)
                     node.add_piece(new_piece)
@@ -115,11 +122,11 @@ class Board:
                         self.switch_turn()
                     else:
                         self.must_remove_piece = True
-                        print("Remove a piece!")
+                        logger.info("Remove a piece!")
                 break
         if (self.white_pieces + self.black_pieces) == 0:
             self.phase = PHASE2
-            print("PHASE2")
+            logger.debug("PHASE2")
 
     def pick_up_piece(self):
         for node in self.nodes:
@@ -143,7 +150,7 @@ class Board:
                             self.game_over = True  # game is over
                         self.switch_turn()
                     else:
-                        print("You cannot take piece from windmill!")
+                        logger.info("You cannot take piece from windmill!")
             else:
                 if node.highlight and node.piece and node.piece.color == WHITE:
                     if not self.check_windmills(WHITE, node) or \
@@ -154,14 +161,14 @@ class Board:
                             self.game_over = True  # game is over
                         self.switch_turn()
                     else:
-                        print("You cannot take piece from windmill!")
+                        logger.info("You cannot take piece from windmill!")
         self.node_pressed = False
 
     def put_down_piece(self) -> bool:
         """Puts down a picked up piece.
 
         Returns:
-            bool: True if the turn was changed, False otherwise.
+            bool: True if the turn was changed, False otherwise. For morris_net.
 
         """
         changed_turn = False
@@ -169,7 +176,7 @@ class Board:
             for node in self.where_can_go(self.node_taken_piece):
                 if node.highlight and not node.piece:
                     node.add_piece(self.picked_up_piece)
-                    print(node.piece)
+                    logger.debug("Piece: {}".format(node.piece))
                     self.change_node_color(self.node_taken_piece, (0, 0, 0), (0, 0, 0))
                     self.node_taken_piece.piece.release(node)
                     self.node_taken_piece.take_piece()
@@ -180,7 +187,7 @@ class Board:
                         changed_turn = True
                     else:
                         self.must_remove_piece = True
-                        print("Remove a piece!")
+                        logger.info("Remove a piece!")
 
         # Release piece if player released the left button.
         if self.picked_up_piece:
@@ -268,7 +275,7 @@ class Board:
         """
         for i, windmill in enumerate(self.windmills):
             if self.check_nodes(windmill, color) and any(map(lambda n: n is node, windmill)):
-                print("{} windmill: {}".format(color, i))
+                logger.debug("{} windmill: {}".format(color, i))
                 self.turns_without_windmills = 0
                 return True
         return False
@@ -287,11 +294,11 @@ class Board:
         for node in self.nodes:
             if node.piece and node.piece.color == color:
                 pieces += 1
-        print(pieces)
+        logger.debug(f"{color} pieces remaining: {pieces}")
         return pieces
 
     def check_player_pieces(self, color: tuple) -> bool:
-        """Checks the number of pieces of a player and returns when the game is over.
+        """Checks the number of pieces of a player and returns if the game is over.
 
         If the player has 3 pieces remaining, his/her pieces can go anywhere and if 2 pieces remaining, he/she loses.
 
@@ -403,7 +410,7 @@ class Board:
         else:
             color = BLACK
 
-        print("Player " + str(player))
+        logger.debug(f"Player {player} is checked")
         player_nodes = [node for node in self.nodes if node.piece and node.piece.color == color]
         num_of_player_nodes = len(player_nodes)
 
@@ -418,9 +425,11 @@ class Board:
             if not num_of_nodes_can_go:
                 num_of_player_nodes -= 1
 
+        logger.debug(f"num_of_player_nodes = {num_of_player_nodes}")
+
         if not num_of_player_nodes and self.count_pieces(color) > 3 \
-                and self.white_pieces == 0 if color == WHITE else self.black_pieces == 0:
-            print("Player {} is blocked!".format(player))
+                and (self.white_pieces == 0 if color == WHITE else self.black_pieces == 0):
+            logger.info("Player {} is blocked!".format(player))
             return True
         else:
             return False

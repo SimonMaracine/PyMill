@@ -1,3 +1,5 @@
+import logging
+
 import pygame
 from src import display
 from src.display import WIDTH, HEIGHT
@@ -5,6 +7,11 @@ from src import state_manager
 from src.gui.button import Button, TextButton
 from src.constants import *
 from src.fonts import button_font, title_font
+from src.log import stream_handler
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(stream_handler)
 
 
 def init():
@@ -15,7 +22,7 @@ def init():
     background = pygame.Surface((WIDTH // 2, HEIGHT // 2))
     background.fill(BACKGROUND_COLOR)
     who_won = title_font.render(f"{'White' if winner == WHITE else 'Black'} won!", True, (0, 0, 0))
-    print(winner)
+    logger.debug(f"Winner is {winner}")
 
 
 def render(surface):
