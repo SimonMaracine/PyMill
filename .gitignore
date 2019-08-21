@@ -8,3 +8,4 @@ __pycache__/
 *.exe
 *.spec
 .idea/vcs.xml
+post_make.py
