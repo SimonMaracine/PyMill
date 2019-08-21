@@ -8,11 +8,9 @@ states = []
 class State:
     """Class representing a game state."""
 
-    def __init__(self, id_: int, init, update, render, clock):
+    def __init__(self, id_: int, state, clock):
         self._id = id_
-        self._init = init
-        self._update = update
-        self._render = render
+        self._state = state
         self._clock = clock
         self._running = True
         self._fps = 60
@@ -20,12 +18,12 @@ class State:
         states.append(self)
 
     def run(self, control, surface):
-        self._init(*control["args"])
+        self._state = self._state.__class__(*control["args"])
         control["args"] = tuple()
         while self._running:
-            self._update(control)
+            self._state.update(control)
             window.fill((0, 0, 0))
-            self._render(surface)
+            self._state.render(surface)
             if self.show_fps:
                 self._show_fps(surface)
             pygame.display.flip()

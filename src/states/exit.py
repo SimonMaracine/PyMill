@@ -1,13 +1,13 @@
-def init():
-    pass
+class Exit:
 
+    def __init__(self):
+        pass
 
-def render(surface):
-    pass
+    def render(self, surface):
+        pass
 
-
-def update(control):
-    pass
+    def update(self, control):
+        pass
 
 
 def run(control):

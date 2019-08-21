@@ -22,9 +22,9 @@ def main():
             options.run(control)
         elif current_state == MORRIS_HOTSEAT_STATE:
             morris_hotseat.run(control)
-        elif current_state == MORRIS_ONLINE_STATE:
+        elif current_state == MORRIS_NET_STATE:
             morris_net.run(control)
-        elif current_state == ONLINE_START_STATE:
+        elif current_state == NET_START_STATE:
             online_start.run(control)
         elif current_state == NETSETTINGS_STATE:
             netsettings.run(control)
