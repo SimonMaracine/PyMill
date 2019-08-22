@@ -16,7 +16,7 @@ from ..gui.conn_status import ConnStatus
 # from src.file_io import read_file
 
 
-class OnlineStart:
+class NetStart:
 
     def __init__(self):
         # timer_font = pygame.font.SysFont("calibri", 28, True)
@@ -56,7 +56,7 @@ class OnlineStart:
         mouse_pressed = pygame.mouse.get_pressed()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                online_start.switch_state(EXIT, control)
+                net_start.switch_state(EXIT, control)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
                     self.host_entry.backspace()
@@ -75,11 +75,14 @@ class OnlineStart:
                 elif self.buttons[1].pressed(mouse, mouse_pressed):
                     self.connect_to_host()
                 elif self.buttons[2].pressed(mouse, mouse_pressed):
-                    online_start.switch_state(START_STATE, control)
+                    net_start.switch_state(START_STATE, control)
                     self.host.disconnect = True
                     self.client.disconnect = True
                     if self.host.sock is not None:
-                        self.host.stop_sock()
+                        try:
+                            self.host.stop_sock()
+                        except OSError as e:
+                            print(e)
                 elif self.buttons[3].pressed(mouse, mouse_pressed):
                     if self.mode == HOST:
                         self.started_game.set(True)
@@ -131,15 +134,16 @@ class OnlineStart:
         if self.mode == HOST:
             if self.client_started and self.started_game.get():
                 print("Starting game")
-                online_start.switch_state(MORRIS_ONLINE_STATE, control, HOST, self.host, self.client)
+                net_start.switch_state(MORRIS_NET_STATE, control, False, HOST, self.host, self.client)
         elif self.mode == CLIENT:
             if self.host_started and self.started_game.get():
                 print("Starting game")
-                online_start.switch_state(MORRIS_ONLINE_STATE, control, CLIENT, self.host, self.client)
+                net_start.switch_state(MORRIS_NET_STATE, control, False, CLIENT, self.host, self.client)
 
     def host_game(self):
+        if not self.host.run():
+            return
         self.mode = HOST
-        self.host.run()
         self.timer.start()
         self.buttons[0].lock()
         self.buttons[1].lock()
@@ -156,7 +160,7 @@ class OnlineStart:
 
 
 def run(control):
-    global online_start
-    online_start = state_manager.State(600, OnlineStart(), display.clock)
-    online_start.set_frame_rate(60)
-    online_start.run(control, display.window)
+    global net_start
+    net_start = state_manager.State(600, NetStart(), display.clock)
+    net_start.set_frame_rate(60)
+    net_start.run(control, display.window)

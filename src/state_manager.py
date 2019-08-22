@@ -8,7 +8,7 @@ states = []
 class State:
     """Class representing a game state."""
 
-    def __init__(self, id_: int, state, clock):
+    def __init__(self, id_: int, state, clock: pygame.time.Clock):
         self._id = id_
         self._state = state
         self._clock = clock
@@ -17,7 +17,7 @@ class State:
         self.show_fps = False
         states.append(self)
 
-    def run(self, control, surface):
+    def run(self, control: dict, surface: pygame.Surface):
         self._state = self._state.__class__(*control["args"])
         control["args"] = tuple()
         while self._running:
@@ -42,13 +42,13 @@ class State:
         control["state"] = to_state
         control["args"] = args
 
-    def set_frame_rate(self, fps):
+    def set_frame_rate(self, fps: int):
         self._fps = fps
 
     def _tick(self):
         self._clock.tick(self._fps)
 
-    def _show_fps(self, surface):
+    def _show_fps(self, surface: pygame.Surface):
         text = fps_font.render("FPS: " + str(int(self._clock.get_fps())), True, (255, 255, 16))
         surface.blit(text, (7, HEIGHT - 22))
 

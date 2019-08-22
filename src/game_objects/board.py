@@ -137,8 +137,15 @@ class Board:
                     self.picked_up_piece = node.piece
                 break
 
-    def remove_opponent_piece(self):
-        """Removes a piece from opponent."""
+    def remove_opponent_piece(self) -> bool:
+        """Removes a piece from opponent.
+
+        Returns:
+            bool: True if the player can ctually remove the piece, False otherwise.
+
+        """
+        can_remove = False
+
         for node in self.nodes:
             if self.turn == PLAYER1:
                 if node.highlight and node.piece and node.piece.color == BLACK:
@@ -149,6 +156,7 @@ class Board:
                         if self.check_player_pieces(BLACK):
                             self.game_over = True  # game is over
                         self.switch_turn()
+                        can_remove = True
                     else:
                         logger.info("You cannot take piece from windmill!")
             else:
@@ -160,9 +168,11 @@ class Board:
                         if self.check_player_pieces(WHITE):
                             self.game_over = True  # game is over
                         self.switch_turn()
+                        can_remove = True
                     else:
                         logger.info("You cannot take piece from windmill!")
         self.node_pressed = False
+        return can_remove
 
     def put_down_piece(self) -> bool:
         """Puts down a picked up piece.

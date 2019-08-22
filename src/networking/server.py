@@ -18,21 +18,29 @@ class Server:
         self.to_send: bytes = b"Hallo!"
         self.to_be_received: bytes = serialize(Boolean(False))
 
-    def prepare(self):
+    def prepare(self) -> bool:
         self.sock = create_socket()
-        self.bind()
+        try:
+            self.bind()
+        except OSError as e:
+            print(e)
+            return False
         self.sock.settimeout(61)
         self.sock.listen(3)
         print("Server started. Waiting for connection...\n")
+        return True
 
-    def run(self):
+    def run(self) -> bool:
         if not self.waiting_for_conn or self.hosting:
-            self.prepare()
+            if not self.prepare():
+                return False
             self.thread = create_thread(target=self.wait_for_conns)
             self.thread.start()
             self.waiting_for_conn = True
+            return True
         else:
             print("Server already running")
+            return False
 
     def wait_for_conns(self):
         try:

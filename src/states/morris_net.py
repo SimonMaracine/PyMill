@@ -64,8 +64,8 @@ class MorrisNet:
                     if mouse_pressed[0]:
                         if self.board.must_remove_piece:
                             if self.board.node_pressed:
-                                self.board.remove_opponent_piece()
-                                self.change_turn = True
+                                if self.board.remove_opponent_piece():
+                                    self.change_turn = True
                         if self.board.phase == PHASE1:
                             if self.board.node_pressed:
                                 self.board.put_new_piece()
@@ -89,7 +89,7 @@ class MorrisNet:
                 btn.update(mouse)
 
             if self.board.game_over:
-                morris_net.switch_state(MORRIS_HOTSEAT_STATE, control)
+                morris_net.switch_state(GAME_OVER_STATE, control)
         else:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -138,7 +138,7 @@ class MorrisNet:
 
 def run(control):
     global morris_net
-    morris_net = state_manager.State(MORRIS_NET_STATE, MorrisNet(), display.clock)
+    morris_net = state_manager.State(MORRIS_NET_STATE, MorrisNet(*control["args"]), display.clock)
     morris_net.show_fps = True
     morris_net.set_frame_rate(48)
     morris_net.run(control, display.window)
