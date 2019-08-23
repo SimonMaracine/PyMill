@@ -1,4 +1,5 @@
 import socket
+import pygame
 from ..helpers import create_thread, create_socket, Boolean, serialize
 
 
@@ -14,6 +15,7 @@ class Server:
         self.hosting = False
         self.sock = None
         self.thread = None
+        self.clock = pygame.time.Clock()
 
         self.to_send: bytes = b"Hallo!"
         self.to_be_received: bytes = serialize(Boolean(False))
@@ -46,10 +48,12 @@ class Server:
         try:
             connection, address = self.sock.accept()
             print("Connected by {}".format(address))
-        except OSError:
+        except OSError as e:
             connection = None
-        except socket.timeout:
-            print("Socket timed out")
+            print(e)
+        except socket.timeout as e:
+            # print("Socket timed out")
+            print(e)
             connection = None
 
         self.connection = connection
@@ -68,7 +72,7 @@ class Server:
         sock = create_socket()
         sock.connect((self.host, self.port))
         sock.close()
-        print("Stopped")
+        print("Listening socket stopped")
 
     def bind(self):
         self.sock.bind((self.host, self.port))
@@ -77,6 +81,7 @@ class Server:
         """The send-receive loop with the client."""
         with self.connection as conn:
             while not self.disconnect:
+                print("Server working")
                 try:
                     conn.send(self.to_send)
                     # print("Sent: {}".format(self.to_send))
@@ -100,6 +105,7 @@ class Server:
                 # except ConnectionError:
                 #     print("An unexpected error occurred")
                 #     break
+                self.clock.tick(40)
 
         self.hosting = False
         print("Hosting aborted")

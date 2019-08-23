@@ -1,5 +1,6 @@
 import time
 import configparser
+import logging
 from os.path import join
 
 import pygame
@@ -11,6 +12,12 @@ from src.constants import *
 from src.states import pause
 from ..helpers import serialize, deserialize, str_to_tuple
 from src.fonts import small_button_font
+from src.log import stream_handler
+from src.states import game_over2
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(stream_handler)
 
 
 class MorrisNet:
@@ -64,7 +71,7 @@ class MorrisNet:
                     if mouse_pressed[0]:
                         if self.board.must_remove_piece:
                             if self.board.node_pressed:
-                                if self.board.remove_opponent_piece():
+                                if self.board.remove_opponent_piece():  # returns if we could take the piece
                                     self.change_turn = True
                         if self.board.phase == PHASE1:
                             if self.board.node_pressed:
@@ -88,8 +95,9 @@ class MorrisNet:
             for btn in self.buttons:
                 btn.update(mouse)
 
-            if self.board.game_over:
-                morris_net.switch_state(GAME_OVER_STATE, control)
+            # if self.board.game_over:
+            #     logger.debug("Switching to GAME_OVER_STATE")
+            #     game_over.run(control, display.window.copy(), self.board.winner)
         else:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -127,6 +135,10 @@ class MorrisNet:
             self.turn = self.switch_turn()
             self.change_turn = False
 
+        if self.board.game_over:
+            logger.debug("Switching to GAME_OVER_STATE")
+            game_over2.run(control, display.window.copy(), self.board.winner, self.client, self.host)
+
         print("HOST" if self.turn == HOST else "CLIENT")
 
     def switch_turn(self) -> int:
@@ -140,5 +152,4 @@ def run(control):
     global morris_net
     morris_net = state_manager.State(MORRIS_NET_STATE, MorrisNet(*control["args"]), display.clock)
     morris_net.show_fps = True
-    morris_net.set_frame_rate(48)
     morris_net.run(control, display.window)

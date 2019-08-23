@@ -13,12 +13,12 @@ class State:
         self._state = state
         self._clock = clock
         self._running = True
-        self._fps = 60
+        self._fps = 30
         self.show_fps = False
         states.append(self)
 
     def run(self, control: dict, surface: pygame.Surface):
-        self._state = self._state.__class__(*control["args"])
+        # self._state = self._state.__class__(*control["args"])
         control["args"] = tuple()
         while self._running:
             self._state.update(control)

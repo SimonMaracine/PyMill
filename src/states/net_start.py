@@ -1,4 +1,5 @@
 import configparser
+import logging
 from os.path import join
 
 import pygame
@@ -14,6 +15,11 @@ from src.timer import Timer
 from ..helpers import Boolean, serialize, deserialize
 from ..gui.conn_status import ConnStatus
 # from src.file_io import read_file
+from src.log import stream_handler
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(stream_handler)
 
 
 class NetStart:
@@ -24,7 +30,7 @@ class NetStart:
         button1 = TextButton(120, 50, "HOST A GAME", button_font, (255, 0, 0))
         button2 = TextButton(120, 100, "CONNECT TO HOST", button_font, (255, 0, 0))
         button3 = TextButton(WIDTH // 2 + 200, HEIGHT - 80, "BACK", button_font, (255, 0, 0)).offset(0)
-        button4 = TextButton(120, 170, "START GAME", button_font, (255, 0, 0))
+        button4 = TextButton(120, 170, "READY", button_font, (255, 0, 0))
         button4.lock()
         self.buttons = (button1, button2, button3, button4)
         self.host_entry = TextEntry(120 + button2.width + 10, 100, 240, 15)
@@ -79,6 +85,7 @@ class NetStart:
                     self.host.disconnect = True
                     self.client.disconnect = True
                     if self.host.sock is not None:
+                        logger.debug("Trying to stop the listening socket")
                         try:
                             self.host.stop_sock()
                         except OSError as e:
@@ -130,6 +137,8 @@ class NetStart:
             self.host_started = deserialize(self.client.receive()).get()
         except EOFError:
             pass
+        except AttributeError as e:
+            print(e)
 
         if self.mode == HOST:
             if self.client_started and self.started_game.get():
@@ -151,7 +160,6 @@ class NetStart:
 
     def connect_to_host(self):
         self.mode = CLIENT
-        # host_entry.text = ["7", "1", "2", ".", ".", "4", "6", ".", "0", "."]
         self.client.host = self.host_entry.get_text()
         if not self.client.host:
             print("IP address not inserted")

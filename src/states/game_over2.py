@@ -14,11 +14,13 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(stream_handler)
 
 
-class GameOver:
+class GameOver2:
 
     def __init__(self, *args):
         self.last_frame = args[0]
         self.winner = args[1]
+        self.client = args[2]
+        self.host = args[3]
         button1 = TextButton(WIDTH // 2, HEIGHT // 2, "PLAY AGAIN", button_font, (255, 0, 0)).offset(0)
         button2 = TextButton(WIDTH // 2, HEIGHT // 2 + 50, "EXIT TO MENU", button_font, (255, 0, 0)).offset(0)
         self.buttons = (button1, button2)
@@ -39,16 +41,19 @@ class GameOver:
         mouse_pressed = pygame.mouse.get_pressed()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                game_over.switch_state(EXIT, control)
+                game_over2.switch_state(EXIT, control)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if any(map(lambda button: button.hovered(mouse), self.buttons)):
                     Button.button_down = True
                     TextButton.button_down = True
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.buttons[0].pressed(mouse, mouse_pressed):
-                    game_over.switch_state(MORRIS_HOTSEAT_STATE, control, except_self=True)
+                    pass
                 elif self.buttons[1].pressed(mouse, mouse_pressed):
-                    game_over.switch_state(MENU_STATE, control)
+                    game_over2.switch_state(MENU_STATE, control)
+                    self.host.disconnect = True
+                    self.client.disconnect = True
+                    logger.debug("Stopping the server and client")
                 Button.button_down = False
                 TextButton.button_down = False
 
@@ -57,6 +62,6 @@ class GameOver:
 
 
 def run(control, *args):
-    global game_over
-    game_over = state_manager.State(GAME_OVER_STATE, GameOver(*args), display.clock)
-    game_over.run(control, display.window)
+    global game_over2
+    game_over2 = state_manager.State(GAME_OVER_STATE, GameOver2(*args), display.clock)
+    game_over2.run(control, display.window)

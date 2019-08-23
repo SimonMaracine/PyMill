@@ -208,6 +208,8 @@ class Board:
         if self.check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK because turn
             if not self.must_remove_piece:                                      # was already switched
                 self.game_over = True  # game is over
+                changed_turn = False  # todo check this
+                logger.debug("game_over = True")
         return changed_turn
 
     def clicked_on_node(self) -> bool:

@@ -1,4 +1,5 @@
 import socket
+import pygame
 from ..helpers import create_thread, create_socket, serialize, Boolean
 
 
@@ -12,12 +13,14 @@ class Client:
         self.disconnect = False
         self.sock = None
         # self.thread = None
+        self.clock = pygame.time.Clock()
 
         self.to_send: bytes = b"HEY!!!"
         self.to_be_received: bytes = serialize(Boolean(False))
 
     def prepare(self):
         self.sock = create_socket()
+        self.sock.settimeout(10)
         if self.connect():
             self.connected = True
 
@@ -38,20 +41,24 @@ class Client:
             self.sock.connect((self.host, self.port))
             print("Connected to server")
             return True
-        except socket.gaierror:
-            print("Invalid IP address")
+        except socket.gaierror as e:
+            # print("Invalid IP address")
+            print(e)
             return False
-        except ConnectionRefusedError:
-            print("Could not connect to server")
+        except ConnectionRefusedError as e:
+            # print("Could not connect to server")
+            print(e)
             return False
-        except TimeoutError:
-            print("Connection attempt failed (timeout)")
+        except (socket.timeout, TimeoutError) as e:
+            # print("Connection attempt failed (timeout)")
+            print(e)
             return False
 
     def server(self):
         """The send-receive loop with the server."""
         with self.sock as sock:
             while not self.disconnect:
+                print("Client working")
                 try:
                     data: bytes = sock.recv(16384)
                     # try:
@@ -66,12 +73,14 @@ class Client:
 
                     sock.send(self.to_send)
                     # print("Sent: {}".format(self.to_send))
-                except ConnectionResetError:
-                    print("Server has probably closed the connection")
+                except ConnectionResetError as e:
+                    # print("Server has probably closed the connection")
+                    print(e)
                     break
                 # except ConnectionError:
                 #     print("An unexpected error occurred")
                 #     break
+                self.clock.tick(40)
 
         self.connected = False
         print("Disconnected from server")
