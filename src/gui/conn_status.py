@@ -16,7 +16,7 @@ class ConnStatus:
         self.mode = int
         self.timer = None
 
-    def render(self, surface):
+    def render(self, surface: pygame.Surface):
         pygame.draw.rect(surface, (16, 16, 16), (self.x, self.y, self.width, self.height), 7)
 
         if self.mode == HOST:
@@ -29,7 +29,7 @@ class ConnStatus:
         if self.host.waiting_for_conn:
             self.show_host_timer(surface)
 
-    def update(self, host, client, host_started: bool, client_started: bool, mode, timer):
+    def update(self, host, client, host_started: bool, client_started: bool, mode: int, timer):
         self.host = host
         self.client = client
         self.mode = mode
@@ -37,7 +37,7 @@ class ConnStatus:
         self.client_started_game = client_started
         self.timer = timer
 
-    def show_connection_host(self, surface):
+    def show_connection_host(self, surface: pygame.Surface):
         text1 = connstatus_font.render("Client is connected" if self.host.connection is not None else "",
                                        True, (0, 0, 0))
         text2 = connstatus_font.render("Client is ready to start the game: {}".format(self.client_started_game), True, (0, 0, 0))
@@ -46,7 +46,7 @@ class ConnStatus:
         if self.host.hosting:
             surface.blit(text2, (self.x + 15, self.y + 65))
 
-    def show_connection_client(self, surface):
+    def show_connection_client(self, surface: pygame.Surface):
         text1 = connstatus_font.render("Connected to host" if self.client.connected else "",
                                        True, (0, 0, 0))
         text2 = connstatus_font.render("Host is ready to start the game: {}".format(self.host_started_game), True, (0, 0, 0))
@@ -54,7 +54,7 @@ class ConnStatus:
         surface.blit(text1, (self.x + 15, self.y + 15))
         surface.blit(text2, (self.x + 15, self.y + 65))
 
-    def show_host_timer(self, surface):
+    def show_host_timer(self, surface: pygame.Surface):
         t = self.timer.get_time()
         text = connstatus_font.render("Waiting for connection... " + str(t), True, (0, 0, 0))
         surface.blit(text, (self.x + 15, self.y + 15))

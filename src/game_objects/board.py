@@ -6,11 +6,10 @@ from src.game_objects.piece import Piece
 from src.game_objects.node import Node
 from src.constants import *
 from src.fonts import board_font
-from src.log import stream_handler
+from src.log import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 logger.setLevel(logging.DEBUG)
-logger.addHandler(stream_handler)
 
 
 class Board:
@@ -80,7 +79,7 @@ class Board:
         self.game_over = False
         self.turns_without_windmills = 0
         self.winner = tuple
-        # self.phase2_now()
+        # self._phase2_now()
 
     def render(self, surface: pygame.Surface):
         self.show_board(surface)
@@ -102,7 +101,14 @@ class Board:
             if node.piece is not None:
                 node.piece.update(mouse_x, mouse_y)
 
-    def put_new_piece(self):
+    def put_new_piece(self) -> bool:
+        """Puts a new piece on to the board.
+
+        Returns:
+            bool: True if the turn was changed, False otherwise. For morris_net.
+
+        """
+        changed_turn = False
         for node in self.nodes:
             if node.highlight and not node.piece:
                 if self.turn == PLAYER1:
@@ -111,6 +117,7 @@ class Board:
                     self.white_pieces -= 1
                     if not self.check_windmills(WHITE, node):
                         self.switch_turn()
+                        changed_turn = True
                     else:
                         self.must_remove_piece = True
                         logger.info("Remove a piece!")
@@ -120,6 +127,7 @@ class Board:
                     self.black_pieces -= 1
                     if not self.check_windmills(BLACK, node):
                         self.switch_turn()
+                        changed_turn = True
                     else:
                         self.must_remove_piece = True
                         logger.info("Remove a piece!")
@@ -127,6 +135,7 @@ class Board:
         if (self.white_pieces + self.black_pieces) == 0:
             self.phase = PHASE2
             logger.debug("PHASE2")
+        return changed_turn
 
     def pick_up_piece(self):
         for node in self.nodes:
@@ -452,7 +461,7 @@ class Board:
         else:
             return BLACK
 
-    def phase2_now(self):
+    def _phase2_now(self):
         """Automatically puts all pieces. Only for testing purposes."""
         w = True
         for node in self.nodes:

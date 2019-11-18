@@ -3,6 +3,7 @@
 import pygame
 from src.states import morris_hotseat, menu, start, options, exit, net_start, morris_net, netsettings
 from src.constants import *
+from src.tkinter_debug import tk_debug
 
 VERSION = "v0.2.0"
 control = {"state": MENU_STATE, "running": True, "args": ()}
@@ -11,6 +12,7 @@ control = {"state": MENU_STATE, "running": True, "args": ()}
 def main():
     print("PyMill " + VERSION, end="\n\n")
     pygame.init()
+    tk_debug.tk_init()
 
     while control["running"]:
         current_state = control["state"]
@@ -31,4 +33,5 @@ def main():
         elif current_state == EXIT:
             exit.run(control)
 
+    tk_debug.tk_quit()
     pygame.quit()

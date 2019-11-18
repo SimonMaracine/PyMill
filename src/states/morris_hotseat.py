@@ -11,9 +11,10 @@ from src.states import pause
 from src.helpers import str_to_tuple
 from src.states import game_over
 from src.fonts import small_button_font
+from src.state_manager import State
 
 
-class MorrisHotseat:
+class MorrisHotseat(State):
 
     def __init__(self):
         self.board = Board()
@@ -75,6 +76,6 @@ class MorrisHotseat:
 
 def run(control):
     global morris
-    morris = state_manager.State(MORRIS_HOTSEAT_STATE, MorrisHotseat(), display.clock)
+    morris = state_manager.NewState(MORRIS_HOTSEAT_STATE, MorrisHotseat(), display.clock)
     morris.show_fps = True
     morris.run(control, display.window)

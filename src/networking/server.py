@@ -1,6 +1,9 @@
 import socket
+
 import pygame
+
 from ..helpers import create_thread, create_socket, Boolean, serialize
+from src.networking.package import Package
 
 
 class Server:
@@ -18,7 +21,7 @@ class Server:
         self.clock = pygame.time.Clock()
 
         self.to_send: bytes = b"Hallo!"
-        self.to_be_received: bytes = serialize(Boolean(False))
+        self.to_be_received: bytes = serialize(Package(Boolean(False), None, Boolean(False)))
 
     def prepare(self) -> bool:
         self.sock = create_socket()
@@ -95,13 +98,13 @@ class Server:
 
                     if not data:
                         print("Client sent nothing")
-                        break
+                        self.disconnect = True
                 except ConnectionAbortedError:
                     print("Client has closed the connection")
-                    break
+                    self.disconnect = True
                 except ConnectionResetError:
                     print("Client has probably closed the connection")
-                    break
+                    self.disconnect = True
                 # except ConnectionError:
                 #     print("An unexpected error occurred")
                 #     break

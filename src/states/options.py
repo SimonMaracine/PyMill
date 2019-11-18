@@ -5,9 +5,10 @@ from src import state_manager
 from src.gui.button import Button, TextButton
 from src.constants import *
 from src.fonts import button_font
+from src.state_manager import State
 
 
-class Options:
+class Options(State):
 
     def __init__(self):
         button1 = TextButton(WIDTH // 2, HEIGHT // 2 - 75, "CHANGE THEME", button_font, (255, 0, 0)).offset(0)
@@ -16,12 +17,10 @@ class Options:
         button4 = TextButton(WIDTH // 2 + 200, HEIGHT - 80, "BACK", button_font, (255, 0, 0)).offset(0)
         self.buttons = (button1, button2, button3, button4)
 
-
     def render(self, surface):
         surface.fill(BACKGROUND_COLOR)
         for btn in self.buttons:
             btn.render(surface)
-
 
     def update(self, control):
         mouse = pygame.mouse.get_pos()
@@ -51,5 +50,5 @@ class Options:
 
 def run(control):
     global options
-    options = state_manager.State(OPTIONS_STATE, Options(), display.clock)
+    options = state_manager.NewState(OPTIONS_STATE, Options(), display.clock)
     options.run(control, display.window)

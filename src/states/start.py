@@ -5,9 +5,10 @@ from src import state_manager
 from src.gui.button import Button, TextButton
 from src.constants import *
 from src.fonts import button_font
+from src.state_manager import State
 
 
-class Start:
+class Start(State):
 
     def __init__(self):
         button1 = Button(110, 100, 250, 300)
@@ -46,5 +47,5 @@ class Start:
 
 def run(control):
     global start
-    start = state_manager.State(START_STATE, Start(), display.clock)
+    start = state_manager.NewState(START_STATE, Start(), display.clock)
     start.run(control, display.window)

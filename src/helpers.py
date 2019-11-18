@@ -3,6 +3,7 @@
 import socket
 import threading
 import pickle
+from typing import Any
 
 
 class Boolean:
@@ -33,7 +34,7 @@ def serialize(obj) -> bytes:
     return pickle.dumps(obj)
 
 
-def deserialize(bytes_obj):
+def deserialize(bytes_obj) -> Any:
     return pickle.loads(bytes_obj)
 
 

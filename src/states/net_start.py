@@ -1,5 +1,6 @@
 import configparser
 import logging
+import tkinter as tk
 from os.path import join
 
 import pygame
@@ -15,14 +16,16 @@ from src.timer import Timer
 from ..helpers import Boolean, serialize, deserialize
 from ..gui.conn_status import ConnStatus
 # from src.file_io import read_file
-from src.log import stream_handler
+from src.log import get_logger
+from src.networking.package import Package
+from src.tkinter_debug import tk_debug
+from src.state_manager import State
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 logger.setLevel(logging.DEBUG)
-logger.addHandler(stream_handler)
 
 
-class NetStart:
+class NetStart(State):
 
     def __init__(self):
         # timer_font = pygame.font.SysFont("calibri", 28, True)
@@ -49,6 +52,12 @@ class NetStart:
         self.host_started = False
         self.timer = Timer(61)
         self.conn = ConnStatus(120, 270, self.host, self.client)
+
+        self.package = Package(self.started_game, None, Boolean(False))
+
+        self.frame = tk_debug.DebugWindow()
+        self.slider = tk.Scale(self.frame)
+        self.slider.pack()
 
     def render(self, surface):
         surface.fill(BACKGROUND_COLOR)
@@ -129,12 +138,12 @@ class NetStart:
         self.conn.update(self.host, self.client, self.host_started, self.client_started, self.mode, self.timer)
         self.host_entry.update()
 
-        self.host.send(serialize(self.started_game))
-        self.client.send(serialize(self.started_game))
+        self.host.send(serialize(self.package))
+        self.client.send(serialize(self.package))
 
         try:
-            self.client_started = deserialize(self.host.receive()).get()
-            self.host_started = deserialize(self.client.receive()).get()
+            self.client_started = deserialize(self.host.receive()).started.get()
+            self.host_started = deserialize(self.client.receive()).started.get()
         except EOFError:
             pass
         except AttributeError as e:
@@ -148,6 +157,8 @@ class NetStart:
             if self.host_started and self.started_game.get():
                 print("Starting game")
                 net_start.switch_state(MORRIS_NET_STATE, control, False, CLIENT, self.host, self.client)
+
+        tk_debug.update()
 
     def host_game(self):
         if not self.host.run():
@@ -169,6 +180,6 @@ class NetStart:
 
 def run(control):
     global net_start
-    net_start = state_manager.State(600, NetStart(), display.clock)
+    net_start = state_manager.NewState(600, NetStart(), display.clock)
     net_start.set_frame_rate(60)
     net_start.run(control, display.window)

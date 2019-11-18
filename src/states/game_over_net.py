@@ -7,14 +7,13 @@ from src import state_manager
 from src.gui.button import Button, TextButton
 from src.constants import *
 from src.fonts import button_font, title_font
-from src.log import stream_handler
+from src.log import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 logger.setLevel(logging.DEBUG)
-logger.addHandler(stream_handler)
 
 
-class GameOver2:
+class GameOverNet:
 
     def __init__(self, *args):
         self.last_frame = args[0]
@@ -41,7 +40,7 @@ class GameOver2:
         mouse_pressed = pygame.mouse.get_pressed()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                game_over2.switch_state(EXIT, control)
+                game_over_net.switch_state(EXIT, control)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if any(map(lambda button: button.hovered(mouse), self.buttons)):
                     Button.button_down = True
@@ -50,7 +49,7 @@ class GameOver2:
                 if self.buttons[0].pressed(mouse, mouse_pressed):
                     pass
                 elif self.buttons[1].pressed(mouse, mouse_pressed):
-                    game_over2.switch_state(MENU_STATE, control)
+                    game_over_net.switch_state(MENU_STATE, control)
                     self.host.disconnect = True
                     self.client.disconnect = True
                     logger.debug("Stopping the server and client")
@@ -62,6 +61,6 @@ class GameOver2:
 
 
 def run(control, *args):
-    global game_over2
-    game_over2 = state_manager.State(GAME_OVER_STATE, GameOver2(*args), display.clock)
-    game_over2.run(control, display.window)
+    global game_over_net
+    game_over_net = state_manager.State(GAME_OVER_STATE, GameOverNet(*args), display.clock)
+    game_over_net.run(control, display.window)

@@ -5,9 +5,10 @@ from src import state_manager
 from src.gui.button import TextButton
 from src.constants import *
 from src.fonts import button_font
+from src.state_manager import State
 
 
-class Menu:
+class Menu(State):
 
     def __init__(self):
         button1 = TextButton(WIDTH // 2, HEIGHT // 2 - 75, "PLAY", button_font, (255, 0, 0)).offset(0)
@@ -46,6 +47,6 @@ class Menu:
 
 def run(control):
     global menu
-    menu = state_manager.State(MENU_STATE, Menu(), display.clock)
+    menu = state_manager.NewState(MENU_STATE, Menu(), display.clock)
     menu.run(control, display.window)
 

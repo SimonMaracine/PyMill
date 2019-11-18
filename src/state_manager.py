@@ -1,3 +1,5 @@
+from abc import ABC
+
 import pygame
 from src.display import HEIGHT, window
 from src.fonts import fps_font
@@ -5,10 +7,25 @@ from src.fonts import fps_font
 states = []
 
 
-class State:
+class State(ABC):
+
+    def on_event(self, control: dict):
+        pass
+
+    def update(self):
+        pass
+
+    def render(self, surface: pygame.Surface):
+        pass
+
+    def __del__(self):
+        print("DELETED A STATE")
+
+
+class NewState:
     """Class representing a game state."""
 
-    def __init__(self, id_: int, state, clock: pygame.time.Clock):
+    def __init__(self, id_: int, state: State, clock: pygame.time.Clock):
         self._id = id_
         self._state = state
         self._clock = clock

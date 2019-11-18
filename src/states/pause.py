@@ -5,13 +5,13 @@ from src import state_manager
 from src.gui.button import Button, TextButton
 from src.constants import *
 from src.fonts import button_font
+from src.state_manager import State
 
-last_frame: pygame.Surface
 
+class Pause(State):
 
-class Pause:
-
-    def __init__(self):
+    def __init__(self, *args):
+        self.last_frame = args[0]
         button1 = TextButton(WIDTH // 2, HEIGHT // 2 - 100, "OPTIONS", button_font, (255, 0, 0)).offset(0)
         button2 = TextButton(WIDTH // 2, HEIGHT // 2 - 50, "EXIT TO MENU", button_font, (255, 0, 0)).offset(0)
         button3 = TextButton(WIDTH // 2, HEIGHT // 2, "RESTART", button_font, (255, 0, 0)).offset(0)
@@ -20,13 +20,13 @@ class Pause:
         self.background = pygame.Surface((WIDTH // 2, HEIGHT // 2))
         self.background.fill(BACKGROUND_COLOR)
 
-    def render(self, surface):
-        surface.blit(last_frame, (0, 0))
+    def render(self, surface: pygame.Surface):
+        surface.blit(self.last_frame, (0, 0))
         surface.blit(self.background, (WIDTH // 4, HEIGHT // 4))
         for btn in self.buttons:
             btn.render(surface)
 
-    def update(self, control):
+    def update(self, control: dict):
         mouse = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
         for event in pygame.event.get():
@@ -52,8 +52,7 @@ class Pause:
             btn.update(mouse)
 
 
-def run(control, *args):
-    global pause, last_frame
-    last_frame = args[0]
-    pause = state_manager.State(PAUSE_STATE, Pause(), display.clock)
+def run(control: dict, *args):
+    global pause
+    pause = state_manager.NewState(PAUSE_STATE, Pause(*args), display.clock)
     pause.run(control, display.window)

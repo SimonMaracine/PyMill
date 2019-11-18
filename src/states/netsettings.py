@@ -10,9 +10,10 @@ from src.gui.button import Button, TextButton
 from src.gui.text_entry import TextEntry
 from src.constants import *
 from src.fonts import button_font
+from src.state_manager import State
 
 
-class Netsettings:
+class Netsettings(State):
 
     def __init__(self):
         button1 = TextButton(WIDTH // 2 + 200, HEIGHT - 80, "BACK", button_font, (255, 0, 0)).offset(0)
