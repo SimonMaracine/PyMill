@@ -2,11 +2,11 @@ import configparser
 import logging
 import tkinter as tk
 from os.path import join
+from typing import Tuple
 
 import pygame
-from src import display
+
 from src.display import WIDTH, HEIGHT
-from src import state_manager
 from src.gui.button import Button, TextButton
 from src.gui.text_entry import TextEntry
 from src.constants import *
@@ -20,6 +20,7 @@ from src.log import get_logger
 from src.networking.package import Package
 from src.tkinter_debug import tk_debug
 from src.state_manager import State
+from src.fonts import button_font
 
 logger = get_logger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -27,9 +28,9 @@ logger.setLevel(logging.DEBUG)
 
 class NetStart(State):
 
-    def __init__(self):
-        # timer_font = pygame.font.SysFont("calibri", 28, True)
-        button_font = pygame.font.SysFont("calibri", 50, True)
+    def __init__(self, id_, control):
+        super().__init__(id_, control)
+
         button1 = TextButton(120, 50, "HOST A GAME", button_font, (255, 0, 0))
         button2 = TextButton(120, 100, "CONNECT TO HOST", button_font, (255, 0, 0))
         button3 = TextButton(WIDTH // 2 + 200, HEIGHT - 80, "BACK", button_font, (255, 0, 0)).offset(0)
@@ -38,14 +39,10 @@ class NetStart(State):
         self.buttons = (button1, button2, button3, button4)
         self.host_entry = TextEntry(120 + button2.width + 10, 100, 240, 15)
 
-        config = configparser.ConfigParser()
-        config.read(join("data", "settings.ini"))
-        # print(config.sections())
-        port = int(config.get("networking", "port"))
-        ipv4_address = config.get("networking", "host")
+        port, ipv4_address = NetStart.get_port_and_ip()
 
-        self.host = Server(ipv4_address, port)
-        self.client = Client("", port)
+        self.host = Server(ipv4_address, int(port))
+        self.client = Client("", int(port))
         self.mode = int
         self.started_game = Boolean(False)
         self.client_started = False
@@ -59,19 +56,13 @@ class NetStart(State):
         self.slider = tk.Scale(self.frame)
         self.slider.pack()
 
-    def render(self, surface):
-        surface.fill(BACKGROUND_COLOR)
-        for btn in self.buttons:
-            btn.render(surface)
-        self.conn.render(surface)
-        self.host_entry.render(surface)
+    def __del__(self):
+        self.frame.close()
 
-    def update(self, control):
-        mouse = pygame.mouse.get_pos()
-        mouse_pressed = pygame.mouse.get_pressed()
+    def on_event(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                net_start.switch_state(EXIT, control)
+                self.switch_state(EXIT, self._control)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
                     self.host_entry.backspace()
@@ -81,16 +72,16 @@ class NetStart(State):
                     if event.unicode not in ("", "\x1b", "\t"):
                         self.host_entry.insert_character(event.unicode)
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if any(map(lambda button: button.hovered(mouse), self.buttons)):
+                if any(map(lambda button: button.hovered(event.pos), self.buttons)):
                     Button.button_down = True
                     TextButton.button_down = True
             elif event.type == pygame.MOUSEBUTTONUP:
-                if self.buttons[0].pressed(mouse, mouse_pressed):
+                if self.buttons[0].pressed(event.pos, event.button):
                     self.host_game()
-                elif self.buttons[1].pressed(mouse, mouse_pressed):
+                elif self.buttons[1].pressed(event.pos, event.button):
                     self.connect_to_host()
-                elif self.buttons[2].pressed(mouse, mouse_pressed):
-                    net_start.switch_state(START_STATE, control)
+                elif self.buttons[2].pressed(event.pos, event.button):
+                    self.switch_state(START_STATE, self._control)
                     self.host.disconnect = True
                     self.client.disconnect = True
                     if self.host.sock is not None:
@@ -99,18 +90,20 @@ class NetStart(State):
                             self.host.stop_sock()
                         except OSError as e:
                             print(e)
-                elif self.buttons[3].pressed(mouse, mouse_pressed):
+                elif self.buttons[3].pressed(event.pos, event.button):
                     if self.mode == HOST:
                         self.started_game.set(True)
                     elif self.mode == CLIENT:
                         self.started_game.set(True)
-                if self.host_entry.pressed(mouse, mouse_pressed):
+                if self.host_entry.pressed(event.pos, event.button):
                     self.host_entry.set_focus(True)
                 else:
                     self.host_entry.set_focus(False)
                 Button.button_down = False
                 TextButton.button_down = False
 
+    def update(self):
+        mouse = pygame.mouse.get_pos()
         for btn in self.buttons:
             btn.update(mouse)
 
@@ -152,13 +145,20 @@ class NetStart(State):
         if self.mode == HOST:
             if self.client_started and self.started_game.get():
                 print("Starting game")
-                net_start.switch_state(MORRIS_NET_STATE, control, False, HOST, self.host, self.client)
+                self.switch_state(MORRIS_NET_STATE, self._control, False, HOST, self.host, self.client)
         elif self.mode == CLIENT:
             if self.host_started and self.started_game.get():
                 print("Starting game")
-                net_start.switch_state(MORRIS_NET_STATE, control, False, CLIENT, self.host, self.client)
+                self.switch_state(MORRIS_NET_STATE, self._control, False, CLIENT, self.host, self.client)
 
         tk_debug.update()
+
+    def render(self, surface):
+        surface.fill(BACKGROUND_COLOR)
+        for btn in self.buttons:
+            btn.render(surface)
+        self.conn.render(surface)
+        self.host_entry.render(surface)
 
     def host_game(self):
         if not self.host.run():
@@ -177,9 +177,17 @@ class NetStart(State):
             return
         self.client.run()
 
+    @staticmethod
+    def get_port_and_ip() -> Tuple[str, str]:
+        config = configparser.ConfigParser()
+        config.read(join("data", "settings.ini"))
+        logger.debug(config.sections())
+
+        port = config.get("networking", "port")
+        ipv4_address = config.get("networking", "host")
+        return port, ipv4_address
+
 
 def run(control):
-    global net_start
-    net_start = state_manager.NewState(600, NetStart(), display.clock)
-    net_start.set_frame_rate(60)
-    net_start.run(control, display.window)
+    net_start = NetStart(NET_START_STATE, control)
+    net_start.run()

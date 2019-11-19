@@ -1,7 +1,6 @@
 import pygame
-from src import display
+
 from src.display import WIDTH, HEIGHT
-from src import state_manager
 from src.gui.button import Button, TextButton
 from src.constants import *
 from src.fonts import button_font
@@ -10,7 +9,9 @@ from src.state_manager import State
 
 class PauseNet(State):
 
-    def __init__(self, *args):
+    def __init__(self, id_, control, *args):
+        super().__init__(id_, control)
+
         self.last_frame = args[0]
         self.client = args[1]
         self.host = args[2]
@@ -21,39 +22,38 @@ class PauseNet(State):
         self.background = pygame.Surface((WIDTH // 2, HEIGHT // 2))
         self.background.fill(BACKGROUND_COLOR)
 
+    def on_event(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.switch_state(EXIT, self._control)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if any(map(lambda button: button.hovered(event.pos), self.buttons)):
+                    Button.button_down = True
+                    TextButton.button_down = True
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if self.buttons[0].pressed(event.pos, event.button):
+                    pass
+                elif self.buttons[1].pressed(event.pos, event.button):
+                    self.switch_state(MENU_STATE, self._control)
+                    self.host.disconnect = True
+                    self.client.disconnect = True
+                elif self.buttons[2].pressed(event.pos, event.button):
+                    self.exit()
+                Button.button_down = False
+                TextButton.button_down = False
+
+    def update(self):
+        mouse = pygame.mouse.get_pos()
+        for btn in self.buttons:
+            btn.update(mouse)
+
     def render(self, surface):
         surface.blit(self.last_frame, (0, 0))
         surface.blit(self.background, (WIDTH // 4, HEIGHT // 4))
         for btn in self.buttons:
             btn.render(surface)
 
-    def update(self, control):
-        mouse = pygame.mouse.get_pos()
-        mouse_pressed = pygame.mouse.get_pressed()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pause_net.switch_state(EXIT, control)
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if any(map(lambda button: button.hovered(mouse), self.buttons)):
-                    Button.button_down = True
-                    TextButton.button_down = True
-            elif event.type == pygame.MOUSEBUTTONUP:
-                if self.buttons[0].pressed(mouse, mouse_pressed):
-                    pass
-                elif self.buttons[1].pressed(mouse, mouse_pressed):
-                    pause_net.switch_state(MENU_STATE, control)
-                    self.host.disconnect = True
-                    self.client.disconnect = True
-                elif self.buttons[2].pressed(mouse, mouse_pressed):
-                    pause_net.exit()
-                Button.button_down = False
-                TextButton.button_down = False
-
-        for btn in self.buttons:
-            btn.update(mouse)
-
 
 def run(control, *args):
-    global pause_net
-    pause_net = state_manager.NewState(PAUSE_STATE, PauseNet(*args), display.clock)
-    pause_net.run(control, display.window)
+    pause_net = PauseNet(PAUSE_STATE, control, *args)
+    pause_net.run()

@@ -23,7 +23,7 @@ class TextEntry:  # todo make text y position lower
         self.surface = pygame.Surface((self.width - 8, self.height - 8))
         self.surface.set_clip(None)
 
-    def render(self, surface):
+    def render(self, surface: pygame.Surface):
         pygame.draw.rect(surface, self.color, (self.x, self.y, self.width, self.height), 4)
         if self.focus:
             pygame.draw.rect(surface, self.focus_color, (self.x + 2, self.y + 2, self.width - 3, self.height - 3), 3)
@@ -56,10 +56,10 @@ class TextEntry:  # todo make text y position lower
                 return True
         return False
 
-    def pressed(self, mouse: tuple, mouse_pressed: tuple) -> bool:
+    def pressed(self, mouse: tuple, mouse_pressed: int) -> bool:
         if self.locked:
             return False
-        if mouse_pressed[0]:
+        if mouse_pressed == pygame.BUTTON_LEFT:
             if self.hovered(mouse):
                 return True
         return False

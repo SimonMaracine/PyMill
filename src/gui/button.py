@@ -13,7 +13,7 @@ class Button:
         self.color = (255, 255, 255)
         self.locked = False
 
-    def render(self, surface):
+    def render(self, surface: pygame.Surface):
         pygame.draw.rect(surface, self.color, (self.x, self.y, self.width, self.height))
 
     def update(self, mouse: tuple):
@@ -33,10 +33,10 @@ class Button:
                 return True
         return False
 
-    def pressed(self, mouse: tuple, mouse_pressed: tuple) -> bool:
+    def pressed(self, mouse: tuple, mouse_pressed: int) -> bool:
         if self.locked:
             return False
-        if mouse_pressed[0] and self.button_down:
+        if mouse_pressed == pygame.BUTTON_LEFT and self.button_down:
             if self.hovered(mouse):
                 return True
         return False
@@ -71,7 +71,7 @@ class TextButton(Button):
 
         self.render_background = False
 
-    def render(self, surface):
+    def render(self, surface: pygame.Surface):
         if self.render_background:
             super().render(surface)
         text = self.font.render(self.text, True, self.text_color)
@@ -95,7 +95,7 @@ class ImageButton(Button):
         self.image_height = self.image.get_height()
         super().__init__(x, y, self.image_width, self.image_height)
 
-    def render(self, surface):
+    def render(self, surface: pygame.Surface):
         surface.blit((self.x, self.y), self.image)
 
     def update(self, mouse: tuple):

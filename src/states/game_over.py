@@ -1,21 +1,22 @@
 import logging
-
 import pygame
-from src import display
+
 from src.display import WIDTH, HEIGHT
-from src import state_manager
 from src.gui.button import Button, TextButton
 from src.constants import *
 from src.fonts import button_font, title_font
 from src.log import get_logger
+from src.state_manager import State
 
 logger = get_logger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class GameOver:
+class GameOver(State):
 
-    def __init__(self, *args):
+    def __init__(self, id_, control, *args):
+        super().__init__(id_, control)
+
         self.last_frame = args[0]
         self.winner = args[1]
         button1 = TextButton(WIDTH // 2, HEIGHT // 2, "PLAY AGAIN", button_font, (255, 0, 0)).offset(0)
@@ -26,6 +27,27 @@ class GameOver:
         self.who_won = title_font.render(f"{'White' if self.winner == WHITE else 'Black'} won!", True, (0, 0, 0))
         logger.debug(f"Winner is {self.winner}")
 
+    def on_event(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.switch_state(EXIT, self._control)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if any(map(lambda button: button.hovered(event.pos), self.buttons)):
+                    Button.button_down = True
+                    TextButton.button_down = True
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if self.buttons[0].pressed(event.pos, event.button):
+                    self.switch_state(MORRIS_HOTSEAT_STATE, self._control, except_self=True)
+                elif self.buttons[1].pressed(event.pos, event.button):
+                    self.switch_state(MENU_STATE, self._control)
+                Button.button_down = False
+                TextButton.button_down = False
+
+    def update(self):
+        mouse = pygame.mouse.get_pos()
+        for btn in self.buttons:
+            btn.update(mouse)
+
     def render(self, surface):
         surface.blit(self.last_frame, (0, 0))
         surface.blit(self.background, (WIDTH // 4, HEIGHT // 4))
@@ -33,29 +55,7 @@ class GameOver:
         for btn in self.buttons:
             btn.render(surface)
 
-    def update(self, control):
-        mouse = pygame.mouse.get_pos()
-        mouse_pressed = pygame.mouse.get_pressed()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                game_over.switch_state(EXIT, control)
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if any(map(lambda button: button.hovered(mouse), self.buttons)):
-                    Button.button_down = True
-                    TextButton.button_down = True
-            elif event.type == pygame.MOUSEBUTTONUP:
-                if self.buttons[0].pressed(mouse, mouse_pressed):
-                    game_over.switch_state(MORRIS_HOTSEAT_STATE, control, except_self=True)
-                elif self.buttons[1].pressed(mouse, mouse_pressed):
-                    game_over.switch_state(MENU_STATE, control)
-                Button.button_down = False
-                TextButton.button_down = False
-
-        for btn in self.buttons:
-            btn.update(mouse)
-
 
 def run(control, *args):
-    global game_over
-    game_over = state_manager.State(GAME_OVER_STATE, GameOver(*args), display.clock)
-    game_over.run(control, display.window)
+    game_over = GameOver(GAME_OVER_STATE, control, *args)
+    game_over.run()

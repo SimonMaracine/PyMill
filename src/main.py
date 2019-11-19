@@ -1,12 +1,13 @@
 """Main game module. It must be imported from the game folder and its main() executed."""
 
 import pygame
-from src.states import morris_hotseat, menu, start, options, exit, net_start, morris_net, netsettings
+from src.states import morris_hotseat, menu, start, options, exit, net_start, morris_net, net_settings
 from src.constants import *
 from src.tkinter_debug import tk_debug
+from src.state_manager import Control
 
 VERSION = "v0.2.0"
-control = {"state": MENU_STATE, "running": True, "args": ()}
+control = Control(state=MENU_STATE, running=True, args=())
 
 
 def main():
@@ -14,8 +15,9 @@ def main():
     pygame.init()
     tk_debug.tk_init()
 
-    while control["running"]:
-        current_state = control["state"]
+    while control.running:
+        current_state = control.state
+
         if current_state == MENU_STATE:
             menu.run(control)
         elif current_state == START_STATE:
@@ -28,8 +30,8 @@ def main():
             morris_net.run(control)
         elif current_state == NET_START_STATE:
             net_start.run(control)
-        elif current_state == NETSETTINGS_STATE:
-            netsettings.run(control)
+        elif current_state == NET_SETTINGS_STATE:
+            net_settings.run(control)
         elif current_state == EXIT:
             exit.run(control)
 
