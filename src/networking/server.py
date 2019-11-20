@@ -1,4 +1,6 @@
 import socket
+import threading
+from typing import Callable, Optional
 
 import pygame
 
@@ -16,12 +18,14 @@ class Server:
         self.waiting_for_conn = False
         self.disconnect = False
         self.hosting = False
-        self.sock = None
-        self.thread = None
+        self.sock: Optional[socket.SocketType] = None
+        self.thread: Optional[threading.Thread] = None
         self.clock = pygame.time.Clock()
 
         self.to_send: bytes = b"Hallo!"
         self.to_be_received: bytes = serialize(Package(Boolean(False), None, Boolean(False)))
+
+        self._on_disconnect: Callable = lambda: None
 
     def prepare(self) -> bool:
         self.sock = create_socket()
@@ -51,12 +55,12 @@ class Server:
         try:
             connection, address = self.sock.accept()
             print("Connected by {}".format(address))
-        except OSError as e:
+        except OSError as err:
             connection = None
-            print(e)
-        except socket.timeout as e:
+            print(err)
+        except socket.timeout as err:
             # print("Socket timed out")
-            print(e)
+            print(err)
             connection = None
 
         self.connection = connection
@@ -99,18 +103,22 @@ class Server:
                     if not data:
                         print("Client sent nothing")
                         self.disconnect = True
-                except ConnectionAbortedError:
-                    print("Client has closed the connection")
+                except ConnectionAbortedError as err:
+                    # print("Client has closed the connection")
+                    print(err)
                     self.disconnect = True
-                except ConnectionResetError:
-                    print("Client has probably closed the connection")
+                except ConnectionResetError as err:
+                    # print("Client has probably closed the connection")
+                    print(err)
                     self.disconnect = True
                 # except ConnectionError:
                 #     print("An unexpected error occurred")
                 #     break
+
                 self.clock.tick(40)
 
         self.hosting = False
+        self._on_disconnect()
         print("Hosting aborted")
 
     def send(self, data: bytes):
@@ -118,3 +126,6 @@ class Server:
 
     def receive(self) -> bytes:
         return self.to_be_received
+
+    def set_on_disconnect(self, func: Callable):
+        self._on_disconnect = func

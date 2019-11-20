@@ -45,6 +45,9 @@ class Start(State):
         for btn in self.buttons:
             btn.render(surface)
 
+    def on_exit(self):
+        pass
+
 
 def run(control):
     start = Start(START_STATE, control)

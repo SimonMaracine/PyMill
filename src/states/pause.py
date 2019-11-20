@@ -9,10 +9,11 @@ from src.state_manager import State
 
 class Pause(State):
 
-    def __init__(self, id_, control, *args):
+    def __init__(self, id_, control):
         super().__init__(id_, control)
 
-        self.last_frame = args[0]
+        self.last_frame = control.args[0]
+
         button1 = TextButton(WIDTH // 2, HEIGHT // 2 - 100, "OPTIONS", button_font, (255, 0, 0)).offset(0)
         button2 = TextButton(WIDTH // 2, HEIGHT // 2 - 50, "EXIT TO MENU", button_font, (255, 0, 0)).offset(0)
         button3 = TextButton(WIDTH // 2, HEIGHT // 2, "RESTART", button_font, (255, 0, 0)).offset(0)
@@ -52,7 +53,11 @@ class Pause(State):
         for btn in self.buttons:
             btn.render(surface)
 
+    def on_exit(self):
+        pass
+
 
 def run(control, *args):
-    pause = Pause(PAUSE_STATE, control, *args)
+    control.args = args
+    pause = Pause(PAUSE_STATE, control)
     pause.run()

@@ -92,6 +92,9 @@ class NetSettings(State):
         self.port_entry.render(surface)
         self.host_entry.render(surface)
 
+    def on_exit(self):
+        pass
+
     def apply_changes(self):
         config = configparser.ConfigParser()
         config.read(join("data", "settings.ini"))

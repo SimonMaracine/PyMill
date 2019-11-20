@@ -14,13 +14,14 @@ logger.setLevel(logging.DEBUG)
 
 class GameOverNet(State):
 
-    def __init__(self, id_, control, *args):
+    def __init__(self, id_, control):
         super().__init__(id_, control)
 
-        self.last_frame = args[0]
-        self.winner = args[1]
-        self.client = args[2]
-        self.host = args[3]
+        self.last_frame = control.args[0]
+        self.winner = control.args[1]
+        self.client = control.args[2]
+        self.host = control.args[3]
+
         button1 = TextButton(WIDTH // 2, HEIGHT // 2, "PLAY AGAIN", button_font, (255, 0, 0)).offset(0)
         button2 = TextButton(WIDTH // 2, HEIGHT // 2 + 50, "EXIT TO MENU", button_font, (255, 0, 0)).offset(0)
         self.buttons = (button1, button2)
@@ -39,6 +40,7 @@ class GameOverNet(State):
                     TextButton.button_down = True
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.buttons[0].pressed(event.pos, event.button):
+                    # self.switch_state(MORRIS_NET_STATE, self._control, except_self=True, )
                     pass
                 elif self.buttons[1].pressed(event.pos, event.button):
                     self.switch_state(MENU_STATE, self._control)
@@ -60,7 +62,11 @@ class GameOverNet(State):
         for btn in self.buttons:
             btn.render(surface)
 
+    def on_exit(self):
+        pass
+
 
 def run(control, *args):
-    game_over_net = GameOverNet(GAME_OVER_STATE, control, *args)
+    control.args = args
+    game_over_net = GameOverNet(GAME_OVER_STATE, control)
     game_over_net.run()

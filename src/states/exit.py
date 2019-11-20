@@ -15,6 +15,9 @@ class Exit(State):
     def render(self, surface):
         pass
 
+    def on_exit(self):
+        pass
+
 
 def run(control):
     control.running = False

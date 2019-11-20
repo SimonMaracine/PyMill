@@ -1,4 +1,5 @@
 import pygame
+
 from src.fonts import text_entry_font
 from src.constants import *
 

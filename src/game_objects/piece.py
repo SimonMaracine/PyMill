@@ -14,9 +14,9 @@ class Piece:
         self.picked_up = False
 
     def render(self, surface):
-        pygame.draw.circle(surface, self.color, (self.x, self.y), self.radius)
+        pygame.draw.circle(surface, self.color, (self.x, self.y), Piece.radius)
 
-    def update(self, mouse_x, mouse_y):
+    def update(self, mouse_x: int, mouse_y: int):
         if self.picked_up:
             self.x = mouse_x
             self.y = mouse_y

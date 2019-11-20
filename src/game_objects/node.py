@@ -22,14 +22,14 @@ class Node:
         return "[{}, {}; {}]".format(self.x // 90, self.y // 90, True if self.piece else False)
 
     def render(self, surface: pygame.Surface):
-        pygame.draw.circle(surface, self.color, (self.x, self.y), self.dot_radius)
+        pygame.draw.circle(surface, self.color, (self.x, self.y), Node.dot_radius)
         if self.highlight:
             pygame.draw.ellipse(surface, self.highlight_color,
-                                (self.x - self.radius, self.y - self.radius, self.radius * 2, self.radius * 2), 3)
+                                (self.x - Node.radius, self.y - Node.radius, Node.radius * 2, Node.radius * 2), 3)
 
     def update(self, mouse_x: int, mouse_y: int, must_remove_piece: bool):
         distance = sqrt(((mouse_x - self.x) ** 2 + (mouse_y - self.y) ** 2))
-        if distance <= self.radius:
+        if distance <= Node.radius:
             self.highlight = True
         else:
             self.highlight = False
@@ -41,10 +41,10 @@ class Node:
 
     def render_remove_thingy(self, surface: pygame.Surface):
         if self.highlight and self.remove_thingy:
-            pygame.draw.line(surface, self.highlight_color, (self.x - self.radius//2, self.y - self.radius//2),
-                             (self.x + self.radius//2, self.y + self.radius//2), 3)
-            pygame.draw.line(surface, self.highlight_color, (self.x + self.radius//2, self.y - self.radius//2),
-                             (self.x - self.radius//2, self.y + self.radius//2), 3)
+            pygame.draw.line(surface, self.highlight_color, (self.x - Node.radius//2, self.y - Node.radius//2),
+                             (self.x + Node.radius//2, self.y + Node.radius//2), 3)
+            pygame.draw.line(surface, self.highlight_color, (self.x + Node.radius//2, self.y - Node.radius//2),
+                             (self.x - Node.radius//2, self.y + Node.radius//2), 3)
 
     def add_piece(self, piece):
         self.piece = piece

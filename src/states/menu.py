@@ -45,6 +45,9 @@ class Menu(State):
         for btn in self.buttons:
             btn.render(surface)
 
+    def on_exit(self):
+        pass
+
 
 def run(control):
     menu = Menu(MENU_STATE, control)

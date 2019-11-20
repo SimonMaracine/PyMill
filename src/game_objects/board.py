@@ -1,6 +1,8 @@
 import logging
+from typing import Optional
 
 import pygame
+
 from src.display import WIDTH, HEIGHT
 from src.game_objects.piece import Piece
 from src.game_objects.node import Node
@@ -53,8 +55,9 @@ class Board:
         self.white_pieces = 9
         self.black_pieces = 9
         self.phase = PHASE1
-        self.picked_up_piece = None  # has picked up a piece
-        self.node_taken_piece = None
+        self.picked_up_piece: Optional[Piece] = None  # has picked up a piece
+        self.node_taken_piece: Optional[Piece] = None
+
         self.windmills = (
             (self.nodes[0], self.nodes[1], self.nodes[2]),
             (self.nodes[0], self.nodes[9], self.nodes[21]),
@@ -139,7 +142,7 @@ class Board:
 
     def pick_up_piece(self):
         for node in self.nodes:
-            if node.highlight and node.piece and not self.picked_up_piece:
+            if node.highlight and node.piece and self.picked_up_piece is None:
                 if node.piece.pick_up(self.turn):
                     self.change_node_color(node, (0, 255, 0), (255, 0, 0))
                     self.node_taken_piece = node
@@ -191,7 +194,7 @@ class Board:
 
         """
         changed_turn = False
-        if self.picked_up_piece:
+        if self.picked_up_piece is not None:
             for node in self.where_can_go(self.node_taken_piece):
                 if node.highlight and not node.piece:
                     node.add_piece(self.picked_up_piece)
@@ -209,7 +212,7 @@ class Board:
                         logger.info("Remove a piece!")
 
         # Release piece if player released the left button.
-        if self.picked_up_piece:
+        if self.picked_up_piece is not None:
             self.change_node_color(self.node_taken_piece, (0, 0, 0), (0, 0, 0))
             self.picked_up_piece.release(self.node_taken_piece)
             self.picked_up_piece = None
@@ -227,7 +230,7 @@ class Board:
                 return True
         return False
 
-    def show_board(self, surface):
+    def show_board(self, surface: pygame.Surface):
         # Drawing three rectangles...
         pygame.draw.rect(surface, (0, 0, 0), (self.x, self.y, self.width, self.width), 2)
         pygame.draw.rect(surface, (0, 0, 0), (self.x + self.DIV, self.y + self.DIV,
@@ -244,13 +247,13 @@ class Board:
         pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 6, self.y + self.DIV * 3),
                          (self.x + self.DIV * 4, self.y + self.DIV * 3), 2)
 
-    def show_player_pieces(self, surface, font):
+    def show_player_pieces(self, surface: pygame.Surface, font: pygame.font.Font):
         player1_text = font.render("x {}".format(self.white_pieces), True, (0, 0, 0))
         player2_text = font.render("x {}".format(self.black_pieces), True, (0, 0, 0))
         surface.blit(player1_text, (20, HEIGHT//2 - 30))
         surface.blit(player2_text, (WIDTH - 20 - player2_text.get_width(), HEIGHT // 2 - 30))
 
-    def show_player_indicator(self, surface, font):
+    def show_player_indicator(self, surface: pygame.Surface, font: pygame.font.Font):
         text = font.render("Player: {}".format(self.turn), True, (0, 0, 0))
         surface.blit(text, (5, 60))
 

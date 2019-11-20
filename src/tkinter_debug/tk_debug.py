@@ -1,6 +1,5 @@
 import logging
 import tkinter as tk
-from typing import Callable
 
 from src.log import get_logger
 
@@ -14,7 +13,7 @@ class DebugWindow(tk.Frame):
         self._top_level = tk.Toplevel()
         self._top_level.wm_minsize(100, 80)
         self._top_level.attributes("-topmost", True)
-        self._position_window()
+        # self._position_window()
 
         self._top_level.bind("<ButtonPress-3>", self._start_move)
         self._top_level.bind("<ButtonRelease-3>", self._stop_move)

@@ -60,7 +60,8 @@ class Button:
 
 
 class TextButton(Button):
-    def __init__(self, x: int, y: int, text: str, font: pygame.font, text_color: tuple):
+
+    def __init__(self, x: int, y: int, text: str, font: pygame.font.Font, text_color: tuple):
         self.text = text
         self.font = font
         self.text_color = text_color
@@ -88,9 +89,10 @@ class TextButton(Button):
 
 
 class ImageButton(Button):
-    def __init__(self,  x: int, y: int, width: int, height: int, image: pygame.Surface):
+
+    def __init__(self, x: int, y: int, width: int, height: int, image: pygame.Surface):
         self.image = image
-        self.scale_image(width,  height)
+        self._scale_image(width,  height)
         self.image_width = self.image.get_width()
         self.image_height = self.image.get_height()
         super().__init__(x, y, self.image_width, self.image_height)
@@ -101,5 +103,5 @@ class ImageButton(Button):
     def update(self, mouse: tuple):
         pass
 
-    def scale_image(self, width: int, height: int):
+    def _scale_image(self, width: int, height: int):
         pygame.transform.scale(self.image, (width, height))

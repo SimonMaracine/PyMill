@@ -14,11 +14,12 @@ logger.setLevel(logging.DEBUG)
 
 class GameOver(State):
 
-    def __init__(self, id_, control, *args):
+    def __init__(self, id_, control):
         super().__init__(id_, control)
 
-        self.last_frame = args[0]
-        self.winner = args[1]
+        self.last_frame = control.args[0]
+        self.winner = control.args[1]
+
         button1 = TextButton(WIDTH // 2, HEIGHT // 2, "PLAY AGAIN", button_font, (255, 0, 0)).offset(0)
         button2 = TextButton(WIDTH // 2, HEIGHT // 2 + 50, "EXIT TO MENU", button_font, (255, 0, 0)).offset(0)
         self.buttons = (button1, button2)
@@ -55,7 +56,11 @@ class GameOver(State):
         for btn in self.buttons:
             btn.render(surface)
 
+    def on_exit(self):
+        pass
+
 
 def run(control, *args):
-    game_over = GameOver(GAME_OVER_STATE, control, *args)
+    control.args = args
+    game_over = GameOver(GAME_OVER_STATE, control)
     game_over.run()

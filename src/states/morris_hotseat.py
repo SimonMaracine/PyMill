@@ -74,6 +74,9 @@ class MorrisHotseat(State):
         for btn in self.buttons:
             btn.render(surface)
 
+    def on_exit(self):
+        pass
+
     @staticmethod
     def get_background_color() -> str:
         config = configparser.ConfigParser()

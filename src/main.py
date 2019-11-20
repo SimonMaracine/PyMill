@@ -1,7 +1,8 @@
 """Main game module. It must be imported from the game folder and its main() executed."""
 
 import pygame
-from src.states import morris_hotseat, menu, start, options, exit, net_start, morris_net, net_settings
+from src.states import morris_hotseat, menu, start, options, exit,\
+        net_start, morris_net, net_settings, the_other_disconnected
 from src.constants import *
 from src.tkinter_debug import tk_debug
 from src.state_manager import Control
@@ -32,6 +33,8 @@ def main():
             net_start.run(control)
         elif current_state == NET_SETTINGS_STATE:
             net_settings.run(control)
+        elif current_state == THE_OTHER_DISCONNECTED:
+            the_other_disconnected.run(control)
         elif current_state == EXIT:
             exit.run(control)
 

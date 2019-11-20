@@ -32,7 +32,7 @@ class Options(State):
                 elif self.buttons[1].pressed(event.pos, event.button):
                     pass
                 elif self.buttons[2].pressed(event.pos, event.button):
-                    self.switch_state(NETSETTINGS_STATE, self._control)
+                    self.switch_state(NET_SETTINGS_STATE, self._control)
                 elif self.buttons[3].pressed(event.pos, event.button):
                     self.switch_state(MENU_STATE, self._control)
                 Button.button_down = False

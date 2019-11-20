@@ -1,7 +1,7 @@
 import time
 import configparser
 import logging
-import tkinter as tk
+# import tkinter as tk
 from os.path import join
 
 import pygame
@@ -15,7 +15,7 @@ from ..helpers import serialize, deserialize, str_to_tuple, Boolean
 from src.fonts import small_button_font
 from src.networking.package import Package
 from src.log import get_logger
-from src.tkinter_debug import tk_debug
+# from src.tkinter_debug import tk_debug
 from src.state_manager import State
 
 logger = get_logger(__name__)
@@ -24,12 +24,16 @@ logger.setLevel(logging.DEBUG)
 
 class MorrisNet(State):
 
-    def __init__(self, id_, control, *args):
+    def __init__(self, id_, control):
         super().__init__(id_, control)
 
-        self.mode = args[0]
-        self.host = args[1]
-        self.client = args[2]
+        self.mode = control.args[0]
+        self.host = control.args[1]
+        self.client = control.args[2]
+
+        self.host.set_on_disconnect(self.on_disconnect)
+        self.client.set_on_disconnect(self.on_disconnect)
+
         self.turn = CLIENT
         self.change_turn = Boolean(False)
         self.board = Board()
@@ -46,19 +50,19 @@ class MorrisNet(State):
         self.buttons = (button1,)
 
         self.bg_color = str_to_tuple(MorrisNet.get_background_color())
+        self.lost_connection = False
 
-        self.frame = tk_debug.DebugWindow()
-        self.tk_turn = tk.StringVar(self.frame)
-        tk.Label(self.frame, textvariable=self.tk_turn).pack()
+        # self.frame = tk_debug.DebugWindow()
+        # self.tk_turn = tk.StringVar(self.frame)
+        # tk.Label(self.frame, textvariable=self.tk_turn).pack()
 
     def on_event(self):
         if self.mode == self.turn:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.host.disconnect = True
                     self.switch_state(EXIT, self._control)
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if not event.button[0]:
+                    if event.button == pygame.BUTTON_LEFT:
                         if self.board.clicked_on_node():
                             self.board.node_pressed = True
                         if not self.board.must_remove_piece:
@@ -67,7 +71,7 @@ class MorrisNet(State):
                     if any(map(lambda button: button.hovered(event.pos), self.buttons)):
                         TextButton.button_down = True
                 elif event.type == pygame.MOUSEBUTTONUP:
-                    if event.button[0]:
+                    if event.button == pygame.BUTTON_LEFT:
                         if self.board.must_remove_piece:
                             if self.board.node_pressed:
                                 if self.board.remove_opponent_piece():  # returns if we could take the piece
@@ -75,7 +79,6 @@ class MorrisNet(State):
                         if self.board.phase == PHASE1:
                             if self.board.node_pressed:
                                 if self.board.put_new_piece():  # returns if we must change the self.turn
-                                # if not self.board.must_remove_piece:
                                     self.change_turn.set(True)
                         else:
                             if self.board.put_down_piece():  # returns if we must change the self.turn
@@ -89,10 +92,6 @@ class MorrisNet(State):
                 elif event.type == pygame.KEYUP:
                     if event.key == pygame.K_ESCAPE:
                         pause_net.run(self._control, display.window.copy(), self.client, self.host)
-
-            # if self.board.game_over:
-            #     logger.debug("Switching to GAME_OVER_STATE")
-            #     game_over.run(control, display.window.copy(), self.board.winner)
         else:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -123,28 +122,22 @@ class MorrisNet(State):
 
         if self.mode == HOST:
             if self.turn != self.mode:
-                try:
-                    self.package = deserialize(self.host.receive())
-                except EOFError as e:
-                    print(e)
+                self.receive_data(HOST)
                 self.change_turn = self.package.change_turn
                 if self.package.board is not None:
                     self.board = self.package.board
             else:
-                self.host.send(serialize(self.package))
+                self.send_data(HOST)
                 if self.change_turn.get():
                     time.sleep(0.1)
         else:
             if self.turn != self.mode:
-                try:
-                    self.package = deserialize(self.client.receive())
-                except EOFError as e:
-                    print(e)
+                self.receive_data(CLIENT)
                 self.change_turn = self.package.change_turn
                 if self.package.board is not None:
                     self.board = self.package.board
             else:
-                self.client.send(serialize(self.package))
+                self.send_data(CLIENT)
                 if self.change_turn.get():
                     time.sleep(0.1)
 
@@ -156,17 +149,11 @@ class MorrisNet(State):
             logger.debug("Switching to GAME_OVER_STATE")
             game_over_net.run(self._control, display.window.copy(), self.board.winner, self.client, self.host)
 
-        if self.mode == HOST:
-            if self.client.disconnect:
-                print("CLIENT GONE")
-                the_other_disconnected.run(self._control, display.window.copy())
-        else:
-            if self.host.disconnect:
-                print("HOST GONE")
-                the_other_disconnected.run(self._control, display.window.copy())
+        if self.lost_connection and self._control.state == MORRIS_NET_STATE:
+            self.switch_state(THE_OTHER_DISCONNECTED, self._control, False, display.window.copy())
 
-        self.tk_turn.set(("HOST" if self.turn == HOST else "CLIENT") + " is making a move")
-        tk_debug.update()
+        # self.tk_turn.set(("HOST" if self.turn == HOST else "CLIENT") + " is making a move")
+        # tk_debug.update()
 
     def render(self, surface):
         surface.fill(self.bg_color)
@@ -174,11 +161,36 @@ class MorrisNet(State):
         for btn in self.buttons:
             btn.render(surface)
 
+    def on_exit(self):
+        pass
+        # self.frame.close()
+
     def switch_turn(self) -> int:
         if self.turn == HOST:
             return CLIENT
         else:
             return HOST
+
+    def send_data(self, who: int):
+        if who == HOST:
+            self.host.send(serialize(self.package))
+        else:
+            self.client.send(serialize(self.package))
+
+    def receive_data(self, who: int):
+        if who == HOST:
+            try:
+                self.package = deserialize(self.host.receive())
+            except EOFError as err:
+                print(err)
+        else:
+            try:
+                self.package = deserialize(self.client.receive())
+            except EOFError as err:
+                print(err)
+
+    def on_disconnect(self):
+        self.lost_connection = True
 
     @staticmethod
     def get_background_color() -> str:
@@ -188,5 +200,5 @@ class MorrisNet(State):
 
 
 def run(control):
-    morris_net = MorrisNet(MORRIS_NET_STATE, control, *control.args)
+    morris_net = MorrisNet(MORRIS_NET_STATE, control)
     morris_net.run()

@@ -1,4 +1,5 @@
 import socket
+from typing import Callable
 
 import pygame
 
@@ -19,6 +20,8 @@ class Client:
 
         self.to_send: bytes = b"HEY!!!"
         self.to_be_received: bytes = serialize(Package(Boolean(False), None, Boolean(False)))
+
+        self._on_disconnect: Callable = lambda: None
 
     def prepare(self):
         self.sock = create_socket()
@@ -75,19 +78,21 @@ class Client:
 
                     sock.send(self.to_send)
                     # print("Sent: {}".format(self.to_send))
-                except ConnectionResetError as e:
+                except ConnectionResetError as err:
                     # print("Server has probably closed the connection")
-                    print(e)
+                    print(err)
                     self.disconnect = True
-                except ConnectionAbortedError as e:
-                    print(e)
+                except ConnectionAbortedError as err:
+                    print(err)
                     self.disconnect = True
-                except ConnectionError as e:
-                    print(e)
+                except ConnectionError as err:
+                    print(err)
                     self.disconnect = True
+
                 self.clock.tick(40)
 
         self.connected = False
+        self._on_disconnect()
         print("Disconnected from server")
 
     def send(self, data: bytes):
@@ -95,3 +100,6 @@ class Client:
 
     def receive(self) -> bytes:
         return self.to_be_received
+
+    def set_on_disconnect(self, func: Callable):
+        self._on_disconnect = func

@@ -3,7 +3,7 @@
 import socket
 import threading
 import pickle
-from typing import Any
+from typing import Any, Callable
 
 
 class Boolean:
@@ -26,15 +26,15 @@ def create_socket() -> socket.SocketType:
     return socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
 
 
-def create_thread(target, args=(), daemon=True) -> threading.Thread:
+def create_thread(target: Callable, args=(), daemon=True) -> threading.Thread:
     return threading.Thread(target=target, args=args, daemon=daemon)
 
 
-def serialize(obj) -> bytes:
+def serialize(obj: Any) -> bytes:
     return pickle.dumps(obj)
 
 
-def deserialize(bytes_obj) -> Any:
+def deserialize(bytes_obj: bytes) -> Any:
     return pickle.loads(bytes_obj)
 
 

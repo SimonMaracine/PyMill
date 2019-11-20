@@ -1,6 +1,5 @@
 import configparser
 import logging
-import tkinter as tk
 from os.path import join
 from typing import Tuple
 
@@ -18,7 +17,6 @@ from ..gui.conn_status import ConnStatus
 # from src.file_io import read_file
 from src.log import get_logger
 from src.networking.package import Package
-from src.tkinter_debug import tk_debug
 from src.state_manager import State
 from src.fonts import button_font
 
@@ -43,21 +41,15 @@ class NetStart(State):
 
         self.host = Server(ipv4_address, int(port))
         self.client = Client("", int(port))
-        self.mode = int
+        self.mode = 0
         self.started_game = Boolean(False)
         self.client_started = False
         self.host_started = False
         self.timer = Timer(61)
         self.conn = ConnStatus(120, 270, self.host, self.client)
+        self.conn_established = False
 
         self.package = Package(self.started_game, None, Boolean(False))
-
-        self.frame = tk_debug.DebugWindow()
-        self.slider = tk.Scale(self.frame)
-        self.slider.pack()
-
-    def __del__(self):
-        self.frame.close()
 
     def on_event(self):
         for event in pygame.event.get():
@@ -79,7 +71,8 @@ class NetStart(State):
                 if self.buttons[0].pressed(event.pos, event.button):
                     self.host_game()
                 elif self.buttons[1].pressed(event.pos, event.button):
-                    self.connect_to_host()
+                    if not self.conn_established:
+                        self.connect_to_host()
                 elif self.buttons[2].pressed(event.pos, event.button):
                     self.switch_state(START_STATE, self._control)
                     self.host.disconnect = True
@@ -88,8 +81,8 @@ class NetStart(State):
                         logger.debug("Trying to stop the listening socket")
                         try:
                             self.host.stop_sock()
-                        except OSError as e:
-                            print(e)
+                        except OSError as err:
+                            print(err)
                 elif self.buttons[3].pressed(event.pos, event.button):
                     if self.mode == HOST:
                         self.started_game.set(True)
@@ -112,6 +105,7 @@ class NetStart(State):
             self.buttons[0].unlock()
             self.buttons[1].unlock()
             self.host_entry.unlock()
+            self.conn_established = False
 
         if self.client.connected:
             self.buttons[0].lock()
@@ -137,10 +131,10 @@ class NetStart(State):
         try:
             self.client_started = deserialize(self.host.receive()).started.get()
             self.host_started = deserialize(self.client.receive()).started.get()
-        except EOFError:
-            pass
-        except AttributeError as e:
-            print(e)
+        except EOFError as err:
+            print(err)
+        except AttributeError as err:
+            print(err)
 
         if self.mode == HOST:
             if self.client_started and self.started_game.get():
@@ -151,8 +145,6 @@ class NetStart(State):
                 print("Starting game")
                 self.switch_state(MORRIS_NET_STATE, self._control, False, CLIENT, self.host, self.client)
 
-        tk_debug.update()
-
     def render(self, surface):
         surface.fill(BACKGROUND_COLOR)
         for btn in self.buttons:
@@ -160,21 +152,31 @@ class NetStart(State):
         self.conn.render(surface)
         self.host_entry.render(surface)
 
+    def on_exit(self):
+        pass
+
     def host_game(self):
-        if not self.host.run():
+        if self.conn_established:
+            return
+        elif not self.host.run():
             return
         self.mode = HOST
         self.timer.start()
         self.buttons[0].lock()
         self.buttons[1].lock()
         self.host_entry.lock()
+        self.conn_established = True
 
     def connect_to_host(self):
-        self.mode = CLIENT
         self.client.host = self.host_entry.get_text()
-        if not self.client.host:
+        if self.conn_established:
+            return
+        elif not self.client.host:
             print("IP address not inserted")
             return
+        self.mode = CLIENT
+
+        self.conn_established = True
         self.client.run()
 
     @staticmethod
