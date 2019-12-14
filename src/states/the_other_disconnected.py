@@ -47,7 +47,7 @@ class TheOtherDisconnected(State):
     def render(self, surface):
         surface.blit(self.last_frame, (0, 0))
         surface.blit(self.background, (WIDTH // 4, HEIGHT // 4))
-        surface.blit(self.who_won, (WIDTH // 2 - self.who_won.get_width() // 2, HEIGHT // 2 - 90))
+        surface.blit(self.who_won, (WIDTH // 2 - self.who_won.get_width() // 2, HEIGHT // 2 - 50))
         for btn in self.buttons:
             btn.render(surface)
 

@@ -13,8 +13,7 @@ class PauseNet(State):
         super().__init__(id_, control)
 
         self.last_frame = control.args[0]
-        self.client = control.args[1]
-        self.host = control.args[2]
+        self.thing = control.args[1]  # client or server
 
         button1 = TextButton(WIDTH // 2, HEIGHT // 2 - 50, "OPTIONS", button_font, (255, 0, 0)).offset(0)
         button2 = TextButton(WIDTH // 2, HEIGHT // 2, "EXIT TO MENU", button_font, (255, 0, 0)).offset(0)
@@ -36,8 +35,7 @@ class PauseNet(State):
                     pass
                 elif self.buttons[1].pressed(event.pos, event.button):
                     self.switch_state(MENU_STATE, self._control)
-                    self.host.disconnect = True
-                    self.client.disconnect = True
+                    self.thing.disconnect = True
                     self.on_exit()
                 elif self.buttons[2].pressed(event.pos, event.button):
                     self.exit()

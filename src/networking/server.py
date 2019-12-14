@@ -27,10 +27,28 @@ class Server:
 
         self._on_disconnect: Callable = lambda: None
 
-    def prepare(self) -> bool:
+    def run(self) -> bool:
+        if not self.waiting_for_conn or self.hosting:
+            if not self._prepare():
+                return False
+            self.thread = create_thread(target=self._wait_for_conns)
+            self.thread.start()
+            self.waiting_for_conn = True
+            return True
+        else:
+            print("Server already running")
+            return False
+
+    def stop_sock(self):
+        sock = create_socket()
+        sock.connect((self.host, self.port))
+        sock.close()
+        print("Listening socket stopped")
+
+    def _prepare(self) -> bool:
         self.sock = create_socket()
         try:
-            self.bind()
+            self._bind()
         except OSError as e:
             print(e)
             return False
@@ -39,29 +57,16 @@ class Server:
         print("Server started. Waiting for connection...\n")
         return True
 
-    def run(self) -> bool:
-        if not self.waiting_for_conn or self.hosting:
-            if not self.prepare():
-                return False
-            self.thread = create_thread(target=self.wait_for_conns)
-            self.thread.start()
-            self.waiting_for_conn = True
-            return True
-        else:
-            print("Server already running")
-            return False
-
-    def wait_for_conns(self):
+    def _wait_for_conns(self):
         try:
             connection, address = self.sock.accept()
             print("Connected by {}".format(address))
+        except socket.timeout as err:
+            connection = None
+            print(err)
         except OSError as err:
             connection = None
             print(err)
-        except socket.timeout as err:
-            # print("Socket timed out")
-            print(err)
-            connection = None
 
         self.connection = connection
 
@@ -75,13 +80,7 @@ class Server:
         self.sock.close()
         print("Socket closed")
 
-    def stop_sock(self):
-        sock = create_socket()
-        sock.connect((self.host, self.port))
-        sock.close()
-        print("Listening socket stopped")
-
-    def bind(self):
+    def _bind(self):
         self.sock.bind((self.host, self.port))
 
     def client(self):
@@ -104,16 +103,14 @@ class Server:
                         print("Client sent nothing")
                         self.disconnect = True
                 except ConnectionAbortedError as err:
-                    # print("Client has closed the connection")
                     print(err)
                     self.disconnect = True
                 except ConnectionResetError as err:
-                    # print("Client has probably closed the connection")
                     print(err)
                     self.disconnect = True
-                # except ConnectionError:
-                #     print("An unexpected error occurred")
-                #     break
+                except ConnectionError as err:
+                    print(err)
+                    self.disconnect = True
 
                 self.clock.tick(40)
 

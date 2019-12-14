@@ -19,8 +19,7 @@ class GameOverNet(State):
 
         self.last_frame = control.args[0]
         self.winner = control.args[1]
-        self.client = control.args[2]
-        self.host = control.args[3]
+        self.thing = control.args[2]
 
         button1 = TextButton(WIDTH // 2, HEIGHT // 2, "PLAY AGAIN", button_font, (255, 0, 0)).offset(0)
         button2 = TextButton(WIDTH // 2, HEIGHT // 2 + 50, "EXIT TO MENU", button_font, (255, 0, 0)).offset(0)
@@ -44,8 +43,7 @@ class GameOverNet(State):
                     pass
                 elif self.buttons[1].pressed(event.pos, event.button):
                     self.switch_state(MENU_STATE, self._control)
-                    self.host.disconnect = True
-                    self.client.disconnect = True
+                    self.thing.disconnect = True
                     logger.debug("Stopping the server and client")
                 Button.button_down = False
                 TextButton.button_down = False

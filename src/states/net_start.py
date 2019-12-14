@@ -139,11 +139,11 @@ class NetStart(State):
         if self.mode == HOST:
             if self.client_started and self.started_game.get():
                 print("Starting game")
-                self.switch_state(MORRIS_NET_STATE, self._control, False, HOST, self.host, self.client)
+                self.switch_state(MORRIS_NET_STATE_SERVER, self._control, False, self.host)
         elif self.mode == CLIENT:
             if self.host_started and self.started_game.get():
                 print("Starting game")
-                self.switch_state(MORRIS_NET_STATE, self._control, False, CLIENT, self.host, self.client)
+                self.switch_state(MORRIS_NET_STATE_CLIENT, self._control, False, self.client)
 
     def render(self, surface):
         surface.fill(BACKGROUND_COLOR)
@@ -172,7 +172,7 @@ class NetStart(State):
         if self.conn_established:
             return
         elif not self.client.host:
-            print("IP address not inserted")
+            logger.info("IP address not inserted")
             return
         self.mode = CLIENT
 

@@ -2,7 +2,7 @@
 
 import pygame
 from src.states import morris_hotseat, menu, start, options, exit,\
-        net_start, morris_net, net_settings, the_other_disconnected
+        net_start, morris_net_server, morris_net_client, net_settings, the_other_disconnected
 from src.constants import *
 from src.tkinter_debug import tk_debug
 from src.state_manager import Control
@@ -27,8 +27,10 @@ def main():
             options.run(control)
         elif current_state == MORRIS_HOTSEAT_STATE:
             morris_hotseat.run(control)
-        elif current_state == MORRIS_NET_STATE:
-            morris_net.run(control)
+        elif current_state == MORRIS_NET_STATE_SERVER:
+            morris_net_server.run(control)
+        elif current_state == MORRIS_NET_STATE_CLIENT:
+            morris_net_client.run(control)
         elif current_state == NET_START_STATE:
             net_start.run(control)
         elif current_state == NET_SETTINGS_STATE:

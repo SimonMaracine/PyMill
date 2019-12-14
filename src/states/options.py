@@ -48,6 +48,9 @@ class Options(State):
         for btn in self.buttons:
             btn.render(surface)
 
+    def on_exit(self):
+        pass
+
 
 def run(control):
     options = Options(OPTIONS_STATE, control)

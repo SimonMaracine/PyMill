@@ -23,18 +23,18 @@ class Client:
 
         self._on_disconnect: Callable = lambda: None
 
-    def prepare(self):
-        self.sock = create_socket()
-        self.sock.settimeout(10)
-        if self.connect():
-            self.connected = True
-
     def run(self):
-        self.prepare()
+        self._prepare()
         if self.connected:
             create_thread(target=self.server).start()
 
-    def connect(self) -> bool:
+    def _prepare(self):
+        self.sock = create_socket()
+        self.sock.settimeout(10)
+        if self._connect():
+            self.connected = True
+
+    def _connect(self) -> bool:
         """Connects the client to a server.
 
         Returns:
@@ -46,16 +46,13 @@ class Client:
             self.sock.connect((self.host, self.port))
             print("Connected to server")
             return True
-        except socket.gaierror as e:
-            # print("Invalid IP address")
+        except socket.gaierror as e:  # invalid IP address
             print(e)
             return False
         except ConnectionRefusedError as e:
-            # print("Could not connect to server")
             print(e)
             return False
         except (socket.timeout, TimeoutError) as e:
-            # print("Connection attempt failed (timeout)")
             print(e)
             return False
 
@@ -79,7 +76,6 @@ class Client:
                     sock.send(self.to_send)
                     # print("Sent: {}".format(self.to_send))
                 except ConnectionResetError as err:
-                    # print("Server has probably closed the connection")
                     print(err)
                     self.disconnect = True
                 except ConnectionAbortedError as err:
