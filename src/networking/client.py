@@ -46,15 +46,17 @@ class Client:
             self.sock.connect((self.host, self.port))
             print("Connected to server")
             return True
-        except socket.gaierror as e:  # invalid IP address
-            print(e)
+        except socket.gaierror as err:  # invalid IP address
+            print(err)
             return False
-        except ConnectionRefusedError as e:
-            print(e)
+        except ConnectionRefusedError as err:
+            print(err)
             return False
-        except (socket.timeout, TimeoutError) as e:
-            print(e)
+        except (socket.timeout, TimeoutError) as err:
+            print(err)
             return False
+        except OSError as err:  # no route
+            print(err)
 
     def server(self):
         """The send-receive loop with the server."""

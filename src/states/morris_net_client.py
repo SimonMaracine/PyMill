@@ -3,8 +3,10 @@ import configparser
 import logging
 # import tkinter as tk
 from os.path import join
+from pickle import UnpicklingError
 
 import pygame
+from pympler import asizeof
 
 from src import display
 from src.game_objects.board import Board
@@ -162,6 +164,8 @@ class MorrisNetClient(State):
             self.package = deserialize(self.client.receive())
         except EOFError as err:
             print(err)
+        except UnpicklingError:
+            print(asizeof.asizeof(self.package))
 
     def on_disconnect(self):
         self.lost_connection = True
