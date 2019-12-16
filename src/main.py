@@ -1,7 +1,7 @@
 """Main game module. It must be imported from the game folder and its main() executed."""
 
 import pygame
-from src.states import morris_hotseat, menu, start, options, exit,\
+from src.states import morris_hotseat, menu, start, options, exit, \
         net_start, morris_net_server, morris_net_client, net_settings, the_other_disconnected
 from src.constants import *
 from src.tkinter_debug import tk_debug

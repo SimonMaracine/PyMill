@@ -59,9 +59,8 @@ class MorrisHotseat(State):
 
     def update(self):
         mouse = pygame.mouse.get_pos()
-        mouse_pressed = pygame.mouse.get_pressed()
 
-        self.board.update(mouse, mouse_pressed)
+        self.board.update(mouse)
         for btn in self.buttons:
             btn.update(mouse)
 

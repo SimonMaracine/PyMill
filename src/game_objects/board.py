@@ -96,7 +96,7 @@ class Board:
             self.show_player_pieces(surface, board_font)
         self.show_player_indicator(surface, board_font)
 
-    def update(self, mouse: tuple, mouse_pressed: tuple):
+    def update(self, mouse: tuple):
         mouse_x = mouse[0]
         mouse_y = mouse[1]
         for node in self.nodes:
