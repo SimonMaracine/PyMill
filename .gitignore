@@ -2,10 +2,14 @@
 build/
 dist/
 __pycache__/
-.idea/dictionaries/Simon_M.xml
+bin/
+include/
+lib/
+lib64
+
+pyvenv.cfg
 *.xml
 *.iml
 *.exe
 *.spec
-.idea/vcs.xml
 post_make.py
