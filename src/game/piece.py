@@ -7,13 +7,13 @@ class Piece:
 
     radius = 28
 
-    def __init__(self, x, y, color):
+    def __init__(self, x: float, y: float, color: tuple):
         self.x = x
         self.y = y
         self.color = color
         self.picked_up = False
 
-    def render(self, surface):
+    def render(self, surface: pygame.Surface):
         pygame.draw.circle(surface, self.color, (self.x, self.y), Piece.radius)
 
     def update(self, mouse_x: int, mouse_y: int):

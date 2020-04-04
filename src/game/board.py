@@ -1,27 +1,25 @@
-import logging
 from typing import Optional
 
 import pygame
 
-from src.display import WIDTH, HEIGHT
 from game.piece import Piece
 from game.node import Node
 from src.constants import *
-from src.fonts import board_font
 from src.log import get_logger
 
 logger = get_logger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(10)
 
 
 class Board:
     """Game board object."""
 
     def __init__(self):
-        self.width = HEIGHT - 60
-        self.x = (WIDTH - self.width) // 2
-        self.y = (HEIGHT - self.width) // 2
+        self.width = GAME_HEIGHT - 60
+        self.x = (GAME_WIDTH - self.width) // 2
+        self.y = (GAME_HEIGHT - self.width) // 2
         self.DIV = self.width // 6
+
         self.nodes = (
             Node(self.x, self.y, (0, 1, 1, 0)),
             Node(self.x + self.DIV * 3, self.y, (0, 1, 1, 1)),
@@ -51,12 +49,15 @@ class Board:
         for node in self.nodes:  # Correct the position of each node.
             node.x += 1
             node.y += 1
+
+        self.phase = PHASE1
         self.turn = PLAYER1
+
         self.white_pieces = 9
         self.black_pieces = 9
-        self.phase = PHASE1
-        self.picked_up_piece: Optional[Piece] = None  # has picked up a piece
-        self.node_taken_piece: Optional[Piece] = None
+
+        self.picked_up_piece: Optional[Piece] = None  # Has picked up a piece
+        self.node_taken_piece: Optional[Node] = None  # The node whose piece is currently picked up
 
         self.windmills = (
             (self.nodes[0], self.nodes[1], self.nodes[2]),
@@ -76,13 +77,17 @@ class Board:
             (self.nodes[22], self.nodes[19], self.nodes[16]),
             (self.nodes[12], self.nodes[13], self.nodes[14])
         )
+
         self.must_remove_piece = False
         self.can_jump = {PLAYER1: False, PLAYER2: False}
         self.node_pressed = False  # if a node is clicked
+        # self.turns_without_windmills = 0
+
         self.game_over = False
-        self.turns_without_windmills = 0
-        self.winner = tuple
+        self.winner = TIE  # Nobody is the winner
         # self._phase2_now()
+
+        self.gui_font = pygame.font.SysFont("", 30, True)
 
     def render(self, surface: pygame.Surface):
         self.show_board(surface)
@@ -90,11 +95,11 @@ class Board:
             node.render(surface)
             if node.piece:
                 node.piece.render(surface)
-                if node.remove_thingy and self.turn_color() != node.piece.color:
+                if node.remove_thingy and self.get_turn_color() != node.piece.color:
                     node.render_remove_thingy(surface)
         if self.phase == PHASE1:
-            self.show_player_pieces(surface, board_font)
-        self.show_player_indicator(surface, board_font)
+            self.show_player_pieces(surface, self.gui_font)
+        self.show_player_indicator(surface, self.gui_font)
 
     def update(self, mouse: tuple):
         mouse_x = mouse[0]
@@ -108,7 +113,7 @@ class Board:
         """Puts a new piece on to the board.
 
         Returns:
-            bool: True if the turn was changed, False otherwise. For morris_net.
+            bool: True if the turn was changed, False otherwise. For pymill_network.
 
         """
         changed_turn = False
@@ -123,7 +128,7 @@ class Board:
                         changed_turn = True
                     else:
                         self.must_remove_piece = True
-                        logger.info("Remove a piece!")
+                        logger.debug("Remove a piece!")
                 else:
                     new_piece = Piece(node.x, node.y, BLACK)
                     node.add_piece(new_piece)
@@ -133,11 +138,11 @@ class Board:
                         changed_turn = True
                     else:
                         self.must_remove_piece = True
-                        logger.info("Remove a piece!")
+                        logger.debug("Remove a piece!")
                 break
         if (self.white_pieces + self.black_pieces) == 0:
             self.phase = PHASE2
-            logger.debug("PHASE2")
+            logger.info("PHASE 2")
         return changed_turn
 
     def pick_up_piece(self):
@@ -166,7 +171,7 @@ class Board:
                         node.take_piece()
                         self.must_remove_piece = False
                         if self.check_player_pieces(BLACK):
-                            self.game_over = True  # game is over
+                            self.game_over = True
                         self.switch_turn()
                         can_remove = True
                     else:
@@ -178,7 +183,7 @@ class Board:
                         node.take_piece()
                         self.must_remove_piece = False
                         if self.check_player_pieces(WHITE):
-                            self.game_over = True  # game is over
+                            self.game_over = True
                         self.switch_turn()
                         can_remove = True
                     else:
@@ -219,12 +224,12 @@ class Board:
 
         if self.check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK because turn
             if not self.must_remove_piece:                                      # was already switched
-                self.game_over = True  # game is over
+                self.game_over = True
                 changed_turn = False  # todo check this
                 logger.debug("game_over = True")
         return changed_turn
 
-    def clicked_on_node(self) -> bool:
+    def mouse_over_node(self) -> bool:
         for node in self.nodes:
             if node.highlight:
                 return True
@@ -250,8 +255,8 @@ class Board:
     def show_player_pieces(self, surface: pygame.Surface, font: pygame.font.Font):
         player1_text = font.render("x {}".format(self.white_pieces), True, (0, 0, 0))
         player2_text = font.render("x {}".format(self.black_pieces), True, (0, 0, 0))
-        surface.blit(player1_text, (20, HEIGHT//2 - 30))
-        surface.blit(player2_text, (WIDTH - 20 - player2_text.get_width(), HEIGHT // 2 - 30))
+        surface.blit(player1_text, (20, GAME_HEIGHT // 2 - 30))
+        surface.blit(player2_text, (GAME_WIDTH - 20 - player2_text.get_width(), GAME_HEIGHT // 2 - 30))
 
     def show_player_indicator(self, surface: pygame.Surface, font: pygame.font.Font):
         text = font.render("Player: {}".format(self.turn), True, (0, 0, 0))
@@ -345,7 +350,6 @@ class Board:
             if pieces_left == 2:
                 win = "White won!" if player == PLAYER2 else "Black won!"
                 print(win)
-                print("Game is over.")
                 self.winner = WHITE if player == PLAYER2 else BLACK
                 return True
 
@@ -354,7 +358,6 @@ class Board:
             if self.is_opponent_blocked(player):
                 win = "White won!" if player is PLAYER2 else "Black won!"
                 print(win)
-                print("Game is over.")
                 self.winner = WHITE if player == PLAYER2 else BLACK
                 return True
 
@@ -370,8 +373,7 @@ class Board:
             tuple: The nodes where the piece can go.
 
         """
-        if node is None:
-            raise TypeError("Node shouldn't be None...")
+        assert node is not None, "Node shouldn't be None..."
 
         if self.turn == PLAYER1 and not self.can_jump[PLAYER1] or self.turn == PLAYER2 and not self.can_jump[PLAYER2]:
             return node.search_neighbors(self.nodes, self.DIV)
@@ -458,26 +460,26 @@ class Board:
         else:
             return False
 
-    def turn_color(self):
+    def get_turn_color(self):
         if self.turn == 1:
             return WHITE
         else:
             return BLACK
 
-    def _phase2_now(self):
-        """Automatically puts all pieces. Only for testing purposes."""
-        w = True
-        for node in self.nodes:
-            if not node.piece and (self.white_pieces + self.black_pieces) > 0:
-                if w:
-                    new_piece = Piece(node.x, node.y, WHITE)
-                    node.add_piece(new_piece)
-                    self.switch_turn()
-                    self.white_pieces -= 1
-                    w = not w
-                else:
-                    new_piece = Piece(node.x, node.y, BLACK)
-                    node.add_piece(new_piece)
-                    self.switch_turn()
-                    self.black_pieces -= 1
-                    w = not w
+    # def _phase2_now(self):
+    #     """Automatically puts all pieces. Only for testing purposes."""
+    #     w = True
+    #     for node in self.nodes:
+    #         if not node.piece and (self.white_pieces + self.black_pieces) > 0:
+    #             if w:
+    #                 new_piece = Piece(node.x, node.y, WHITE)
+    #                 node.add_piece(new_piece)
+    #                 self.switch_turn()
+    #                 self.white_pieces -= 1
+    #                 w = not w
+    #             else:
+    #                 new_piece = Piece(node.x, node.y, BLACK)
+    #                 node.add_piece(new_piece)
+    #                 self.switch_turn()
+    #                 self.black_pieces -= 1
+    #                 w = not w

@@ -8,7 +8,7 @@ class Node:
     radius = 34
     dot_radius = 15
 
-    def __init__(self, x, y, search: tuple):
+    def __init__(self, x: float, y: float, search: tuple):
         self.x = x
         self.y = y
         self.search = search
@@ -41,10 +41,10 @@ class Node:
 
     def render_remove_thingy(self, surface: pygame.Surface):
         if self.highlight and self.remove_thingy:
-            pygame.draw.line(surface, self.highlight_color, (self.x - Node.radius//2, self.y - Node.radius//2),
-                             (self.x + Node.radius//2, self.y + Node.radius//2), 3)
-            pygame.draw.line(surface, self.highlight_color, (self.x + Node.radius//2, self.y - Node.radius//2),
-                             (self.x - Node.radius//2, self.y + Node.radius//2), 3)
+            pygame.draw.line(surface, self.highlight_color, (self.x - Node.radius // 2, self.y - Node.radius // 2),
+                             (self.x + Node.radius // 2, self.y + Node.radius // 2), 3)
+            pygame.draw.line(surface, self.highlight_color, (self.x + Node.radius // 2, self.y - Node.radius // 2),
+                             (self.x - Node.radius // 2, self.y + Node.radius // 2), 3)
 
     def add_piece(self, piece):
         self.piece = piece
