@@ -4,8 +4,8 @@ from typing import Optional
 import pygame
 
 from src.display import WIDTH, HEIGHT
-from src.game_objects.piece import Piece
-from src.game_objects.node import Node
+from game.piece import Piece
+from game.node import Node
 from src.constants import *
 from src.fonts import board_font
 from src.log import get_logger

@@ -4,7 +4,7 @@ from os.path import join
 import pygame
 
 from src import display
-from src.game_objects.board import Board
+from game.board import Board
 from src.gui.button import TextButton
 from src.constants import *
 from src.states import pause

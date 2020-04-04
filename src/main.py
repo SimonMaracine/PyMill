@@ -1,44 +1,69 @@
 """Main game module. It must be imported from the game folder and its main() executed."""
 
-import pygame
-from src.states import morris_hotseat, menu, start, options, exit, \
-        net_start, morris_net_server, morris_net_client, net_settings, the_other_disconnected
-from src.constants import *
-from src.tkinter_debug import tk_debug
-from src.state_manager import Control
+import tkinter as tk
+from os.path import join
+
+from PIL import Image, ImageTk
 
 VERSION = "v0.2.0"
-control = Control(state=MENU_STATE, running=True, args=())
+
+
+class PyMillMenu(tk.Frame):
+
+    def __init__(self, root: tk.Tk):
+        super().__init__(root)
+        self.root = root
+        self.pack(padx=20, pady=20, expand=True)
+
+        self.root.option_add("*tearOff", False)
+        self.root.minsize(width=640, height=480)
+        self.root.title("PyMill")
+
+        frm_buttons = tk.Frame(self)
+        frm_buttons.grid(row=0, sticky=tk.S, pady=60)
+
+        img_player_vs_player = Image.open(join("gfx", "player_vs_player.png")).resize((160, 160), Image.ANTIALIAS)
+        self.img_player_vs_player = ImageTk.PhotoImage(img_player_vs_player)
+
+        img_player_vs_computer = Image.open(join("gfx", "player_vs_computer.png")).resize((160, 160), Image.ANTIALIAS)
+        self.img_player_vs_computer = ImageTk.PhotoImage(img_player_vs_computer)
+
+        img_player_vs_player_net = Image.open(join("gfx", "player_vs_player_net.png")).resize((160, 160), Image.ANTIALIAS)
+        self.img_player_vs_player_net = ImageTk.PhotoImage(img_player_vs_player_net)
+
+        btn1 = tk.Button(frm_buttons, image=self.img_player_vs_player, command=None)
+        btn1.grid(column=0, row=0, padx=4)
+        btn1.bind("<Enter>", lambda event: self.lbl_about_text.configure(text="Play with a friend on the same computer"))
+        btn1.bind("<Leave>", lambda event: self.lbl_about_text.configure(text=""))
+
+        btn2 = tk.Button(frm_buttons, image=self.img_player_vs_computer, command=None)
+        btn2.grid(column=1, row=0, padx=4)
+        btn2.bind("<Enter>", lambda event: self.lbl_about_text.configure(text="Play with the computer"))
+        btn2.bind("<Leave>", lambda event: self.lbl_about_text.configure(text=""))
+
+        btn3 = tk.Button(frm_buttons, image=self.img_player_vs_player_net, command=None)
+        btn3.grid(column=2, row=0, padx=4)
+        btn3.bind("<Enter>", lambda event: self.lbl_about_text.configure(text="Play with a friend over the network"))
+        btn3.bind("<Leave>", lambda event: self.lbl_about_text.configure(text=""))
+
+        frm_about_text = tk.Frame(self)
+        frm_about_text.grid(row=1, sticky=tk.S)
+
+        self.lbl_about_text = tk.Label(frm_about_text, text="", font="Times, 17")
+        self.lbl_about_text.pack()
+
+    def run_pymill_hotseat(self):
+        pass
+
+    def run_pymill_computer(self):
+        pass
+
+    def run_pymill_network(self):
+        pass
 
 
 def main():
     print("PyMill " + VERSION, end="\n\n")
-    pygame.init()
-    tk_debug.tk_init()
-
-    while control.running:
-        current_state = control.state
-
-        if current_state == MENU_STATE:
-            menu.run(control)
-        elif current_state == START_STATE:
-            start.run(control)
-        elif current_state == OPTIONS_STATE:
-            options.run(control)
-        elif current_state == MORRIS_HOTSEAT_STATE:
-            morris_hotseat.run(control)
-        elif current_state == MORRIS_NET_STATE_SERVER:
-            morris_net_server.run(control)
-        elif current_state == MORRIS_NET_STATE_CLIENT:
-            morris_net_client.run(control)
-        elif current_state == NET_START_STATE:
-            net_start.run(control)
-        elif current_state == NET_SETTINGS_STATE:
-            net_settings.run(control)
-        elif current_state == THE_OTHER_DISCONNECTED:
-            the_other_disconnected.run(control)
-        elif current_state == EXIT:
-            exit.run(control)
-
-    tk_debug.tk_quit()
-    pygame.quit()
+    root = tk.Tk()
+    PyMillMenu(root)
+    root.mainloop()
