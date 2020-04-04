@@ -237,20 +237,20 @@ class Board:
 
     def show_board(self, surface: pygame.Surface):
         # Drawing three rectangles...
-        pygame.draw.rect(surface, (0, 0, 0), (self.x, self.y, self.width, self.width), 2)
+        pygame.draw.rect(surface, (0, 0, 0), (self.x, self.y, self.width, self.width), 4)
         pygame.draw.rect(surface, (0, 0, 0), (self.x + self.DIV, self.y + self.DIV,
-                                              self.width - self.DIV * 2, self.width - self.DIV * 2), 2)
+                                              self.width - self.DIV * 2, self.width - self.DIV * 2), 4)
         pygame.draw.rect(surface, (0, 0, 0), (self.x + self.DIV * 2, self.y + self.DIV * 2,
-                                              self.width - self.DIV * 4, self.width - self.DIV * 4), 2)
+                                              self.width - self.DIV * 4, self.width - self.DIV * 4), 4)
         # ...and four middle lines.
         pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 3, self.y),
-                         (self.x + self.DIV * 3, self.y + self.DIV * 2), 2)
+                         (self.x + self.DIV * 3, self.y + self.DIV * 2), 4)
         pygame.draw.line(surface, (0, 0, 0), (self.x, self.y + self.DIV * 3),
-                         (self.x + self.DIV * 2, self.y + self.DIV * 3), 2)
+                         (self.x + self.DIV * 2, self.y + self.DIV * 3), 4)
         pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 3, self.y + self.DIV * 6),
-                         (self.x + self.DIV * 3, self.y + self.DIV * 4), 2)
+                         (self.x + self.DIV * 3, self.y + self.DIV * 4), 4)
         pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 6, self.y + self.DIV * 3),
-                         (self.x + self.DIV * 4, self.y + self.DIV * 3), 2)
+                         (self.x + self.DIV * 4, self.y + self.DIV * 3), 4)
 
     def show_player_pieces(self, surface: pygame.Surface, font: pygame.font.Font):
         player1_text = font.render("x {}".format(self.white_pieces), True, (0, 0, 0))
