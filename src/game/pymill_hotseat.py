@@ -40,6 +40,12 @@ def pymill_hotseat(on_game_exit: Callable):
                         board.put_down_piece()
                 board.node_pressed = False
 
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    board.put_new_piece_alone(0, WHITE)
+                elif event.key == pygame.K_c:
+                    board.change_piece_location(23, 8)
+
         mouse = pygame.mouse.get_pos()
         board.update(mouse)
 

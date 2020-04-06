@@ -8,10 +8,11 @@ class Node:
     radius = 34
     dot_radius = 15
 
-    def __init__(self, x: float, y: float, search: tuple):
+    def __init__(self, x: float, y: float, search: tuple, id_: int):
         self.x = x
         self.y = y
-        self.search = search
+        self.search = search  # represents its neighbors
+        self.id = id_
         self.highlight = False
         self.highlight_color = (180, 170, 190)
         self.color = (0, 0, 0)
@@ -47,9 +48,15 @@ class Node:
                              (self.x - Node.radius // 2, self.y + Node.radius // 2), 3)
 
     def add_piece(self, piece):
+        assert piece is not None
+
         self.piece = piece
+        self.piece.x = self.x
+        self.piece.y = self.y
 
     def take_piece(self):
+        assert self.piece is not None
+
         self.piece = None
 
     def change_color(self, color: tuple):

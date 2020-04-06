@@ -16,35 +16,35 @@ class Board:
 
     def __init__(self):
         self.width = GAME_HEIGHT - 60
-        self.x = (GAME_WIDTH - self.width) // 2
+        self.x = (GAME_WIDTH - self.width) // 2  # x and y are board's origin
         self.y = (GAME_HEIGHT - self.width) // 2
         self.DIV = self.width // 6
 
         self.nodes = (
-            Node(self.x, self.y, (0, 1, 1, 0)),
-            Node(self.x + self.DIV * 3, self.y, (0, 1, 1, 1)),
-            Node(self.x + self.DIV * 6, self.y, (0, 1, 0, 1)),  # line
-            Node(self.x + self.DIV, self.y + self.DIV, (0, 1, 1, 0)),
-            Node(self.x + self.DIV * 3, self.y + self.DIV, (1, 1, 1, 1)),
-            Node(self.x + self.DIV * 5, self.y + self.DIV, (0, 1, 0, 1)),  # line
-            Node(self.x + self.DIV * 2, self.y + self.DIV * 2, (0, 1, 1, 0)),
-            Node(self.x + self.DIV * 3, self.y + self.DIV * 2, (1, 0, 1, 1)),
-            Node(self.x + self.DIV * 4, self.y + self.DIV * 2, (0, 1, 0, 1)),  # line
-            Node(self.x, self.y + self.DIV * 3, (1, 1, 1, 0)),
-            Node(self.x + self.DIV, self.y + self.DIV * 3, (1, 1, 1, 1)),
-            Node(self.x + self.DIV * 2, self.y + self.DIV * 3, (1, 1, 0, 1)),  # line
-            Node(self.x + self.DIV * 4, self.y + self.DIV * 3, (1, 1, 1, 0)),
-            Node(self.x + self.DIV * 5, self.y + self.DIV * 3, (1, 1, 1, 1)),
-            Node(self.x + self.DIV * 6, self.y + self.DIV * 3, (1, 1, 0, 1)),  # line
-            Node(self.x + self.DIV * 2, self.y + self.DIV * 4, (1, 0, 1, 0)),
-            Node(self.x + self.DIV * 3, self.y + self.DIV * 4, (0, 1, 1, 1)),
-            Node(self.x + self.DIV * 4, self.y + self.DIV * 4, (1, 0, 0, 1)),  # line
-            Node(self.x + self.DIV, self.y + self.DIV * 5, (1, 0, 1, 0)),
-            Node(self.x + self.DIV * 3, self.y + self.DIV * 5, (1, 1, 1, 1)),
-            Node(self.x + self.DIV * 5, self.y + self.DIV * 5, (1, 0, 0, 1)),  # line
-            Node(self.x, self.y + self.DIV * 6, (1, 0, 1, 0)),
-            Node(self.x + self.DIV * 3, self.y + self.DIV * 6, (1, 0, 1, 1)),
-            Node(self.x + self.DIV * 6, self.y + self.DIV * 6, (1, 0, 0, 1))  # line
+            Node(self.x, self.y, (0, 1, 1, 0), 0),
+            Node(self.x + self.DIV * 3, self.y, (0, 1, 1, 1), 1),
+            Node(self.x + self.DIV * 6, self.y, (0, 1, 0, 1), 2),  # line
+            Node(self.x + self.DIV, self.y + self.DIV, (0, 1, 1, 0), 3),
+            Node(self.x + self.DIV * 3, self.y + self.DIV, (1, 1, 1, 1), 4),
+            Node(self.x + self.DIV * 5, self.y + self.DIV, (0, 1, 0, 1), 5),  # line
+            Node(self.x + self.DIV * 2, self.y + self.DIV * 2, (0, 1, 1, 0), 6),
+            Node(self.x + self.DIV * 3, self.y + self.DIV * 2, (1, 0, 1, 1), 7),
+            Node(self.x + self.DIV * 4, self.y + self.DIV * 2, (0, 1, 0, 1), 8),  # line
+            Node(self.x, self.y + self.DIV * 3, (1, 1, 1, 0), 9),
+            Node(self.x + self.DIV, self.y + self.DIV * 3, (1, 1, 1, 1), 10),
+            Node(self.x + self.DIV * 2, self.y + self.DIV * 3, (1, 1, 0, 1), 11),  # line
+            Node(self.x + self.DIV * 4, self.y + self.DIV * 3, (1, 1, 1, 0), 12),
+            Node(self.x + self.DIV * 5, self.y + self.DIV * 3, (1, 1, 1, 1), 13),
+            Node(self.x + self.DIV * 6, self.y + self.DIV * 3, (1, 1, 0, 1), 14),  # line
+            Node(self.x + self.DIV * 2, self.y + self.DIV * 4, (1, 0, 1, 0), 15),
+            Node(self.x + self.DIV * 3, self.y + self.DIV * 4, (0, 1, 1, 1), 16),
+            Node(self.x + self.DIV * 4, self.y + self.DIV * 4, (1, 0, 0, 1), 17),  # line
+            Node(self.x + self.DIV, self.y + self.DIV * 5, (1, 0, 1, 0), 18),
+            Node(self.x + self.DIV * 3, self.y + self.DIV * 5, (1, 1, 1, 1), 19),
+            Node(self.x + self.DIV * 5, self.y + self.DIV * 5, (1, 0, 0, 1), 20),  # line
+            Node(self.x, self.y + self.DIV * 6, (1, 0, 1, 0), 21),
+            Node(self.x + self.DIV * 3, self.y + self.DIV * 6, (1, 0, 1, 1), 22),
+            Node(self.x + self.DIV * 6, self.y + self.DIV * 6, (1, 0, 0, 1), 23)  # line
         )
         for node in self.nodes:  # Correct the position of each node.
             node.x += 1
@@ -158,7 +158,7 @@ class Board:
         """Removes a piece from opponent.
 
         Returns:
-            bool: True if the player can ctually remove the piece, False otherwise.
+            bool: True if the player can actually remove the piece, False otherwise.
 
         """
         can_remove = False
@@ -229,6 +229,53 @@ class Board:
                 logger.debug("game_over = True")
         return changed_turn
 
+    def put_new_piece_alone(self, node_id: int, piece_color: tuple):
+        """Puts a new piece on that node. For computer and networking versions of the game.
+
+        Args:
+            node_id: The node on which to put the new piece.
+            piece_color: What type of piece to put.
+
+        """
+        assert 0 <= node_id <= 23
+
+        for node in self.nodes:
+            if node.id == node_id:
+                assert node.piece is None
+                node.add_piece(Piece(node.x, node.y, piece_color))
+                if piece_color == WHITE:
+                    self.white_pieces -= 1
+                else:
+                    self.black_pieces -= 1
+                if not self.check_windmills(piece_color, node):
+                    self.switch_turn()
+                else:
+                    self.must_remove_piece = True
+                    logger.debug("Remove a piece!")
+                break
+
+    def change_piece_location(self, source_node_id: int, destination_node_id: int):
+        assert 0 <= source_node_id <= 23 and 0 <= destination_node_id <= 23
+        assert self.phase != PHASE1
+
+        piece = None
+        for node in self.nodes:
+            if node.id == source_node_id:
+                assert node.piece is not None
+                piece = node.piece
+                node.take_piece()
+
+        for node in self.nodes:
+            if node.id == destination_node_id:
+                assert node.piece is None
+                node.add_piece(piece)
+
+                if not self.check_windmills(piece.color, node):
+                    self.switch_turn()
+                else:
+                    self.must_remove_piece = True
+                    logger.debug("Remove a piece!")
+
     def mouse_over_node(self) -> bool:
         for node in self.nodes:
             if node.highlight:
@@ -295,7 +342,7 @@ class Board:
         """Checks if there is a windmill formed and if node is any of the windmill's nodes.
 
         Args:
-            color (tuple): The color of the pieces it checks.
+            color (tuple): The color of the pieces to check.
             node (Node): The node to check if is any of windmill's nodes.
 
         Returns:
@@ -304,8 +351,8 @@ class Board:
         """
         for i, windmill in enumerate(self.windmills):
             if self.check_nodes(windmill, color) and any(map(lambda n: n is node, windmill)):
-                logger.debug("{} windmill: {}".format(color, i))
-                self.turns_without_windmills = 0
+                logger.debug("{} windmill: {}".format("Black" if color == BLACK else "White", i))
+                # self.turns_without_windmills = 0
                 return True
         return False
 
