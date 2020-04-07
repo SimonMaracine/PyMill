@@ -2,7 +2,7 @@ from typing import Callable
 
 import pygame
 
-from game.board import Board
+from src.game.board import Board
 from src.constants import *
 
 

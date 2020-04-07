@@ -6,7 +6,7 @@ from os.path import join
 
 from PIL import Image, ImageTk
 
-from game.pymill_hotseat import pymill_hotseat
+from src.game.pymill_hotseat import pymill_hotseat
 
 VERSION = "v0.2.0"
 

@@ -2,8 +2,8 @@ from typing import Optional
 
 import pygame
 
-from game.piece import Piece
-from game.node import Node
+from src.game.piece import Piece
+from src.game.node import Node
 from src.constants import *
 from src.log import get_logger
 
