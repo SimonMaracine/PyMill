@@ -10,14 +10,17 @@ from src.log import get_logger
 logger = get_logger(__name__)
 logger.setLevel(10)
 
+window_width = 800
+window_height = 600
+
 
 class Board:
     """Game board object."""
 
     def __init__(self):
-        self.width = GAME_HEIGHT - 60
-        self.x = (GAME_WIDTH - self.width) // 2  # x and y are board's origin
-        self.y = (GAME_HEIGHT - self.width) // 2
+        self.width = window_height - 160
+        self.x = (window_width - self.width) // 2  # x and y are board's origin
+        self.y = (window_height - self.width) // 2
         self.DIV = self.width // 6
 
         self.nodes = (
@@ -115,6 +118,45 @@ class Board:
             node.update(mouse_x, mouse_y, self.must_remove_piece)
             if node.piece is not None:
                 node.piece.update(mouse_x, mouse_y)
+
+    def on_window_resize(self, width: int, height: int):
+        global window_width, window_height
+        window_width = width
+        window_height = height
+
+        if height <= width:
+            self.width = height - 160
+        else:
+            self.width = width - 160
+
+        self.x = (width - self.width) // 2
+        self.y = (height - self.width) // 2
+        self.DIV = self.width // 6
+
+        self.nodes[0].set_position(self.x, self.y)
+        self.nodes[1].set_position(self.x + self.DIV * 3, self.y)
+        self.nodes[2].set_position(self.x + self.DIV * 6, self.y)
+        self.nodes[3].set_position(self.x + self.DIV, self.y + self.DIV)
+        self.nodes[4].set_position(self.x + self.DIV * 3, self.y + self.DIV)
+        self.nodes[5].set_position(self.x + self.DIV * 5, self.y + self.DIV)
+        self.nodes[6].set_position(self.x + self.DIV * 2, self.y + self.DIV * 2)
+        self.nodes[7].set_position(self.x + self.DIV * 3, self.y + self.DIV * 2)
+        self.nodes[8].set_position(self.x + self.DIV * 4, self.y + self.DIV * 2)
+        self.nodes[9].set_position(self.x, self.y + self.DIV * 3)
+        self.nodes[10].set_position(self.x + self.DIV, self.y + self.DIV * 3)
+        self.nodes[11].set_position(self.x + self.DIV * 2, self.y + self.DIV * 3)
+        self.nodes[12].set_position(self.x + self.DIV * 4, self.y + self.DIV * 3)
+        self.nodes[13].set_position(self.x + self.DIV * 5, self.y + self.DIV * 3)
+        self.nodes[14].set_position(self.x + self.DIV * 6, self.y + self.DIV * 3)
+        self.nodes[15].set_position(self.x + self.DIV * 2, self.y + self.DIV * 4)
+        self.nodes[16].set_position(self.x + self.DIV * 3, self.y + self.DIV * 4)
+        self.nodes[17].set_position(self.x + self.DIV * 4, self.y + self.DIV * 4)
+        self.nodes[18].set_position(self.x + self.DIV, self.y + self.DIV * 5)
+        self.nodes[19].set_position(self.x + self.DIV * 3, self.y + self.DIV * 5)
+        self.nodes[20].set_position(self.x + self.DIV * 5, self.y + self.DIV * 5)
+        self.nodes[21].set_position(self.x, self.y + self.DIV * 6)
+        self.nodes[22].set_position(self.x + self.DIV * 3, self.y + self.DIV * 6)
+        self.nodes[23].set_position(self.x + self.DIV * 6, self.y + self.DIV * 6)
 
     def put_new_piece(self) -> bool:
         """Puts a new piece on to the board.
@@ -310,8 +352,8 @@ class Board:
     def _draw_player_pieces(self, surface: pygame.Surface, font: pygame.font.Font):
         player1_text = font.render("x {}".format(self.white_pieces), True, (0, 0, 0))
         player2_text = font.render("x {}".format(self.black_pieces), True, (0, 0, 0))
-        surface.blit(player1_text, (20, GAME_HEIGHT // 2 - 30))
-        surface.blit(player2_text, (GAME_WIDTH - 20 - player2_text.get_width(), GAME_HEIGHT // 2 - 30))
+        surface.blit(player1_text, (20, window_height // 2 - 30))
+        surface.blit(player2_text, (window_width - 20 - player2_text.get_width(), window_height // 2 - 30))
 
     def _draw_player_indicator(self, surface: pygame.Surface, font: pygame.font.Font):
         text = font.render("Player: {}".format(self.turn), True, (0, 0, 0))

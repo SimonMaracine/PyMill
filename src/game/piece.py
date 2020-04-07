@@ -7,7 +7,7 @@ class Piece:
 
     radius = 28
 
-    def __init__(self, x: float, y: float, color: tuple):
+    def __init__(self, x: int, y: int, color: tuple):
         self.x = x
         self.y = y
         self.color = color
