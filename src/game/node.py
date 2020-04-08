@@ -5,8 +5,11 @@ import pygame
 class Node:
     """Class representing a node object used by the Board."""
 
-    radius = 34
-    dot_radius = 15
+    DEFAULT_RADIUS = 34
+    DEFAULT_DOT_RADIUS = 16
+
+    radius = DEFAULT_RADIUS
+    dot_radius = DEFAULT_DOT_RADIUS
 
     def __init__(self, x: int, y: int, search: tuple, id_: int):
         self.x = x

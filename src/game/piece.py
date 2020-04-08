@@ -5,7 +5,9 @@ from src.constants import *
 class Piece:
     """Class representing a piece object used by the Board."""
 
-    radius = 28
+    DEFAULT_RADIUS = 28
+
+    radius = DEFAULT_RADIUS
 
     def __init__(self, x: int, y: int, color: tuple):
         self.x = x

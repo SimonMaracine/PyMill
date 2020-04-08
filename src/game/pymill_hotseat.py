@@ -1,3 +1,4 @@
+import time
 from typing import Callable
 
 import pygame
@@ -7,10 +8,14 @@ from src.constants import *
 
 
 def pymill_hotseat(on_game_exit: Callable):
+    width = 800
+    height = 600
+    current_scale = 1
+
     pygame.display.init()
     pygame.font.init()
 
-    window = pygame.display.set_mode((800, 600), pygame.RESIZABLE)
+    window = pygame.display.set_mode((width, height))
     pygame.display.set_caption("PyMill")
     clock = pygame.time.Clock()
 
@@ -39,18 +44,25 @@ def pymill_hotseat(on_game_exit: Callable):
                     else:
                         board.put_down_piece()
                 board.node_pressed = False
-
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p:
-                    board.put_new_piece_alone(0, WHITE)
-                elif event.key == pygame.K_c:
-                    board.change_piece_location(23, 8)
-
-            elif event.type == pygame.VIDEORESIZE:
-                board.on_window_resize(event.w, event.h)
-
-            elif event.type == pygame.ACTIVEEVENT:
-                print(event)
+                # if event.key == pygame.K_p:
+                #     board.put_new_piece_alone(0, WHITE)
+                # elif event.key == pygame.K_c:
+                #     board.change_piece_location(23, 8)
+                if event.key == pygame.K_MINUS:
+                    if current_scale > 0:
+                        width -= 100
+                        height -= 100
+                        window = pygame.display.set_mode((width, height))
+                        board.on_window_resize(width, height)
+                        current_scale -= 1
+                elif event.key == pygame.K_EQUALS:
+                    if current_scale < 6:
+                        width += 100
+                        height += 100
+                        window = pygame.display.set_mode((width, height))
+                        board.on_window_resize(width, height)
+                        current_scale += 1
 
         mouse = pygame.mouse.get_pos()
         board.update(mouse)
@@ -58,7 +70,7 @@ def pymill_hotseat(on_game_exit: Callable):
         if board.game_over:
             print("GAME OVER")
 
-        window.fill((148, 16, 148))  # TODO window doesn't resize properly
+        window.fill((148, 16, 148))
         board.render(window)
         pygame.display.flip()
         clock.tick(30)

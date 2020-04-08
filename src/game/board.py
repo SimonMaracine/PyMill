@@ -22,6 +22,7 @@ class Board:
         self.x = (window_width - self.width) // 2  # x and y are board's origin
         self.y = (window_height - self.width) // 2
         self.DIV = self.width // 6
+        self.line_thickness = 6
 
         self.nodes = (
             Node(self.x, self.y, (0, 1, 1, 0), 0),
@@ -129,9 +130,9 @@ class Board:
         else:
             self.width = width - 160
 
-        self.x = (width - self.width) // 2
-        self.y = (height - self.width) // 2
-        self.DIV = self.width // 6
+        self.x = round((width - self.width) / 2)
+        self.y = round((height - self.width) / 2)
+        self.DIV = round(self.width / 6)
 
         self.nodes[0].set_position(self.x, self.y)
         self.nodes[1].set_position(self.x + self.DIV * 3, self.y)
@@ -157,6 +158,12 @@ class Board:
         self.nodes[21].set_position(self.x, self.y + self.DIV * 6)
         self.nodes[22].set_position(self.x + self.DIV * 3, self.y + self.DIV * 6)
         self.nodes[23].set_position(self.x + self.DIV * 6, self.y + self.DIV * 6)
+
+        # Assuming that 600 is the default window height
+        Node.dot_radius = round((window_height * Node.DEFAULT_DOT_RADIUS) / 600)
+        Node.radius = round((window_height * Node.DEFAULT_RADIUS) / 600)
+        Piece.radius = round((window_height * Piece.DEFAULT_RADIUS) / 600)
+        self.line_thickness = round((window_height * 6) / 600)
 
     def put_new_piece(self) -> bool:
         """Puts a new piece on to the board.
@@ -334,20 +341,20 @@ class Board:
 
     def _draw_board(self, surface: pygame.Surface):
         # Drawing three rectangles...
-        pygame.draw.rect(surface, (0, 0, 0), (self.x, self.y, self.width, self.width), 4)
+        pygame.draw.rect(surface, (0, 0, 0), (self.x, self.y, self.width, self.width), self.line_thickness)
         pygame.draw.rect(surface, (0, 0, 0), (self.x + self.DIV, self.y + self.DIV,
-                                              self.width - self.DIV * 2, self.width - self.DIV * 2), 4)
+                                              self.width - self.DIV * 2, self.width - self.DIV * 2), self.line_thickness)
         pygame.draw.rect(surface, (0, 0, 0), (self.x + self.DIV * 2, self.y + self.DIV * 2,
-                                              self.width - self.DIV * 4, self.width - self.DIV * 4), 4)
+                                              self.width - self.DIV * 4, self.width - self.DIV * 4), self.line_thickness)
         # ...and four middle lines.
         pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 3, self.y),
-                         (self.x + self.DIV * 3, self.y + self.DIV * 2), 4)
+                         (self.x + self.DIV * 3, self.y + self.DIV * 2), self.line_thickness)
         pygame.draw.line(surface, (0, 0, 0), (self.x, self.y + self.DIV * 3),
-                         (self.x + self.DIV * 2, self.y + self.DIV * 3), 4)
+                         (self.x + self.DIV * 2, self.y + self.DIV * 3), self.line_thickness)
         pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 3, self.y + self.DIV * 6),
-                         (self.x + self.DIV * 3, self.y + self.DIV * 4), 4)
+                         (self.x + self.DIV * 3, self.y + self.DIV * 4), self.line_thickness)
         pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 6, self.y + self.DIV * 3),
-                         (self.x + self.DIV * 4, self.y + self.DIV * 3), 4)
+                         (self.x + self.DIV * 4, self.y + self.DIV * 3), self.line_thickness)
 
     def _draw_player_pieces(self, surface: pygame.Surface, font: pygame.font.Font):
         player1_text = font.render("x {}".format(self.white_pieces), True, (0, 0, 0))
