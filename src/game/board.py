@@ -22,7 +22,9 @@ class Board:
         self.x = (window_width - self.width) // 2  # x and y are board's origin
         self.y = (window_height - self.width) // 2
         self.DIV = self.width // 6
-        self.line_thickness = 6
+
+        self.line_thickness = 8
+        self.board_offset = 35
 
         self.nodes = (
             Node(self.x, self.y, (0, 1, 1, 0), 0),
@@ -91,7 +93,8 @@ class Board:
         self.winner = TIE  # Nobody is the winner
         # self._phase2_now()
 
-        self.gui_font = pygame.font.SysFont("", 32, True)
+        self.font_indicator = pygame.font.SysFont("", 34, True)
+        self.font_pieces = pygame.font.SysFont("", 38, True)
 
     def render(self, surface: pygame.Surface):
         self._draw_board(surface)
@@ -108,9 +111,9 @@ class Board:
             self.picked_up_piece.render(surface)
 
         if self.phase == PHASE1:
-            self._draw_player_pieces(surface, self.gui_font)
+            self._draw_player_pieces(surface, self.font_pieces)
 
-        self._draw_player_indicator(surface, self.gui_font)
+        self._draw_player_indicator(surface, self.font_indicator)
 
     def update(self, mouse: tuple):
         mouse_x = mouse[0]
@@ -163,7 +166,8 @@ class Board:
         Node.dot_radius = round((window_height * Node.DEFAULT_DOT_RADIUS) / 600)
         Node.radius = round((window_height * Node.DEFAULT_RADIUS) / 600)
         Piece.radius = round((window_height * Piece.DEFAULT_RADIUS) / 600)
-        self.line_thickness = round((window_height * 6) / 600)
+        self.line_thickness = round((window_height * 8) / 600)
+        self.board_offset = round((window_height * 35) / 600)
 
     def put_new_piece(self) -> bool:
         """Puts a new piece on to the board.
@@ -340,6 +344,9 @@ class Board:
         return False
 
     def _draw_board(self, surface: pygame.Surface):
+        pygame.draw.rect(surface, (252, 219, 86), (self.x - self.board_offset, self.y - self.board_offset,
+                                                   self.width + self.board_offset * 2, self.width + self.board_offset * 2))
+
         # Drawing three rectangles...
         pygame.draw.rect(surface, (0, 0, 0), (self.x, self.y, self.width, self.width), self.line_thickness)
         pygame.draw.rect(surface, (0, 0, 0), (self.x + self.DIV, self.y + self.DIV,
@@ -363,8 +370,8 @@ class Board:
         surface.blit(player2_text, (window_width - 20 - player2_text.get_width(), window_height // 2 - 30))
 
     def _draw_player_indicator(self, surface: pygame.Surface, font: pygame.font.Font):
-        text = font.render("Player: {}".format(self.turn), True, (0, 0, 0))
-        surface.blit(text, (5, 60))
+        text = font.render("WHITE'S TURN" if self.turn == PLAYER1 else "BLACK'S TURN", True, (0, 0, 0))
+        surface.blit(text, (self.x, window_height - 35))
 
     def _switch_turn(self):
         if self.turn == PLAYER1:
@@ -427,7 +434,7 @@ class Board:
         for node in self.nodes:
             if node.piece and node.piece.color == color:
                 pieces += 1
-        logger.debug(f"{color} pieces remaining: {pieces}")
+        logger.debug(f"{'PLAYER1' if color == WHITE else 'PLAYER2'} pieces remaining: {pieces}")
         return pieces
 
     def _check_player_pieces(self, color: tuple) -> bool:

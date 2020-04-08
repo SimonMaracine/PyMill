@@ -50,16 +50,16 @@ def pymill_hotseat(on_game_exit: Callable):
                 # elif event.key == pygame.K_c:
                 #     board.change_piece_location(23, 8)
                 if event.key == pygame.K_MINUS:
-                    if current_scale > 0:
-                        width -= 100
-                        height -= 100
-                        window = pygame.display.set_mode((width, height))
+                    if current_scale > 1:
+                        width -= 160
+                        height -= 120
+                        window = pygame.display.set_mode((width, height))  # TODO also resize the text
                         board.on_window_resize(width, height)
                         current_scale -= 1
                 elif event.key == pygame.K_EQUALS:
-                    if current_scale < 6:
-                        width += 100
-                        height += 100
+                    if current_scale < 5:
+                        width += 160
+                        height += 120
                         window = pygame.display.set_mode((width, height))
                         board.on_window_resize(width, height)
                         current_scale += 1
