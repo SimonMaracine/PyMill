@@ -29,7 +29,7 @@ class Node:
         pygame.draw.circle(surface, self.color, (self.x, self.y), Node.dot_radius)
         if self.highlight:
             pygame.draw.ellipse(surface, self.highlight_color,
-                                (self.x - Node.radius, self.y - Node.radius, Node.radius * 2, Node.radius * 2), 3)
+                                (self.x - Node.radius, self.y - Node.radius, Node.radius * 2, Node.radius * 2), 4)
 
     def update(self, mouse_x: int, mouse_y: int, must_remove_piece: bool):
         distance = sqrt(((mouse_x - self.x) ** 2 + (mouse_y - self.y) ** 2))
