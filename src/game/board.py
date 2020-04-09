@@ -14,7 +14,7 @@ window_width = 800
 window_height = 600
 
 
-class Board:
+class Board:  # TODO check if turns_without_windmills works and properly define the winner if it's game over
     """Game board object."""
 
     def __init__(self):
@@ -87,11 +87,13 @@ class Board:
         self.must_remove_piece = False
         self.can_jump = {PLAYER1: False, PLAYER2: False}
         self.node_pressed = False  # if a node is clicked
-        # self.turns_without_windmills = 0
+        self.turns_without_windmills = 0
 
         self.game_over = False
         self.winner = TIE  # Nobody is the winner
         # self._phase2_now()
+
+        self.history = {"ones": [], "twos": []}
 
         self.font_indicator = pygame.font.SysFont("", 34, True)
         self.font_pieces = pygame.font.SysFont("", 38, True)
@@ -255,7 +257,7 @@ class Board:
         """Puts down a picked up piece.
 
         Returns:
-            bool: True if the turn was changed, False otherwise. For morris_net.
+            bool: True if the turn was changed, False otherwise. For pymill_network.
 
         """
         changed_turn = False
@@ -271,6 +273,7 @@ class Board:
                     self.picked_up_piece = None
                     if not self._check_windmills(WHITE if self.turn == PLAYER1 else BLACK, node):
                         self._switch_turn()
+                        self.turns_without_windmills += 1
                         changed_turn = True
                     else:
                         self.must_remove_piece = True
@@ -283,10 +286,15 @@ class Board:
             self.picked_up_piece = None
 
         if self._check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK because turn
-            if not self.must_remove_piece:                                      # was already switched
+            if not self.must_remove_piece:                                       # was already switched
                 self.game_over = True
                 changed_turn = False  # todo check this
-                logger.debug("game_over = True")
+
+        self._check_board_state()  # It sets self.game_over by itself
+
+        if self.turns_without_windmills > 50:
+            self.game_over = True
+
         return changed_turn
 
     def put_new_piece_alone(self, node_id: int, piece_color: tuple):
@@ -316,6 +324,13 @@ class Board:
                 break
 
     def change_piece_location(self, source_node_id: int, destination_node_id: int):
+        """Takes a piece from a node and puts it somewhere else.
+
+        Args:
+            source_node_id: The node from which to take the piece.
+            destination_node_id: The node on to which to put the piece.
+
+        """
         assert 0 <= source_node_id <= 23 and 0 <= destination_node_id <= 23
         assert self.phase == PHASE2
 
@@ -333,9 +348,19 @@ class Board:
 
                 if not self._check_windmills(piece.color, node):
                     self._switch_turn()
+                    self.turns_without_windmills += 1
                 else:
                     self.must_remove_piece = True
                     logger.debug("Remove a piece!")
+
+        if self._check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK because turn
+            if not self.must_remove_piece:                                       # was already switched
+                self.game_over = True
+
+        self._check_board_state()  # Checks if it's game over
+
+        if self.turns_without_windmills > 50:
+            self.game_over = True
 
     def mouse_over_node(self) -> bool:
         for node in self.nodes:
@@ -379,6 +404,39 @@ class Board:
         else:
             self.turn = PLAYER1
 
+    def _check_board_state(self):
+        """Get the current state of the board and check if it's game over.
+
+        0 - no piece
+        1 - WHITE piece
+        2 - BLACK piece
+
+        """
+        current_state = []
+        for node in self.nodes:
+            if node.piece is None:
+                current_state.append(0)
+            else:
+                if node.piece.color == WHITE:
+                    current_state.append(1)
+                else:
+                    current_state.append(2)
+
+        current_state = tuple(current_state)
+
+        for state in self.history["twos"]:
+            if state == current_state:
+                self.game_over = True
+                return
+
+        for state in self.history["ones"]:
+            if state == current_state:
+                self.history["ones"].remove(state)
+                self.history["twos"].append(state)
+                return
+
+        self.history["ones"].append(current_state)
+
     @staticmethod
     def _check_nodes(w_mill: tuple, color: tuple) -> bool:
         """Checks if all nodes within a group of nodes have pieces of the same color.
@@ -416,7 +474,7 @@ class Board:
         for i, windmill in enumerate(self.windmills):
             if self._check_nodes(windmill, color) and any(map(lambda n: n is node, windmill)):
                 logger.debug("{} windmill: {}".format("Black" if color == BLACK else "White", i))
-                # self.turns_without_windmills = 0
+                self.turns_without_windmills = 0
                 return True
         return False
 
@@ -459,17 +517,17 @@ class Board:
                 self.can_jump[player] = False
 
             if pieces_left == 2:
-                win = "White won!" if player == PLAYER2 else "Black won!"
-                print(win)
-                self.winner = WHITE if player == PLAYER2 else BLACK
+                # win = "White won!" if player == PLAYER2 else "Black won!"
+                # print(win)
+                # self.winner = WHITE if player == PLAYER2 else BLACK
                 return True
 
         pieces_to_check = (self.black_pieces < 2) if player is PLAYER2 else (self.white_pieces < 2)
         if pieces_to_check:
             if self._is_opponent_blocked(player):
-                win = "White won!" if player is PLAYER2 else "Black won!"
-                print(win)
-                self.winner = WHITE if player == PLAYER2 else BLACK
+                # win = "White won!" if player is PLAYER2 else "Black won!"
+                # print(win)
+                # self.winner = WHITE if player == PLAYER2 else BLACK
                 return True
 
         return False
@@ -554,7 +612,6 @@ class Board:
         for node in player_nodes:
             where_can_go = self._where_can_go(node)
             num_of_nodes_can_go = len(where_can_go)
-            # print(where_can_go)
             for n in where_can_go:
                 if n.piece:
                     num_of_nodes_can_go -= 1
