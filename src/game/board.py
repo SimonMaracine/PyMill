@@ -213,7 +213,7 @@ class Board:
         for node in self.nodes:
             if node.highlight and node.piece and self.picked_up_piece is None:
                 if node.piece.pick_up(self.turn):
-                    self._change_node_color(node, (0, 255, 0), (255, 0, 0))
+                    self._change_nodes_color(node, (0, 255, 0), (255, 0, 0))
                     self.node_taken_piece = node
                     self.picked_up_piece = node.piece
                 break
@@ -268,7 +268,7 @@ class Board:
                 if node.highlight and not node.piece:
                     node.add_piece(self.picked_up_piece)
                     logger.debug("Piece: {}".format(node.piece))
-                    self._change_node_color(self.node_taken_piece, (0, 0, 0), (0, 0, 0))
+                    self._change_nodes_color(self.node_taken_piece, (0, 0, 0), (0, 0, 0))
                     self.node_taken_piece.piece.release(node)
                     self.node_taken_piece.take_piece()
                     self.node_taken_piece = None
@@ -281,20 +281,20 @@ class Board:
                         self.must_remove_piece = True
                         logger.info("Remove a piece!")
 
+                    # Do all of this only if there was a piece put down on a node
+                    if self._check_player_pieces(
+                            WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK because turn
+                        if not self.must_remove_piece:                  # was already switched
+                            self._game_over(tie=False)
+
+                    self._check_board_state()
+                    self._check_turns_without_windmills()  # They call self._game_over by itself
+
         # Release piece if player released the left button.
         if self.picked_up_piece is not None:
-            self._change_node_color(self.node_taken_piece, (0, 0, 0), (0, 0, 0))
+            self._change_nodes_color(self.node_taken_piece, (0, 0, 0), (0, 0, 0))
             self.picked_up_piece.release(self.node_taken_piece)
             self.picked_up_piece = None
-
-        if self._check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK because turn
-            if not self.must_remove_piece:                                       # was already switched
-                self._game_over(tie=False)
-
-        self._check_board_state()  # It sets self.game_over by itself
-
-        if self.turns_without_windmills > self.MAX_TURNS_WO_MILLS:
-            self._game_over(tie=True)
 
         return changed_turn
 
@@ -358,10 +358,8 @@ class Board:
             if not self.must_remove_piece:                                       # was already switched
                 self._game_over(tie=False)
 
-        self._check_board_state()  # Checks if it's game over
-
-        if self.turns_without_windmills > self.MAX_TURNS_WO_MILLS:
-            self._game_over(tie=True)
+        self._check_board_state()
+        self._check_turns_without_windmills()  # They call self._game_over by itself
 
     def mouse_over_node(self) -> bool:
         for node in self.nodes:
@@ -372,6 +370,8 @@ class Board:
     def _draw_board(self, surface: pygame.Surface):
         pygame.draw.rect(surface, (252, 219, 86), (self.x - self.board_offset, self.y - self.board_offset,
                                                    self.width + self.board_offset * 2, self.width + self.board_offset * 2))
+        pygame.draw.rect(surface, (0, 0, 0), (self.x - self.board_offset, self.y - self.board_offset,
+                                              self.width + self.board_offset * 2, self.width + self.board_offset * 2), 1)
 
         # Drawing three rectangles...
         pygame.draw.rect(surface, (0, 0, 0), (self.x, self.y, self.width, self.width), self.line_thickness)
@@ -437,6 +437,11 @@ class Board:
                 return
 
         self.history["ones"].append(current_state)
+
+    def _check_turns_without_windmills(self):
+        if self.turns_without_windmills > self.MAX_TURNS_WO_MILLS:
+            self._game_over(tie=True)
+            logger.info("The amount of turns without windmills was exceeded")
 
     def _game_over(self, tie: bool):
         self.game_over = True
@@ -571,7 +576,7 @@ class Board:
                     pieces_inside_windmills.add(node)
         return len(pieces_inside_windmills)
 
-    def _change_node_color(self, node: Node, color1: tuple, color2: tuple):
+    def _change_nodes_color(self, node: Node, color1: tuple, color2: tuple):
         """Changes color of other nodes based on where the piece can go.
 
         Args:
@@ -586,7 +591,7 @@ class Board:
         nodes_copy = list(self.nodes)
         for i in self.nodes:
             for j in self._where_can_go(node):
-                if i is j:
+                if i == j:
                     nodes_copy.remove(i)
         nodes_copy.remove(node)
 

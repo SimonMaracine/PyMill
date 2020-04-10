@@ -17,7 +17,7 @@ class Node:
         self.search = search  # represents its neighbors
         self.id = id_
         self.highlight = False
-        self.highlight_color = (180, 170, 190)
+        self.highlight_color = (200, 190, 210)
         self.color = (0, 0, 0)
         self.piece = None
         self.remove_thingy = False
@@ -46,9 +46,9 @@ class Node:
     def render_remove_thingy(self, surface: pygame.Surface):
         if self.highlight and self.remove_thingy:
             pygame.draw.line(surface, self.highlight_color, (self.x - Node.radius // 2, self.y - Node.radius // 2),
-                             (self.x + Node.radius // 2, self.y + Node.radius // 2), 3)
+                             (self.x + Node.radius // 2, self.y + Node.radius // 2), 4)
             pygame.draw.line(surface, self.highlight_color, (self.x + Node.radius // 2, self.y - Node.radius // 2),
-                             (self.x - Node.radius // 2, self.y + Node.radius // 2), 3)
+                             (self.x - Node.radius // 2, self.y + Node.radius // 2), 4)
 
     def add_piece(self, piece):
         assert piece is not None

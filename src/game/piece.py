@@ -1,4 +1,5 @@
 import pygame
+import pygame.gfxdraw
 from src.constants import *
 
 
@@ -17,6 +18,10 @@ class Piece:
 
     def render(self, surface: pygame.Surface):
         pygame.draw.circle(surface, self.color, (self.x, self.y), Piece.radius)
+        if self.color == WHITE:
+            pygame.gfxdraw.circle(surface, self.x, self.y, Piece.radius, (0, 0, 0))
+        else:
+            pygame.gfxdraw.circle(surface, self.x, self.y, Piece.radius, WHITE)
 
     def update(self, mouse_x: int, mouse_y: int):
         if self.picked_up:
