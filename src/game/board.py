@@ -14,7 +14,7 @@ window_width = 800
 window_height = 600
 
 
-class Board:
+class Board:  # TODO improve history test by cleaning up after a piece is taken out
     """Game board object."""
 
     def __init__(self):
@@ -237,6 +237,8 @@ class Board:
                         if self._check_player_pieces(BLACK):
                             self._game_over(tie=False)
                         self._switch_turn()
+                        self.history["ones"].clear()  # Clear the history, because it will never repeat itself
+                        self.history["twos"].clear()
                         can_remove = True
                     else:
                         logger.info("You cannot take piece from windmill!")
