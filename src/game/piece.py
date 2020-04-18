@@ -1,5 +1,6 @@
 import pygame
 import pygame.gfxdraw
+
 from src.constants import *
 
 
@@ -15,6 +16,9 @@ class Piece:
         self.y = y
         self.color = color
         self.picked_up = False
+
+    def __repr__(self):
+        return "WHITE" if self.color == WHITE else "BLACK"
 
     def render(self, surface: pygame.Surface):
         pygame.draw.circle(surface, self.color, (self.x, self.y), Piece.radius)

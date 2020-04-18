@@ -14,7 +14,7 @@ window_width = 800
 window_height = 600
 
 
-class Board:  # TODO improve history test by cleaning up after a piece is taken out
+class Board:
     """Game board object."""
 
     def __init__(self):
@@ -93,7 +93,6 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
 
         self.game_over = False
         self.winner = TIE  # Nobody is the winner
-        # self._phase2_now()
 
         self.history = {"ones": [], "twos": []}
 
@@ -187,7 +186,7 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
                     new_piece = Piece(node.x, node.y, WHITE)
                     node.add_piece(new_piece)
                     self.white_pieces -= 1
-                    if not self._check_windmills(WHITE, node):
+                    if not self._check_is_windmill_formed(WHITE, node):
                         self._switch_turn()
                         changed_turn = True
                     else:
@@ -197,7 +196,7 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
                     new_piece = Piece(node.x, node.y, BLACK)
                     node.add_piece(new_piece)
                     self.black_pieces -= 1
-                    if not self._check_windmills(BLACK, node):
+                    if not self._check_is_windmill_formed(BLACK, node):
                         self._switch_turn()
                         changed_turn = True
                     else:
@@ -230,8 +229,8 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
         for node in self.nodes:
             if self.turn == PLAYER1:
                 if node.highlight and node.piece and node.piece.color == BLACK:
-                    if not self._check_windmills(BLACK, node) or \
-                            self._number_pieces_in_windmills(BLACK) == self._count_pieces(BLACK):
+                    if not self._check_is_windmill_formed(BLACK, node) or \
+                            self._number_pieces_in_windmills(BLACK) == self._count_pieces_left_of_player(BLACK):
                         node.take_piece()
                         self.must_remove_piece = False
                         if self._check_player_pieces(BLACK):
@@ -244,13 +243,15 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
                         logger.info("You cannot take piece from windmill!")
             else:
                 if node.highlight and node.piece and node.piece.color == WHITE:
-                    if not self._check_windmills(WHITE, node) or \
-                            self._number_pieces_in_windmills(WHITE) == self._count_pieces(WHITE):
+                    if not self._check_is_windmill_formed(WHITE, node) or \
+                            self._number_pieces_in_windmills(WHITE) == self._count_pieces_left_of_player(WHITE):
                         node.take_piece()
                         self.must_remove_piece = False
                         if self._check_player_pieces(WHITE):
                             self._game_over(tie=False)
                         self._switch_turn()
+                        self.history["ones"].clear()  # Clear the history, because it will never repeat itself
+                        self.history["twos"].clear()
                         can_remove = True
                     else:
                         logger.info("You cannot take piece from windmill!")
@@ -275,7 +276,7 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
                     self.node_taken_piece.take_piece()
                     self.node_taken_piece = None
                     self.picked_up_piece = None
-                    if not self._check_windmills(WHITE if self.turn == PLAYER1 else BLACK, node):
+                    if not self._check_is_windmill_formed(WHITE if self.turn == PLAYER1 else BLACK, node):
                         self._switch_turn()
                         self.turns_without_windmills += 1
                         changed_turn = True
@@ -319,12 +320,15 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
                     self.white_pieces -= 1
                 else:
                     self.black_pieces -= 1
-                if not self._check_windmills(piece_color, node):
+                if not self._check_is_windmill_formed(piece_color, node):
                     self._switch_turn()
                 else:
                     self.must_remove_piece = True
                     logger.debug("Remove a piece!")
                 break
+        if (self.white_pieces + self.black_pieces) == 0:
+            self.phase = PHASE2
+            logger.info("PHASE 2")
 
     def change_piece_location(self, source_node_id: int, destination_node_id: int):
         """Takes a piece from a node and puts it somewhere else.
@@ -336,6 +340,7 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
         """
         assert 0 <= source_node_id <= 23 and 0 <= destination_node_id <= 23
         assert self.phase == PHASE2
+        assert source_node_id != destination_node_id
 
         piece = None
         for node in self.nodes:
@@ -349,7 +354,7 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
                 assert node.piece is None
                 node.add_piece(piece)
 
-                if not self._check_windmills(piece.color, node):
+                if not self._check_is_windmill_formed(piece.color, node):
                     self._switch_turn()
                     self.turns_without_windmills += 1
                 else:
@@ -361,9 +366,71 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
                 self._game_over(tie=False)
 
         self._check_board_state()
-        self._check_turns_without_windmills()  # They call self._game_over by itself
+        self._check_turns_without_windmills()  # They call self._game_over by themself
 
-    def mouse_over_node(self) -> bool:
+    def remove_opponent_piece_alone(self, node_id: int):  # TODO 1 it doesn't check for game over properly (or it just seems)
+        """Removes a piece from opponent. For computer and networking versions of the game.
+
+        Warning: It doesn't check if the piece can actually be taken (i.e. it is inside a windmill).
+
+        Args:
+            node_id (int): The node from which to take the piece.
+
+        """
+        for node in self.nodes:
+            if node.id == node_id:  # TODO this may be simplified, because nodes' id is the same as the index
+                assert node.piece is not None
+                node.take_piece()
+                logger.info(f"Piece node {node.id} removed")
+
+                self.must_remove_piece = False
+                if self._check_player_pieces(BLACK if self.turn == PLAYER1 else WHITE):  # TODO maybe I just fixed it (1)
+                    self._game_over(tie=False)
+                self._switch_turn()
+                self.history["ones"].clear()  # Clear the history, because it will never repeat itself
+                self.history["twos"].clear()
+
+    def get_current_state(self) -> list:  # TODO this may be deleted
+        """
+        0 - no piece
+        1 - WHITE piece
+        2 - BLACK piece
+
+        The state is just a list of numbers representing the pieces' positions.
+
+        Returns:
+            list: A representation of the current game state.
+
+        """
+
+        current_state = []
+        for node in self.nodes:
+            if node.piece is None:
+                current_state.append(0)
+            else:
+                if node.piece.color == WHITE:
+                    current_state.append(1)
+                else:
+                    current_state.append(2)
+        return current_state
+
+    def check_is_windmill_formed(self, color: tuple, node: Node) -> bool:
+        """Same as the private version of this method, but optimized.
+
+        Args:
+            color (tuple): The color of the pieces to check.
+            node (Node): The node to check if is any of windmill's nodes.
+
+        Returns:
+            bool: True if there is a windmill and if node is in there, False otherwise.
+
+        """
+        for windmill in self.windmills:
+            if self._check_nodes_for_windmill(windmill, color) and any(map(lambda n: n is node, windmill)):
+                return True
+        return False
+
+    def mouse_over_any_node(self) -> bool:
         for node in self.nodes:
             if node.highlight:
                 return True
@@ -410,22 +477,8 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
     def _check_board_state(self):
         """Get the current state of the board and check if it's game over.
 
-        0 - no piece
-        1 - WHITE piece
-        2 - BLACK piece
-
         """
-        current_state = []
-        for node in self.nodes:
-            if node.piece is None:
-                current_state.append(0)
-            else:
-                if node.piece.color == WHITE:
-                    current_state.append(1)
-                else:
-                    current_state.append(2)
-
-        current_state = tuple(current_state)
+        current_state = tuple(self.get_current_state())
 
         for state in self.history["twos"]:
             if state == current_state:
@@ -441,6 +494,9 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
         self.history["ones"].append(current_state)
 
     def _check_turns_without_windmills(self):
+        """Checks if the number of turns without windmills was exceeded.
+
+        """
         if self.turns_without_windmills > self.MAX_TURNS_WO_MILLS:
             self._game_over(tie=True)
             logger.info("The amount of turns without windmills was exceeded")
@@ -454,7 +510,7 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
             logger.info("Tie!")
 
     @staticmethod
-    def _check_nodes(w_mill: tuple, color: tuple) -> bool:
+    def _check_nodes_for_windmill(w_mill: tuple, color: tuple) -> bool:
         """Checks if all nodes within a group of nodes have pieces of the same color.
 
         Args:
@@ -465,18 +521,9 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
             bool: True if the nodes within the windmill actually form a windmill, False otherwise.
 
         """
-        nodes = []
-        for n in w_mill:
-            if n.piece and n.piece.color == color:
-                nodes.append(True)
-            else:
-                nodes.append(False)
-        if all(nodes):
-            return True
-        else:
-            return False
+        return all(map(lambda n: n.piece is not None and n.piece.color == color, w_mill))
 
-    def _check_windmills(self, color: tuple, node: Node) -> bool:
+    def _check_is_windmill_formed(self, color: tuple, node: Node) -> bool:
         """Checks if there is a windmill formed and if node is any of the windmill's nodes.
 
         Args:
@@ -488,13 +535,13 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
 
         """
         for i, windmill in enumerate(self.windmills):
-            if self._check_nodes(windmill, color) and any(map(lambda n: n is node, windmill)):
-                logger.debug("{} windmill: {}".format("Black" if color == BLACK else "White", i))
+            if self._check_nodes_for_windmill(windmill, color) and any(map(lambda n: n is node, windmill)):
+                logger.debug("{} windmill nr. {}".format("Black" if color == BLACK else "White", i))
                 self.turns_without_windmills = 0
                 return True
         return False
 
-    def _count_pieces(self, color: tuple) -> int:
+    def _count_pieces_left_of_player(self, color: tuple) -> int:
         """Counts the number of pieces a player has.
 
         Args:
@@ -508,7 +555,7 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
         for node in self.nodes:
             if node.piece and node.piece.color == color:
                 pieces += 1
-        logger.debug(f"{'PLAYER1' if color == WHITE else 'PLAYER2'} pieces remaining: {pieces}")
+        logger.debug(f"{'PLAYER 1' if color == WHITE else 'PLAYER 2'} pieces remaining: {pieces}")
         return pieces
 
     def _check_player_pieces(self, color: tuple) -> bool:
@@ -524,7 +571,7 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
 
         """
         player = PLAYER1 if color == WHITE else PLAYER2
-        pieces_left = self._count_pieces(color)
+        pieces_left = self._count_pieces_left_of_player(color)
 
         if self.phase == PHASE2:
             if pieces_left == 3:
@@ -544,6 +591,8 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
 
     def _where_can_go(self, node: Node) -> tuple:
         """Decides where a piece can go based on the dictionary self.can_jump.
+
+        It returns the neighbor nodes, if the player cannot jump; it doesn't check for pieces.
 
         Args:
             node (Node): The node from where the piece wants to go.
@@ -573,7 +622,7 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
         """
         pieces_inside_windmills = set()
         for windmill in self.windmills:
-            if self._check_nodes(windmill, color):
+            if self._check_nodes_for_windmill(windmill, color):
                 for node in windmill:
                     pieces_inside_windmills.add(node)
         return len(pieces_inside_windmills)
@@ -615,7 +664,7 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
         else:
             color = BLACK
 
-        logger.debug(f"Player {player} is checked")
+        logger.debug(f"Player {player} is checked if it's blocked")
         player_nodes = [node for node in self.nodes if node.piece and node.piece.color == color]
         num_of_player_nodes = len(player_nodes)
 
@@ -631,7 +680,7 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
 
         logger.debug(f"num_of_player_nodes = {num_of_player_nodes}")
 
-        if not num_of_player_nodes and self._count_pieces(color) > 3 \
+        if not num_of_player_nodes and self._count_pieces_left_of_player(color) > 3 \
                 and (self.white_pieces == 0 if color == WHITE else self.black_pieces == 0):
             logger.info("Player {} is blocked!".format(player))
             return True
@@ -643,21 +692,3 @@ class Board:  # TODO improve history test by cleaning up after a piece is taken 
             return WHITE
         else:
             return BLACK
-
-    # def _phase2_now(self):
-    #     """Automatically puts all pieces. Only for testing purposes."""
-    #     w = True
-    #     for node in self.nodes:
-    #         if not node.piece and (self.white_pieces + self.black_pieces) > 0:
-    #             if w:
-    #                 new_piece = Piece(node.x, node.y, WHITE)
-    #                 node.add_piece(new_piece)
-    #                 self._switch_turn()
-    #                 self.white_pieces -= 1
-    #                 w = not w
-    #             else:
-    #                 new_piece = Piece(node.x, node.y, BLACK)
-    #                 node.add_piece(new_piece)
-    #                 self._switch_turn()
-    #                 self.black_pieces -= 1
-    #                 w = not w

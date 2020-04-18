@@ -83,5 +83,5 @@ class PyMillMenu(tk.Frame):
 def main():
     print("PyMill " + VERSION, end="\n\n")
     root = tk.Tk()
-    PyMillMenu(root)
-    root.mainloop()
+    PyMillMenu(root).run_pymill_computer()
+    # root.mainloop()

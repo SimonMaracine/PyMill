@@ -27,7 +27,7 @@ def pymill_hotseat(on_game_exit: Callable):
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == pygame.BUTTON_LEFT:
-                    if board.mouse_over_node():
+                    if board.mouse_over_any_node():
                         board.node_pressed = True
                     if not board.must_remove_piece:
                         if board.phase == PHASE2:
