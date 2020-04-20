@@ -24,11 +24,12 @@ def pymill_computer(on_game_exit: Callable):
     running = True
 
     while running:
-        if board.turn == PLAYER1:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            if board.turn == PLAYER1:
+                if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == pygame.BUTTON_LEFT:
                         if board.mouse_over_any_node():
                             board.node_pressed = True
@@ -61,15 +62,16 @@ def pymill_computer(on_game_exit: Callable):
                             window = pygame.display.set_mode((width, height))
                             board.on_window_resize(width, height)
                             current_scale += 1
-        else:
-            if board.phase == PHASE1:
-                board.put_new_piece_alone(ai_place_piece_at(board), BLACK)
-                if board.must_remove_piece:
-                    board.remove_opponent_piece_alone(ai_remove_piece())
             else:
-                board.change_piece_location(*ai_move_piece(board))
-                if board.must_remove_piece:
-                    board.remove_opponent_piece_alone(ai_remove_piece())
+                if board.phase == PHASE1:
+                    board.put_new_piece_alone(ai_place_piece_at(board), BLACK)
+                    if board.must_remove_piece:
+                        board.remove_opponent_piece_alone(ai_remove_piece())
+                else:
+                    if not board.game_over:
+                        board.change_piece_location(*ai_move_piece(board))
+                        if board.must_remove_piece:
+                            board.remove_opponent_piece_alone(ai_remove_piece())
 
         mouse = pygame.mouse.get_pos()
         board.update(mouse)

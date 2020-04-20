@@ -9,8 +9,8 @@ from src.game.board import Board
 # For now the AI is always BLACK.
 
 values = {
-    "mill": 9,
-    "piece": 6,
+    "mill": 8,
+    "piece": 9,
     "free_move": 1
 }
 
