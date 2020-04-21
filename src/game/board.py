@@ -285,13 +285,12 @@ class Board:
                         logger.info("Remove a piece!")
 
                     # Do all of this only if there was a piece put down on a node
-                    if self._check_player_pieces(
-                            WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK because turn
-                        if not self.must_remove_piece:                  # was already switched
-                            self._game_over(tie=False)
+                    if self._check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK
+                        if not self.must_remove_piece:                                       # because turn was already
+                            self._game_over(tie=False)                                       # switched
 
                     self._check_board_state()
-                    self._check_turns_without_windmills()  # They call self._game_over by itself
+                    self._check_turns_without_windmills()  # They call self._game_over by themself
 
         # Release piece if player released the left button.
         if self.picked_up_piece is not None:
@@ -368,7 +367,7 @@ class Board:
         self._check_board_state()
         self._check_turns_without_windmills()  # They call self._game_over by themself
 
-    def remove_opponent_piece_alone(self, node_id: int):  # TODO 1 it doesn't check for game over properly (or it just seems)
+    def remove_opponent_piece_alone(self, node_id: int):
         """Removes a piece from opponent. For computer and networking versions of the game.
 
         Warning: It doesn't check if the piece can actually be taken (i.e. it is inside a windmill).
@@ -384,25 +383,24 @@ class Board:
                 logger.info(f"Piece node {node.id} removed")
 
                 self.must_remove_piece = False
-                if self._check_player_pieces(BLACK if self.turn == PLAYER1 else WHITE):  # TODO maybe I just fixed it (1)
+                if self._check_player_pieces(BLACK if self.turn == PLAYER1 else WHITE):
                     self._game_over(tie=False)
                 self._switch_turn()
                 self.history["ones"].clear()  # Clear the history, because it will never repeat itself
                 self.history["twos"].clear()
 
-    def get_current_state(self) -> list:  # TODO this may be deleted
+    def get_current_state(self) -> list:
         """
         0 - no piece
         1 - WHITE piece
         2 - BLACK piece
 
-        The state is just a list of numbers representing the pieces' positions.
+        The state is just a list of numbers representing the pieces' positions, two boolean values and an integer.
 
         Returns:
             list: A representation of the current game state.
 
         """
-
         current_state = []
         for node in self.nodes:
             if node.piece is None:
@@ -412,6 +410,11 @@ class Board:
                     current_state.append(1)
                 else:
                     current_state.append(2)
+
+        current_state.append(self.can_jump[PLAYER1])
+        current_state.append(self.can_jump[PLAYER2])
+        # current_state.append(self.turn)
+
         return current_state
 
     def check_is_windmill_formed(self, color: tuple, node: Node) -> bool:
@@ -559,7 +562,7 @@ class Board:
         return pieces
 
     def _check_player_pieces(self, color: tuple) -> bool:
-        """Checks the number of pieces of a player and returns if the game is over.
+        """Checks the number of pieces of a player, checks if it's blocked and returns if the game is over.
 
         If the player has 3 pieces remaining, his/her pieces can go anywhere and if 2 pieces remaining, he/she loses.
 
@@ -604,7 +607,7 @@ class Board:
         assert node is not None, "Node shouldn't be None..."
 
         if self.turn == PLAYER1 and not self.can_jump[PLAYER1] or self.turn == PLAYER2 and not self.can_jump[PLAYER2]:
-            return node.search_neighbors(self.nodes, self.DIV)
+            return node.search_neighbors(self.nodes)
         else:
             new_nodes = list(self.nodes)
             new_nodes.remove(node)

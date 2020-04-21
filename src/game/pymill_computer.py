@@ -64,12 +64,12 @@ def pymill_computer(on_game_exit: Callable):
                             current_scale += 1
             else:
                 if board.phase == PHASE1:
-                    board.put_new_piece_alone(ai_place_piece_at(board), BLACK)
+                    board.put_new_piece_alone(ai_place_piece_at(board.get_current_state()), BLACK)
                     if board.must_remove_piece:
                         board.remove_opponent_piece_alone(ai_remove_piece())
                 else:
                     if not board.game_over:
-                        board.change_piece_location(*ai_move_piece(board))
+                        board.change_piece_location(*ai_move_piece(board.get_current_state()))
                         if board.must_remove_piece:
                             board.remove_opponent_piece_alone(ai_remove_piece())
 

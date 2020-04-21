@@ -72,7 +72,7 @@ class Node:
             self.piece.x = x
             self.piece.y = y
 
-    def search_neighbors(self, nodes: tuple, div: int) -> tuple:  # TODO check if it works
+    def search_neighbors(self, nodes: tuple) -> tuple:
         if self.id == 0:
             return nodes[1], nodes[9]
         elif self.id == 1:
@@ -120,4 +120,4 @@ class Node:
         elif self.id == 22:
             return nodes[19], nodes[21], nodes[23]
         else:
-            return nodes[14], nodes[22], nodes[4]
+            return nodes[14], nodes[22]
