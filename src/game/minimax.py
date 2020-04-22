@@ -34,7 +34,7 @@ def ai_place_piece_at(position: list) -> int:
             position[i] = 2  # Put a BLACK piece
             if _check_is_windmill_formed(position, 2, i):
                 best_eval_piece_to_take = inf
-                for j, node_ in enumerate(_get_nodes_pieces_to_take(position, 1)):
+                for j, node_ in _get_nodes_pieces_to_take(position, 1).items():
                     position[j] = 0
                     evaluation = minimax_phase1(position, 3, -inf, inf, True)
                     position[j] = 1
@@ -89,13 +89,13 @@ def ai_move_piece(position: list) -> tuple:
     start = default_timer()
     for i, node in enumerate(position[0:24]):
         if node == 2:
-            for j, node_ in enumerate(_where_can_go(position, i, 2).items()):
-                if node_[0] == 0:
+            for j, node_ in _where_can_go(position, i, 2).items():
+                if node_ == 0:
                     position[j] = 2
                     position[i] = 0
                     if _check_is_windmill_formed(position, 2, j):
                         best_eval_piece_to_take = inf
-                        for k, node__ in enumerate(_get_nodes_pieces_to_take(position, 1)):
+                        for k, node__ in _get_nodes_pieces_to_take(position, 1).items():
                             position[k] = 0
                             evaluation = minimax_phase2(position, 3, -inf, inf, True)
                             position[k] = 1
@@ -104,13 +104,13 @@ def ai_move_piece(position: list) -> tuple:
                                 best_eval_piece_to_take = evaluation
                             if evaluation < best_evaluation:
                                 best_node_id_src = i
-                                best_node_id_dest = node_[1]
+                                best_node_id_dest = j
                                 best_evaluation = evaluation
                     else:
                         evaluation = minimax_phase2(position, 3, -inf, inf, True)
                         if evaluation < best_evaluation:
                             best_node_id_src = i
-                            best_node_id_dest = node_[1]
+                            best_node_id_dest = j
                             best_evaluation = evaluation
                     position[i] = 2  # Undo the taking
                     position[j] = 0
@@ -166,7 +166,7 @@ def minimax_phase1(position: list, depth: int, alpha: float, beta: float, maximi
             if node == 0:
                 position[i] = 1  # It's WHITE's turn
                 if _check_is_windmill_formed(position, 1, i):
-                    for j, node_ in enumerate(_get_nodes_pieces_to_take(position, 2)):
+                    for j, node_ in _get_nodes_pieces_to_take(position, 2).items():
                         position[j] = 0
                         eval = minimax_phase1(position, depth - 1, alpha, beta, False)
                         position[j] = 2
@@ -189,7 +189,7 @@ def minimax_phase1(position: list, depth: int, alpha: float, beta: float, maximi
             if node == 0:
                 position[i] = 2  # It's BLACK's turn
                 if _check_is_windmill_formed(position, 2, i):
-                    for j, node_ in enumerate(_get_nodes_pieces_to_take(position, 1)):
+                    for j, node_ in _get_nodes_pieces_to_take(position, 1).items():
                         position[j] = 0
                         eval = minimax_phase1(position, depth - 1, alpha, beta, True)
                         position[j] = 1
@@ -217,12 +217,12 @@ def minimax_phase2(position: list, depth: int, alpha: float, beta: float, maximi
         max_eval = -inf
         for i, node in enumerate(position[0:24]):
             if node == 1:
-                for j, node_ in enumerate(_where_can_go(position, i, 1).keys()):
+                for j, node_ in _where_can_go(position, i, 1).items():
                     if node_ == 0:
                         position[j] = 1
                         position[i] = 0
                         if _check_is_windmill_formed(position, 1, i):
-                            for k, node__ in enumerate(_get_nodes_pieces_to_take(position, 2)):
+                            for k, node__ in _get_nodes_pieces_to_take(position, 2).items():
                                 position[k] = 0
                                 eval = minimax_phase2(position, depth - 1, alpha, beta, True)
                                 position[k] = 2
@@ -247,12 +247,12 @@ def minimax_phase2(position: list, depth: int, alpha: float, beta: float, maximi
         min_eval = inf
         for i, node in enumerate(position[0:24]):
             if node == 2:
-                for j, node_ in enumerate(_where_can_go(position, i, 2).keys()):
+                for j, node_ in _where_can_go(position, i, 2).items():
                     if node_ == 0:
                         position[j] = 2
                         position[i] = 0
                         if _check_is_windmill_formed(position, 2, i):
-                            for k, node__ in enumerate(_get_nodes_pieces_to_take(position, 1)):
+                            for k, node__ in _get_nodes_pieces_to_take(position, 1).items():
                                 position[k] = 0
                                 eval = minimax_phase2(position, depth - 1, alpha, beta, True)
                                 position[k] = 1
@@ -336,65 +336,75 @@ def _where_can_go(position: list, node: int, player: int) -> dict:
         player (int): PLAYER1 or PLAYER2; for deciding if the player can jump.
 
     Returns:
-        dict: Contains the id of the nodes as the value and the node itself (0, 1 or 2) as the key.
+        dict: Contains the id of the nodes as the key and the node itself (0, 1 or 2) as the value.
 
     """
     if player == 1 and not position[-2] or player == 2 and not position[-1]:  # TODO the can_jump variables must be set
         if node == 0:
-            return {position[1]: 1, position[9]: 9}
+            return {1: position[1], 9: position[9]}
         elif node == 1:
-            return {position[0]: 0, position[2]: 2, position[4]: 4}
+            return {0: position[0], 2: position[2], 4: position[4]}
         elif node == 2:
-            return {position[1]: 1, position[14]: 14}
+            return {1: position[1], 14: position[14]}
         elif node == 3:
-            return {position[4]: 4, position[10]: 10}
+            return {4: position[4], 10: position[10]}
         elif node == 4:
-            return {position[1]: 1, position[3]: 3, position[5]: 5, position[7]: 7}
+            return {1: position[1], 3: position[3], 5: position[5], 7: position[7]}
         elif node == 5:
-            return {position[4]: 4, position[13]: 13}
+            return {4: position[4], 13: position[13]}
         elif node == 6:
-            return {position[7]: 7, position[11]: 11}
+            return {7: position[7], 11: position[11]}
         elif node == 7:
-            return {position[4]: 4, position[6]: 6, position[8]: 8}
+            return {4: position[4], 6: position[6], 8: position[8]}
         elif node == 8:
-            return {position[7]: 7, position[12]: 12}
+            return {7: position[7], 12: position[12]}
         elif node == 9:
-            return {position[0]: 0, position[10]: 10, position[21]: 21}
+            return {0: position[0], 10: position[10], 21: position[21]}
         elif node == 10:
-            return {position[3]: 3, position[9]: 9, position[11]: 11, position[18]: 18}
+            return {3: position[3], 9: position[9], 11: position[11], 18: position[18]}
         elif node == 11:
-            return {position[6]: 6, position[10]: 10, position[15]: 15}
+            return {6: position[6], 10: position[10], 15: position[15]}
         elif node == 12:
-            return {position[8]: 8, position[13]: 13, position[17]: 17}
+            return {8: position[8], 13: position[13], 17: position[17]}
         elif node == 13:
-            return {position[5]: 5, position[12]: 12, position[14]: 14, position[20]: 20}
+            return {5: position[5], 12: position[12], 14: position[14], 20: position[20]}
         elif node == 14:
-            return {position[2]: 2, position[13]: 13, position[23]: 23}
+            return {2: position[2], 13: position[13], 23: position[23]}
         elif node == 15:
-            return {position[11]: 11, position[16]: 16}
+            return {11: position[11], 16: position[16]}
         elif node == 16:
-            return {position[15]: 15, position[17]: 17, position[19]: 19}
+            return {15: position[15], 17: position[17], 19: position[19]}
         elif node == 17:
-            return {position[12]: 12, position[16]: 16}
+            return {12: position[12], 16: position[16]}
         elif node == 18:
-            return {position[10]: 10, position[19]: 19}
+            return {10: position[10], 19: position[19]}
         elif node == 19:
-            return {position[16]: 16, position[18]: 18, position[20]: 20, position[22]: 22}
+            return {16: position[16], 18: position[18], 20: position[20], 22: position[22]}
         elif node == 20:
-            return {position[13]: 13, position[19]: 19}
+            return {13: position[13], 19: position[19]}
         elif node == 21:
-            return {position[9]: 9, position[22]: 22}
+            return {9: position[9], 22: position[22]}
         elif node == 22:
-            return {position[19]: 19, position[21]: 21, position[23]: 23}
+            return {19: position[19], 21: position[21], 23: position[23]}
         else:
-            return {position[14]: 14, position[22]: 22}
+            return {14: position[14], 22: position[22]}
     else:
         nodes = copy(position[0:24])
         del nodes[node]
         return {node: i for i, node in enumerate(nodes)}
 
 
-def _get_nodes_pieces_to_take(position: list, color: int) -> list:
+def _get_nodes_pieces_to_take(position: list, color: int) -> dict:
+    """
+
+    Args:
+        position (list): The state of the game.
+        color (int): The color of the pieces to take.
+
+    Returns:
+        dict: Contains the id of the nodes as the key and the node itself (0, 1 or 2) as the value.
+
+    """
     windmill_nodes = []
     if position[0] == position[1] == position[2] == color:
         windmill_nodes.append(0)
@@ -461,14 +471,14 @@ def _get_nodes_pieces_to_take(position: list, color: int) -> list:
         windmill_nodes.append(13)
         windmill_nodes.append(14)
 
-    nodes = []
+    nodes = {}
     for i, node in enumerate(position[0:24]):
         if node == color and i not in windmill_nodes:
-            nodes.append(i)
+            nodes[i] = node
 
     # If there are no nodes, then they all must be in windmills, so return them all.
     if not nodes:
-        return [node for node in position[0:24] if node == color]
+        return {i: node for i, node in enumerate(position[0:24]) if node == color}
 
     return nodes
 
