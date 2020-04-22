@@ -144,12 +144,12 @@ def get_evaluation_of_position(position: list) -> int:
     for i, node in enumerate(position[0:24]):
         if node == 1:
             positions = _where_can_go(position, i, 1)
-            for node_ in positions.keys():
+            for node_ in positions.values():
                 if node_ == 0:
                     evaluation += values["free_move"]
         elif node == 2:
             positions = _where_can_go(position, i, 2)
-            for node_ in positions.keys():
+            for node_ in positions.values():
                 if node_ == 0:
                     evaluation -= values["free_move"]
 
@@ -396,7 +396,6 @@ def _where_can_go(position: list, node: int, player: int) -> dict:
 
 def _get_nodes_pieces_to_take(position: list, color: int) -> dict:
     """
-
     Args:
         position (list): The state of the game.
         color (int): The color of the pieces to take.
