@@ -395,7 +395,7 @@ class Board:
         1 - WHITE piece
         2 - BLACK piece
 
-        The state is just a list of numbers representing the pieces' positions, two boolean values and an integer.
+        The state is just a list of numbers representing the pieces' positions and two boolean values.
 
         Returns:
             list: A representation of the current game state.
@@ -413,7 +413,6 @@ class Board:
 
         current_state.append(self.can_jump[PLAYER1])
         current_state.append(self.can_jump[PLAYER2])
-        # current_state.append(self.turn)
 
         return current_state
 

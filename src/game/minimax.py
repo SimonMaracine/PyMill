@@ -2,8 +2,6 @@ from math import inf
 from timeit import default_timer
 from copy import copy
 
-from src.constants import *
-
 # Assume maximizing player is WHITE and minimizing player is BLACK.
 # For now the AI is always BLACK.
 
@@ -31,7 +29,7 @@ def ai_place_piece_at(position: list) -> int:
     best_node_id = -1
 
     start = default_timer()
-    for i, node in enumerate(position[0:23]):
+    for i, node in enumerate(position[0:24]):
         if node == 0:  # If there is no piece
             position[i] = 2  # Put a BLACK piece
             if _check_is_windmill_formed(position, 2, i):
@@ -89,10 +87,10 @@ def ai_move_piece(position: list) -> tuple:
     best_node_id_dest = -1
 
     start = default_timer()
-    for i, node in enumerate(position[0:23]):
+    for i, node in enumerate(position[0:24]):
         if node == 2:
-            for node_, j in _where_can_go(position, i, 2).items():
-                if node_ == 0:
+            for j, node_ in enumerate(_where_can_go(position, i, 2).items()):
+                if node_[0] == 0:
                     position[j] = 2
                     position[i] = 0
                     if _check_is_windmill_formed(position, 2, j):
@@ -106,13 +104,13 @@ def ai_move_piece(position: list) -> tuple:
                                 best_eval_piece_to_take = evaluation
                             if evaluation < best_evaluation:
                                 best_node_id_src = i
-                                best_node_id_dest = j
+                                best_node_id_dest = node_[1]
                                 best_evaluation = evaluation
                     else:
                         evaluation = minimax_phase2(position, 3, -inf, inf, True)
                         if evaluation < best_evaluation:
                             best_node_id_src = i
-                            best_node_id_dest = j
+                            best_node_id_dest = node_[1]
                             best_evaluation = evaluation
                     position[i] = 2  # Undo the taking
                     position[j] = 0
@@ -131,7 +129,7 @@ def get_evaluation_of_position(position: list) -> int:
 
     evaluation = 0
 
-    for node in position[0:23]:
+    for node in position[0:24]:
         if node == 1:  # Piece is WHITE
             evaluation += values["piece"]
         elif node == 2:  # Piece is BLACK
@@ -143,7 +141,7 @@ def get_evaluation_of_position(position: list) -> int:
     for _ in range(black_mills):
         evaluation -= values["mill"]
 
-    for i, node in enumerate(position[0:23]):
+    for i, node in enumerate(position[0:24]):
         if node == 1:
             positions = _where_can_go(position, i, 1)
             for node_ in positions.keys():
@@ -164,7 +162,7 @@ def minimax_phase1(position: list, depth: int, alpha: float, beta: float, maximi
 
     if maximizing_player:
         max_eval = -inf
-        for i, node in enumerate(position[0:23]):
+        for i, node in enumerate(position[0:24]):
             if node == 0:
                 position[i] = 1  # It's WHITE's turn
                 if _check_is_windmill_formed(position, 1, i):
@@ -187,11 +185,11 @@ def minimax_phase1(position: list, depth: int, alpha: float, beta: float, maximi
         return max_eval
     else:
         min_eval = inf
-        for i, node in enumerate(position[0:23]):
+        for i, node in enumerate(position[0:24]):
             if node == 0:
                 position[i] = 2  # It's BLACK's turn
                 if _check_is_windmill_formed(position, 2, i):
-                    for j, node_ in enumerate(_get_nodes_pieces_to_take(position, WHITE)):
+                    for j, node_ in enumerate(_get_nodes_pieces_to_take(position, 1)):
                         position[j] = 0
                         eval = minimax_phase1(position, depth - 1, alpha, beta, True)
                         position[j] = 1
@@ -217,14 +215,14 @@ def minimax_phase2(position: list, depth: int, alpha: float, beta: float, maximi
 
     if maximizing_player:
         max_eval = -inf
-        for i, node in enumerate(position[0:23]):
+        for i, node in enumerate(position[0:24]):
             if node == 1:
-                for node_, j in _where_can_go(position, i, 1).items():
+                for j, node_ in enumerate(_where_can_go(position, i, 1).keys()):
                     if node_ == 0:
                         position[j] = 1
                         position[i] = 0
                         if _check_is_windmill_formed(position, 1, i):
-                            for k, node__ in enumerate(_get_nodes_pieces_to_take(position, BLACK)):
+                            for k, node__ in enumerate(_get_nodes_pieces_to_take(position, 2)):
                                 position[k] = 0
                                 eval = minimax_phase2(position, depth - 1, alpha, beta, True)
                                 position[k] = 2
@@ -247,14 +245,14 @@ def minimax_phase2(position: list, depth: int, alpha: float, beta: float, maximi
         return max_eval
     else:
         min_eval = inf
-        for i, node in enumerate(position[0:23]):
+        for i, node in enumerate(position[0:24]):
             if node == 2:
-                for node_, j in _where_can_go(position, i, 2).items():
+                for j, node_ in enumerate(_where_can_go(position, i, 2).keys()):
                     if node_ == 0:
                         position[j] = 2
                         position[i] = 0
                         if _check_is_windmill_formed(position, 2, i):
-                            for k, node__ in enumerate(_get_nodes_pieces_to_take(position, WHITE)):
+                            for k, node__ in enumerate(_get_nodes_pieces_to_take(position, 1)):
                                 position[k] = 0
                                 eval = minimax_phase2(position, depth - 1, alpha, beta, True)
                                 position[k] = 1
@@ -281,63 +279,48 @@ def _check_is_windmill_formed(position: list, color: int, node: int) -> bool:
     if position[0] == position[1] == position[2] == color:
         if node == 0 or node == 1 or node == 2:
             return True
-
     if position[0] == position[9] == position[21] == color:
         if node == 0 or node == 9 or node == 21:
             return True
-
     if position[21] == position[22] == position[23] == color:
         if node == 21 or node == 22 or node == 23:
             return True
-
     if position[23] == position[14] == position[2] == color:
         if node == 23 or node == 14 or node == 2:
             return True
-
     if position[3] == position[4] == position[5] == color:
         if node == 3 or node == 4 or node == 5:
             return True
-
     if position[3] == position[10] == position[18] == color:
         if node == 3 or node == 10 or node == 18:
             return True
-
     if position[18] == position[19] == position[20] == color:
         if node == 18 or node == 19 or node == 20:
             return True
-
     if position[20] == position[13] == position[5] == color:
         if node == 20 or node == 13 or node == 5:
             return True
-
     if position[6] == position[7] == position[8] == color:
         if node == 6 or node == 7 or node == 8:
             return True
-
     if position[6] == position[11] == position[15] == color:
         if node == 6 or node == 11 or node == 15:
             return True
-
     if position[15] == position[16] == position[17] == color:
         if node == 15 or node == 16 or node == 17:
             return True
-
     if position[17] == position[12] == position[8] == color:
         if node == 17 or node == 12 or node == 8:
             return True
-
     if position[1] == position[4] == position[7] == color:
         if node == 1 or node == 4 or node == 7:
             return True
-
     if position[9] == position[10] == position[11] == color:
         if node == 9 or node == 10 or node == 11:
             return True
-
     if position[22] == position[19] == position[16] == color:
         if node == 22 or node == 19 or node == 16:
             return True
-
     if position[12] == position[13] == position[14] == color:
         if node == 12 or node == 13 or node == 14:
             return True
@@ -346,9 +329,19 @@ def _check_is_windmill_formed(position: list, color: int, node: int) -> bool:
 
 
 def _where_can_go(position: list, node: int, player: int) -> dict:
+    """
+    Args:
+        position (list): The state of the game.
+        node (int): From where to go.
+        player (int): PLAYER1 or PLAYER2; for deciding if the player can jump.
+
+    Returns:
+        dict: Contains the id of the nodes as the value and the node itself (0, 1 or 2) as the key.
+
+    """
     if player == 1 and not position[-2] or player == 2 and not position[-1]:  # TODO the can_jump variables must be set
         if node == 0:
-            return {position[1]: 1, position[9]: 9}  # The key is the node and the value is the id, which is weird
+            return {position[1]: 1, position[9]: 9}
         elif node == 1:
             return {position[0]: 0, position[2]: 2, position[4]: 4}
         elif node == 2:
@@ -396,7 +389,7 @@ def _where_can_go(position: list, node: int, player: int) -> dict:
         else:
             return {position[14]: 14, position[22]: 22}
     else:
-        nodes = copy(position[0:23])
+        nodes = copy(position[0:24])
         del nodes[node]
         return {node: i for i, node in enumerate(nodes)}
 
@@ -469,13 +462,13 @@ def _get_nodes_pieces_to_take(position: list, color: int) -> list:
         windmill_nodes.append(14)
 
     nodes = []
-    for i, node in enumerate(position[0:23]):
+    for i, node in enumerate(position[0:24]):
         if node == color and i not in windmill_nodes:
             nodes.append(i)
 
     # If there are no nodes, then they all must be in windmills, so return them all.
     if not nodes:
-        return [node for node in position[0:23] if node == color]
+        return [node for node in position[0:24] if node == color]
 
     return nodes
 
@@ -571,7 +564,7 @@ def _get_number_of_windmills(position: list) -> tuple:
 def _is_game_over(position: list) -> bool:  # TODO check if player is blocked; better make a "check player" method
     black_pieces = 0
     white_pieces = 0
-    for node in position[0:23]:
+    for node in position[0:24]:
         if node == 1:
             white_pieces += 1
         elif node == 2:
