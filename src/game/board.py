@@ -236,8 +236,7 @@ class Board:
                         if self._check_player_pieces(BLACK):
                             self._game_over(tie=False)
                         self._switch_turn()
-                        self.history["ones"].clear()  # Clear the history, because it will never repeat itself
-                        self.history["twos"].clear()
+                        self._clear_history()  # Clear the history, because it will never repeat itself
                         can_remove = True
                     else:
                         logger.info("You cannot take piece from windmill!")
@@ -250,8 +249,7 @@ class Board:
                         if self._check_player_pieces(WHITE):
                             self._game_over(tie=False)
                         self._switch_turn()
-                        self.history["ones"].clear()  # Clear the history, because it will never repeat itself
-                        self.history["twos"].clear()
+                        self._clear_history()  # Clear the history, because it will never repeat itself
                         can_remove = True
                     else:
                         logger.info("You cannot take piece from windmill!")
@@ -311,20 +309,20 @@ class Board:
         assert 0 <= node_id <= 23
         assert self.phase == PHASE1
 
-        for node in self.nodes:
-            if node.id == node_id:
-                assert node.piece is None
-                node.add_piece(Piece(node.x, node.y, piece_color))
-                if piece_color == WHITE:
-                    self.white_pieces -= 1
-                else:
-                    self.black_pieces -= 1
-                if not self._check_is_windmill_formed(piece_color, node):
-                    self._switch_turn()
-                else:
-                    self.must_remove_piece = True
-                    logger.debug("Remove a piece!")
-                break
+        node = self.nodes[node_id]
+
+        assert node.piece is None
+        node.add_piece(Piece(node.x, node.y, piece_color))
+        if piece_color == WHITE:
+            self.white_pieces -= 1
+        else:
+            self.black_pieces -= 1
+        if not self._check_is_windmill_formed(piece_color, node):
+            self._switch_turn()
+        else:
+            self.must_remove_piece = True
+            logger.debug("Remove a piece!")
+
         if (self.white_pieces + self.black_pieces) == 0:
             self.phase = PHASE2
             logger.info("PHASE 2")
@@ -341,24 +339,21 @@ class Board:
         assert self.phase == PHASE2
         assert source_node_id != destination_node_id
 
-        piece = None
-        for node in self.nodes:
-            if node.id == source_node_id:
-                assert node.piece is not None
-                piece = node.piece
-                node.take_piece()
+        node = self.nodes[source_node_id]
+        assert node.piece is not None
+        piece = node.piece
+        node.take_piece()
 
-        for node in self.nodes:
-            if node.id == destination_node_id:
-                assert node.piece is None
-                node.add_piece(piece)
+        node = self.nodes[destination_node_id]
+        assert node.piece is None  # TODO this failed twice on WHITE with 3 pieces
+        node.add_piece(piece)
 
-                if not self._check_is_windmill_formed(piece.color, node):
-                    self._switch_turn()
-                    self.turns_without_windmills += 1
-                else:
-                    self.must_remove_piece = True
-                    logger.debug("Remove a piece!")
+        if not self._check_is_windmill_formed(piece.color, node):
+            self._switch_turn()
+            self.turns_without_windmills += 1
+        else:
+            self.must_remove_piece = True
+            logger.debug("Remove a piece!")
 
         if self._check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK because turn
             if not self.must_remove_piece:                                       # was already switched
@@ -376,18 +371,16 @@ class Board:
             node_id (int): The node from which to take the piece.
 
         """
-        for node in self.nodes:
-            if node.id == node_id:  # TODO this may be simplified, because nodes' id is the same as the index
-                assert node.piece is not None
-                node.take_piece()
-                logger.info(f"Piece node {node.id} removed")
+        node = self.nodes[node_id]
+        assert node.piece is not None
+        node.take_piece()
+        logger.info(f"Piece node {node.id} removed")
 
-                self.must_remove_piece = False
-                if self._check_player_pieces(BLACK if self.turn == PLAYER1 else WHITE):
-                    self._game_over(tie=False)
-                self._switch_turn()
-                self.history["ones"].clear()  # Clear the history, because it will never repeat itself
-                self.history["twos"].clear()
+        self.must_remove_piece = False
+        if self._check_player_pieces(BLACK if self.turn == PLAYER1 else WHITE):
+            self._game_over(tie=False)
+        self._switch_turn()
+        self._clear_history()  # Clear the history, because it will never repeat itself
 
     def get_current_state(self) -> list:
         """
@@ -395,7 +388,7 @@ class Board:
         1 - WHITE piece
         2 - BLACK piece
 
-        The state is just a list of numbers representing the pieces' positions and two boolean values.
+        The state is just a list of numbers representing the pieces' positions.
 
         Returns:
             list: A representation of the current game state.
@@ -410,9 +403,6 @@ class Board:
                     current_state.append(1)
                 else:
                     current_state.append(2)
-
-        current_state.append(self.can_jump[PLAYER1])
-        current_state.append(self.can_jump[PLAYER2])
 
         return current_state
 
@@ -476,7 +466,7 @@ class Board:
         else:
             self.turn = PLAYER1
 
-    def _check_board_state(self):
+    def _check_board_state(self):  # TODO doesn't work well; it is game over too early; problem is when this method is called
         """Get the current state of the board and check if it's game over.
 
         """
@@ -502,6 +492,10 @@ class Board:
         if self.turns_without_windmills > self.MAX_TURNS_WO_MILLS:
             self._game_over(tie=True)
             logger.info("The amount of turns without windmills was exceeded")
+
+    def _clear_history(self):
+        self.history["ones"].clear()
+        self.history["twos"].clear()
 
     def _game_over(self, tie: bool):
         self.game_over = True
@@ -557,7 +551,7 @@ class Board:
         for node in self.nodes:
             if node.piece and node.piece.color == color:
                 pieces += 1
-        logger.debug(f"{'PLAYER 1' if color == WHITE else 'PLAYER 2'} pieces remaining: {pieces}")
+        logger.debug(f"{'Player 1' if color == WHITE else 'Player 2'} pieces remaining: {pieces}")
         return pieces
 
     def _check_player_pieces(self, color: tuple) -> bool:
