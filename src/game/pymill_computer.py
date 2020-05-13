@@ -1,3 +1,4 @@
+import tkinter as tk
 from typing import Callable
 
 import pygame
@@ -5,6 +6,19 @@ import pygame
 from src.game.minimax import ai_place_piece_at, ai_remove_piece, ai_move_piece
 from src.game.board import Board
 from src.constants import *
+
+
+class PymillComputer(tk.Frame):
+
+    def __init__(self, top_level: tk.Toplevel):
+        super().__init__(top_level)
+        self.top_level = top_level
+        self.pack(padx=0, pady=0, expand=True)
+
+        self.top_level.title("Pymill Computer")
+
+        self.canvas = tk.Canvas(self, width=600, height=600)
+        self.canvas.pack()
 
 
 def pymill_computer(on_game_exit: Callable):

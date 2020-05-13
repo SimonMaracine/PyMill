@@ -1,6 +1,5 @@
+import tkinter as tk
 from typing import Optional
-
-import pygame
 
 from src.game.piece import Piece
 from src.game.node import Node
@@ -10,47 +9,42 @@ from src.log import get_logger
 logger = get_logger(__name__)
 logger.setLevel(10)
 
-window_width = 800
-window_height = 600
+canvas_width = 800
+board_width = 600
 
 
 class Board:
     """Game board object."""
 
-    def __init__(self):
-        self.width = window_height - 160
-        self.x = (window_width - self.width) // 2  # x and y are board's origin
-        self.y = (window_height - self.width) // 2
-        self.DIV = self.width // 6
-
-        self.line_thickness = 8
-        self.board_offset = 35
+    def __init__(self, canvas: tk.Canvas):
+        self.canvas = canvas
+        self.DIV = canvas_width // 8
 
         self.nodes = (
-            Node(self.x, self.y, (0, 1, 1, 0), 0),
-            Node(self.x + self.DIV * 3, self.y, (0, 1, 1, 1), 1),
-            Node(self.x + self.DIV * 6, self.y, (0, 1, 0, 1), 2),  # line
-            Node(self.x + self.DIV, self.y + self.DIV, (0, 1, 1, 0), 3),
-            Node(self.x + self.DIV * 3, self.y + self.DIV, (1, 1, 1, 1), 4),
-            Node(self.x + self.DIV * 5, self.y + self.DIV, (0, 1, 0, 1), 5),  # line
-            Node(self.x + self.DIV * 2, self.y + self.DIV * 2, (0, 1, 1, 0), 6),
-            Node(self.x + self.DIV * 3, self.y + self.DIV * 2, (1, 0, 1, 1), 7),
-            Node(self.x + self.DIV * 4, self.y + self.DIV * 2, (0, 1, 0, 1), 8),  # line
-            Node(self.x, self.y + self.DIV * 3, (1, 1, 1, 0), 9),
-            Node(self.x + self.DIV, self.y + self.DIV * 3, (1, 1, 1, 1), 10),
-            Node(self.x + self.DIV * 2, self.y + self.DIV * 3, (1, 1, 0, 1), 11),  # line
-            Node(self.x + self.DIV * 4, self.y + self.DIV * 3, (1, 1, 1, 0), 12),
-            Node(self.x + self.DIV * 5, self.y + self.DIV * 3, (1, 1, 1, 1), 13),
-            Node(self.x + self.DIV * 6, self.y + self.DIV * 3, (1, 1, 0, 1), 14),  # line
-            Node(self.x + self.DIV * 2, self.y + self.DIV * 4, (1, 0, 1, 0), 15),
-            Node(self.x + self.DIV * 3, self.y + self.DIV * 4, (0, 1, 1, 1), 16),
-            Node(self.x + self.DIV * 4, self.y + self.DIV * 4, (1, 0, 0, 1), 17),  # line
-            Node(self.x + self.DIV, self.y + self.DIV * 5, (1, 0, 1, 0), 18),
-            Node(self.x + self.DIV * 3, self.y + self.DIV * 5, (1, 1, 1, 1), 19),
-            Node(self.x + self.DIV * 5, self.y + self.DIV * 5, (1, 0, 0, 1), 20),  # line
-            Node(self.x, self.y + self.DIV * 6, (1, 0, 1, 0), 21),
-            Node(self.x + self.DIV * 3, self.y + self.DIV * 6, (1, 0, 1, 1), 22),
-            Node(self.x + self.DIV * 6, self.y + self.DIV * 6, (1, 0, 0, 1), 23)  # line
+            Node(self.DIV, self.DIV, canvas, 0),
+            Node(self.DIV * 4, self.DIV, canvas, 1),
+            Node(self.DIV * 7, self.DIV, canvas, 2),  # line
+            Node(self.DIV * 2, self.DIV * 2, canvas, 3),
+            Node(self.DIV * 4, self.DIV * 2, canvas, 4),
+            Node(self.DIV * 6, self.DIV * 2, canvas, 5),  # line
+            Node(self.DIV * 3, self.DIV * 3, canvas, 6),
+            Node(self.DIV * 4, self.DIV * 3, canvas, 7),
+            Node(self.DIV * 5, self.DIV * 3, canvas, 8),  # line
+            Node(self.DIV, self.DIV * 4, canvas, 9),
+            Node(self.DIV * 2, self.DIV * 4, canvas, 10),
+            Node(self.DIV * 3, self.DIV * 4, canvas, 11),  # line
+            Node(self.DIV * 5, self.DIV * 4, canvas, 12),
+            Node(self.DIV * 6, self.DIV * 4, canvas, 13),
+            Node(self.DIV * 7, self.DIV * 4, canvas, 14),  # line
+            Node(self.DIV * 3, self.DIV * 5, canvas, 15),
+            Node(self.DIV * 4, self.DIV * 5, canvas, 16),
+            Node(self.DIV * 5, self.DIV * 5, canvas, 17),  # line
+            Node(self.DIV * 2, self.DIV * 6, canvas, 18),
+            Node(self.DIV * 4, self.DIV * 6, canvas, 19),
+            Node(self.DIV * 6, self.DIV * 6, canvas, 20),  # line
+            Node(self.DIV, self.DIV * 7, canvas, 21),
+            Node(self.DIV * 4, self.DIV * 7, canvas, 22),
+            Node(self.DIV * 7, self.DIV * 7, canvas, 23)  # line
         )
         for node in self.nodes:  # Correct the position of each node.
             node.x += 1
@@ -96,33 +90,33 @@ class Board:
 
         self.history = {"ones": [], "twos": []}
 
-        self.font_indicator = pygame.font.SysFont("", 34, True)
-        self.font_pieces = pygame.font.SysFont("", 38, True)
+        self._draw_board()
 
-    def render(self, surface: pygame.Surface):
-        self._draw_board(surface)
+    # def render(self, surface: pygame.Surface):
+    #     self._draw_board(surface)
+    #
+    #     for node in self.nodes:
+    #         node.render(surface)
+    #         if node.piece:
+    #             if node.piece != self.picked_up_piece:
+    #                 node.piece.render(surface)
+    #             if node.remove_thingy and self._get_turn_color() != node.piece.color:
+    #                 node.render_remove_thingy(surface)
+    #
+    #     if self.picked_up_piece is not None:
+    #         self.picked_up_piece.render(surface)
+    #
+    #     if self.phase == PHASE1:
+    #         self._draw_player_pieces(surface, self.font_pieces)
+    #
+    #     self._draw_player_indicator(surface, self.font_indicator)
 
+    def update(self, mouse_x: int, mouse_y: int):
         for node in self.nodes:
-            node.render(surface)
-            if node.piece:
-                if node.piece != self.picked_up_piece:
-                    node.piece.render(surface)
-                if node.remove_thingy and self._get_turn_color() != node.piece.color:
-                    node.render_remove_thingy(surface)
-
-        if self.picked_up_piece is not None:
-            self.picked_up_piece.render(surface)
-
-        if self.phase == PHASE1:
-            self._draw_player_pieces(surface, self.font_pieces)
-
-        self._draw_player_indicator(surface, self.font_indicator)
-
-    def update(self, mouse: tuple):
-        mouse_x = mouse[0]
-        mouse_y = mouse[1]
-        for node in self.nodes:
-            node.update(mouse_x, mouse_y, self.must_remove_piece)
+            try:
+                node.update(mouse_x, mouse_y, self.must_remove_piece, self._get_turn_color() != node.piece.color)
+            except AttributeError:  # Dirty solution
+                node.update(mouse_x, mouse_y, self.must_remove_piece, False)
             if node.piece is not None:
                 node.piece.update(mouse_x, mouse_y)
 
@@ -183,7 +177,7 @@ class Board:
         for node in self.nodes:
             if node.highlight and not node.piece:
                 if self.turn == PLAYER1:
-                    new_piece = Piece(node.x, node.y, WHITE)
+                    new_piece = Piece(node.x, node.y, WHITE, self.canvas)
                     node.add_piece(new_piece)
                     self.white_pieces -= 1
                     if not self._check_is_windmill_formed(WHITE, node):
@@ -193,7 +187,7 @@ class Board:
                         self.must_remove_piece = True
                         logger.debug("Remove a piece!")
                 else:
-                    new_piece = Piece(node.x, node.y, BLACK)
+                    new_piece = Piece(node.x, node.y, BLACK, self.canvas)
                     node.add_piece(new_piece)
                     self.black_pieces -= 1
                     if not self._check_is_windmill_formed(BLACK, node):
@@ -212,7 +206,7 @@ class Board:
         for node in self.nodes:
             if node.highlight and node.piece and self.picked_up_piece is None:
                 if node.piece.pick_up(self.turn):
-                    self._change_nodes_color(node, (0, 255, 0), (255, 0, 0))
+                    self._change_nodes_color(node, "#00ff00", "#ff0000")
                     self.node_taken_piece = node
                     self.picked_up_piece = node.piece
                 break
@@ -231,7 +225,7 @@ class Board:
                 if node.highlight and node.piece and node.piece.color == BLACK:
                     if not self._check_is_windmill_formed(BLACK, node) or \
                             self._number_pieces_in_windmills(BLACK) == self._count_pieces_left_of_player(BLACK):
-                        node.take_piece()
+                        node.take_piece(True)
                         self.must_remove_piece = False
                         if self._check_player_pieces(BLACK):
                             self._game_over(tie=False)
@@ -244,7 +238,7 @@ class Board:
                 if node.highlight and node.piece and node.piece.color == WHITE:
                     if not self._check_is_windmill_formed(WHITE, node) or \
                             self._number_pieces_in_windmills(WHITE) == self._count_pieces_left_of_player(WHITE):
-                        node.take_piece()
+                        node.take_piece(True)
                         self.must_remove_piece = False
                         if self._check_player_pieces(WHITE):
                             self._game_over(tie=False)
@@ -269,7 +263,7 @@ class Board:
                 if node.highlight and not node.piece:
                     node.add_piece(self.picked_up_piece)
                     logger.debug("Piece: {}".format(node.piece))
-                    self._change_nodes_color(self.node_taken_piece, (0, 0, 0), (0, 0, 0))
+                    self._change_nodes_color(self.node_taken_piece, "#000000", "#000000")
                     self.node_taken_piece.piece.release(node)
                     self.node_taken_piece.take_piece()
                     self.node_taken_piece = None
@@ -292,7 +286,7 @@ class Board:
 
         # Release piece if player released the left button.
         if self.picked_up_piece is not None:
-            self._change_nodes_color(self.node_taken_piece, (0, 0, 0), (0, 0, 0))
+            self._change_nodes_color(self.node_taken_piece, "#000000", "#000000")
             self.picked_up_piece.release(self.node_taken_piece)
             self.picked_up_piece = None
 
@@ -428,37 +422,25 @@ class Board:
                 return True
         return False
 
-    def _draw_board(self, surface: pygame.Surface):
-        pygame.draw.rect(surface, (252, 219, 86), (self.x - self.board_offset, self.y - self.board_offset,
-                                                   self.width + self.board_offset * 2, self.width + self.board_offset * 2))
-        pygame.draw.rect(surface, (0, 0, 0), (self.x - self.board_offset, self.y - self.board_offset,
-                                              self.width + self.board_offset * 2, self.width + self.board_offset * 2), 1)
+    def _draw_board(self):
+        self.canvas.create_rectangle(self.DIV, self.DIV, self.DIV * 7, self.DIV * 7, width=8)
+        self.canvas.create_rectangle(self.DIV * 2, self.DIV * 2, self.DIV * 6, self.DIV * 6, width=8)
+        self.canvas.create_rectangle(self.DIV * 3, self.DIV * 3, self.DIV * 5, self.DIV * 5, width=8)
 
-        # Drawing three rectangles...
-        pygame.draw.rect(surface, (0, 0, 0), (self.x, self.y, self.width, self.width), self.line_thickness)
-        pygame.draw.rect(surface, (0, 0, 0), (self.x + self.DIV, self.y + self.DIV,
-                                              self.width - self.DIV * 2, self.width - self.DIV * 2), self.line_thickness)
-        pygame.draw.rect(surface, (0, 0, 0), (self.x + self.DIV * 2, self.y + self.DIV * 2,
-                                              self.width - self.DIV * 4, self.width - self.DIV * 4), self.line_thickness)
-        # ...and four middle lines.
-        pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 3, self.y),
-                         (self.x + self.DIV * 3, self.y + self.DIV * 2), self.line_thickness)
-        pygame.draw.line(surface, (0, 0, 0), (self.x, self.y + self.DIV * 3),
-                         (self.x + self.DIV * 2, self.y + self.DIV * 3), self.line_thickness)
-        pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 3, self.y + self.DIV * 6),
-                         (self.x + self.DIV * 3, self.y + self.DIV * 4), self.line_thickness)
-        pygame.draw.line(surface, (0, 0, 0), (self.x + self.DIV * 6, self.y + self.DIV * 3),
-                         (self.x + self.DIV * 4, self.y + self.DIV * 3), self.line_thickness)
+        self.canvas.create_line(self.DIV, self.DIV * 4, self.DIV * 3, self.DIV * 4, width=8)
+        self.canvas.create_line(self.DIV * 5, self.DIV * 4, self.DIV * 7, self.DIV * 4, width=8)
+        self.canvas.create_line(self.DIV * 4, self.DIV, self.DIV * 4, self.DIV * 3, width=8)
+        self.canvas.create_line(self.DIV * 4, self.DIV * 5, self.DIV * 4, self.DIV * 7, width=8)
 
-    def _draw_player_pieces(self, surface: pygame.Surface, font: pygame.font.Font):
-        player1_text = font.render("x {}".format(self.white_pieces), True, (0, 0, 0))
-        player2_text = font.render("x {}".format(self.black_pieces), True, (0, 0, 0))
-        surface.blit(player1_text, (20, window_height // 2 - 30))
-        surface.blit(player2_text, (window_width - 20 - player2_text.get_width(), window_height // 2 - 30))
-
-    def _draw_player_indicator(self, surface: pygame.Surface, font: pygame.font.Font):
-        text = font.render("WHITE'S TURN" if self.turn == PLAYER1 else "BLACK'S TURN", True, (0, 0, 0))
-        surface.blit(text, (self.x, window_height - 35))
+    # def _draw_player_pieces(self, surface: pygame.Surface, font: pygame.font.Font):
+    #     player1_text = font.render("x {}".format(self.white_pieces), True, (0, 0, 0))
+    #     player2_text = font.render("x {}".format(self.black_pieces), True, (0, 0, 0))
+    #     surface.blit(player1_text, (20, window_height // 2 - 30))
+    #     surface.blit(player2_text, (window_width - 20 - player2_text.get_width(), window_height // 2 - 30))
+    #
+    # def _draw_player_indicator(self, surface: pygame.Surface, font: pygame.font.Font):
+    #     text = font.render("WHITE'S TURN" if self.turn == PLAYER1 else "BLACK'S TURN", True, (0, 0, 0))
+    #     surface.blit(text, (self.x, window_height - 35))
 
     def _switch_turn(self):
         if self.turn == PLAYER1:
@@ -623,7 +605,7 @@ class Board:
                     pieces_inside_windmills.add(node)
         return len(pieces_inside_windmills)
 
-    def _change_nodes_color(self, node: Node, color1: tuple, color2: tuple):
+    def _change_nodes_color(self, node: Node, color1: str, color2: str):
         """Changes color of other nodes based on where the piece can go.
 
         Args:

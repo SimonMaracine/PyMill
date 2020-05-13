@@ -1,54 +1,62 @@
+import tkinter as tk
 from math import sqrt
-import pygame
 
 
 class Node:
     """Class representing a node object used by the Board."""
 
-    DEFAULT_RADIUS = 34
+    DEFAULT_RADIUS = 35
     DEFAULT_DOT_RADIUS = 16
 
     radius = DEFAULT_RADIUS
     dot_radius = DEFAULT_DOT_RADIUS
     highlight_color = (200, 190, 210)
 
-    def __init__(self, x: int, y: int, search: tuple, id_: int):
+    def __init__(self, x: int, y: int, canvas: tk.Canvas, id_: int):
         self.x = x
         self.y = y
-        self.search = search  # represents its neighbors
+        self.canvas = canvas
         self.id = id_
         self.highlight = False
         self.color = (0, 0, 0)
         self.piece = None
         self.remove_thingy = False
 
+        self.highlight_oval = 0
+        self.remove_thingy_line1 = 0
+        self.remove_thingy_line2 = 0
+
+        self.oval = self.canvas.create_oval(self.x - Node.dot_radius - 1, self.y - Node.dot_radius - 1, self.x + Node.dot_radius,
+                                self.y + Node.dot_radius, fill="black")
+
     def __repr__(self):
         return f"{self.id}, {self.piece}"
 
-    def render(self, surface: pygame.Surface):
-        pygame.draw.circle(surface, self.color, (self.x, self.y), Node.dot_radius)
-        if self.highlight:
-            pygame.draw.ellipse(surface, Node.highlight_color,
-                                (self.x - Node.radius, self.y - Node.radius, Node.radius * 2, Node.radius * 2), 4)
-
-    def update(self, mouse_x: int, mouse_y: int, must_remove_piece: bool):
-        distance = sqrt(((mouse_x - self.x) ** 2 + (mouse_y - self.y) ** 2))
+    def update(self, mouse_x: int, mouse_y: int, must_remove_piece: bool, mouse_over_opponent_piece: bool):
+        distance = sqrt((mouse_x - self.x) ** 2 + (mouse_y - self.y) ** 2)
         if distance <= Node.radius:
+            if not self.highlight:
+                self.highlight_oval = self.canvas.create_oval(self.x - Node.radius - 2, self.y - Node.radius - 2,
+                                                              self.x + Node.radius, self.y + Node.radius, width=2)
             self.highlight = True
-        else:
-            self.highlight = False
 
-        if must_remove_piece:
+            if not self.remove_thingy and must_remove_piece and mouse_over_opponent_piece:
+                self.remove_thingy_line1 = self.canvas.create_line(self.x - Node.radius // 2, self.y - Node.radius // 2,
+                                                                   self.x + Node.radius // 2, self.y + Node.radius // 2,
+                                                                   width=2, fill="#c8bed2")
+                self.remove_thingy_line2 = self.canvas.create_line(self.x + Node.radius // 2, self.y - Node.radius // 2,
+                                                                   self.x - Node.radius // 2, self.y + Node.radius // 2,
+                                                                   width=2, fill="#c8bed2")
             self.remove_thingy = True
         else:
-            self.remove_thingy = False
+            if self.highlight:
+                self.canvas.delete(self.highlight_oval)
+            self.highlight = False
 
-    def render_remove_thingy(self, surface: pygame.Surface):
-        if self.highlight and self.remove_thingy:
-            pygame.draw.line(surface, Node.highlight_color, (self.x - Node.radius // 2, self.y - Node.radius // 2),
-                             (self.x + Node.radius // 2, self.y + Node.radius // 2), 4)
-            pygame.draw.line(surface, Node.highlight_color, (self.x + Node.radius // 2, self.y - Node.radius // 2),
-                             (self.x - Node.radius // 2, self.y + Node.radius // 2), 4)
+            if self.remove_thingy and must_remove_piece and mouse_over_opponent_piece:
+                self.canvas.delete(self.remove_thingy_line1)
+                self.canvas.delete(self.remove_thingy_line2)
+            self.remove_thingy = False
 
     def add_piece(self, piece):
         assert piece is not None
@@ -56,14 +64,33 @@ class Node:
         self.piece = piece
         self.piece.x = self.x
         self.piece.y = self.y
+        self.canvas.coords(self.piece.oval, self.piece.x - self.piece.radius - 2, self.piece.y - self.piece.radius - 2,
+                           self.piece.x + self.piece.radius, self.piece.y + self.piece.radius)
 
-    def take_piece(self):
+    def take_piece(self, delete_oval: bool = False):
         assert self.piece is not None
 
+        if delete_oval:
+            self.canvas.delete(self.piece.oval)
+            self.canvas.delete(self.remove_thingy_line1)
+            self.canvas.delete(self.remove_thingy_line2)
         self.piece = None
 
-    def change_color(self, color: tuple):
-        self.color = color
+    def change_color(self, color: str):
+        """Change color of the node. It is limited to red, green and black.
+
+        Args:
+            color: The color in hex of the node.
+
+        """
+        if color == "#00ff00":
+            col = (0, 255, 0)
+        elif color == "#ff0000":
+            col = (255, 0, 0)
+        else:
+            col = (0, 0, 0)
+        self.color = col
+        self.canvas.itemconfig(self.oval, fill=color)
 
     def set_position(self, x: int, y: int):
         self.x = x

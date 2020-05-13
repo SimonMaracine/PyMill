@@ -6,7 +6,7 @@ from os.path import join
 
 from PIL import Image, ImageTk
 
-from src.game.pymill_hotseat import pymill_hotseat
+from src.game.pymill_hotseat import PymillHotseat
 from src.game.pymill_computer import pymill_computer
 
 VERSION = "v0.2.0"
@@ -61,13 +61,16 @@ class PyMillMenu(tk.Frame):
     def change_label_text(self, text: str):
         self.lbl_about_text.configure(text=text)
 
-    def on_game_exit(self):
+    def on_game_exit(self):  # TODO maybe let the user create as many games as he/she wants
         self.in_game = False
 
     def run_pymill_hotseat(self):
+        # if not self.in_game:
+        #     thread = threading.Thread(target=pymill_hotseat, daemon=False, args=(self.on_game_exit,))
+        #     thread.start()
+        #     self.in_game = True
         if not self.in_game:
-            thread = threading.Thread(target=pymill_hotseat, daemon=False, args=(self.on_game_exit,))
-            thread.start()
+            PymillHotseat(tk.Toplevel(self.root), self.on_game_exit)
             self.in_game = True
 
     def run_pymill_computer(self):
@@ -83,5 +86,5 @@ class PyMillMenu(tk.Frame):
 def main():
     print("PyMill " + VERSION, end="\n\n")
     root = tk.Tk()
-    PyMillMenu(root).run_pymill_computer()
-    # root.mainloop()
+    PyMillMenu(root)
+    root.mainloop()

@@ -1,36 +1,33 @@
-import pygame
-import pygame.gfxdraw
-
+import tkinter as tk
 from src.constants import *
 
 
 class Piece:
     """Class representing a piece object used by the Board."""
 
-    DEFAULT_RADIUS = 28
+    DEFAULT_RADIUS = 30
 
     radius = DEFAULT_RADIUS
 
-    def __init__(self, x: int, y: int, color: tuple):
+    def __init__(self, x: int, y: int, color: tuple, canvas: tk.Canvas):
         self.x = x
         self.y = y
         self.color = color
+        self.canvas = canvas
         self.picked_up = False
 
-    def __repr__(self):
-        return "WHITE" if self.color == WHITE else "BLACK"
+        self.oval = self.canvas.create_oval(self.x - Piece.radius - 2, self.y - Piece.radius - 2, self.x + Piece.radius,
+                                            self.y + Piece.radius, fill="#ffde4a" if self.color == WHITE else "black")
 
-    def render(self, surface: pygame.Surface):
-        pygame.draw.circle(surface, self.color, (self.x, self.y), Piece.radius)
-        if self.color == WHITE:
-            pygame.gfxdraw.circle(surface, self.x, self.y, Piece.radius, (0, 0, 0))
-        else:
-            pygame.gfxdraw.circle(surface, self.x, self.y, Piece.radius, WHITE)
+    def __repr__(self):
+        return "WHITE piece" if self.color == WHITE else "BLACK piece"
 
     def update(self, mouse_x: int, mouse_y: int):
         if self.picked_up:
             self.x = mouse_x
             self.y = mouse_y
+            self.canvas.coords(self.oval, self.x - Piece.radius - 2, self.y - Piece.radius - 2, self.x + Piece.radius,
+                               self.y + Piece.radius)
 
     def pick_up(self, turn: int) -> bool:
         if (turn == PLAYER1 and self.color == WHITE) or (turn == PLAYER2 and self.color == BLACK):
@@ -43,3 +40,5 @@ class Piece:
         self.picked_up = False
         self.x = node.x
         self.y = node.y
+        self.canvas.coords(self.oval, self.x - Piece.radius - 2, self.y - Piece.radius - 2, self.x + Piece.radius,
+                           self.y + Piece.radius)
