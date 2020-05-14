@@ -17,7 +17,7 @@ class Piece:
         self.picked_up = False
 
         self.oval = self.canvas.create_oval(self.x - Piece.radius - 2, self.y - Piece.radius - 2, self.x + Piece.radius,
-                                            self.y + Piece.radius, fill="#ffde4a" if self.color == WHITE else "black")
+                                            self.y + Piece.radius, fill="#ffe363" if self.color == WHITE else "black")
 
     def __repr__(self):
         return "WHITE piece" if self.color == WHITE else "BLACK piece"

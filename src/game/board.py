@@ -20,6 +20,8 @@ class Board:
         self.canvas = canvas
         self.DIV = canvas_width // 8
 
+        self._draw_board()
+
         self.nodes = (
             Node(self.DIV, self.DIV, canvas, 0),
             Node(self.DIV * 4, self.DIV, canvas, 1),
@@ -90,8 +92,6 @@ class Board:
 
         self.history = {"ones": [], "twos": []}
 
-        self._draw_board()
-
     # def render(self, surface: pygame.Surface):
     #     self._draw_board(surface)
     #
@@ -120,51 +120,51 @@ class Board:
             if node.piece is not None:
                 node.piece.update(mouse_x, mouse_y)
 
-    def on_window_resize(self, width: int, height: int):
-        global window_width, window_height
-        window_width = width
-        window_height = height
-
-        if height <= width:
-            self.width = height - 160
-        else:
-            self.width = width - 160
-
-        self.x = round((width - self.width) / 2)
-        self.y = round((height - self.width) / 2)
-        self.DIV = round(self.width / 6)
-
-        self.nodes[0].set_position(self.x, self.y)
-        self.nodes[1].set_position(self.x + self.DIV * 3, self.y)
-        self.nodes[2].set_position(self.x + self.DIV * 6, self.y)
-        self.nodes[3].set_position(self.x + self.DIV, self.y + self.DIV)
-        self.nodes[4].set_position(self.x + self.DIV * 3, self.y + self.DIV)
-        self.nodes[5].set_position(self.x + self.DIV * 5, self.y + self.DIV)
-        self.nodes[6].set_position(self.x + self.DIV * 2, self.y + self.DIV * 2)
-        self.nodes[7].set_position(self.x + self.DIV * 3, self.y + self.DIV * 2)
-        self.nodes[8].set_position(self.x + self.DIV * 4, self.y + self.DIV * 2)
-        self.nodes[9].set_position(self.x, self.y + self.DIV * 3)
-        self.nodes[10].set_position(self.x + self.DIV, self.y + self.DIV * 3)
-        self.nodes[11].set_position(self.x + self.DIV * 2, self.y + self.DIV * 3)
-        self.nodes[12].set_position(self.x + self.DIV * 4, self.y + self.DIV * 3)
-        self.nodes[13].set_position(self.x + self.DIV * 5, self.y + self.DIV * 3)
-        self.nodes[14].set_position(self.x + self.DIV * 6, self.y + self.DIV * 3)
-        self.nodes[15].set_position(self.x + self.DIV * 2, self.y + self.DIV * 4)
-        self.nodes[16].set_position(self.x + self.DIV * 3, self.y + self.DIV * 4)
-        self.nodes[17].set_position(self.x + self.DIV * 4, self.y + self.DIV * 4)
-        self.nodes[18].set_position(self.x + self.DIV, self.y + self.DIV * 5)
-        self.nodes[19].set_position(self.x + self.DIV * 3, self.y + self.DIV * 5)
-        self.nodes[20].set_position(self.x + self.DIV * 5, self.y + self.DIV * 5)
-        self.nodes[21].set_position(self.x, self.y + self.DIV * 6)
-        self.nodes[22].set_position(self.x + self.DIV * 3, self.y + self.DIV * 6)
-        self.nodes[23].set_position(self.x + self.DIV * 6, self.y + self.DIV * 6)
-
-        # Assuming that 600 is the default window height
-        Node.dot_radius = round((window_height * Node.DEFAULT_DOT_RADIUS) / 600)
-        Node.radius = round((window_height * Node.DEFAULT_RADIUS) / 600)
-        Piece.radius = round((window_height * Piece.DEFAULT_RADIUS) / 600)
-        self.line_thickness = round((window_height * 8) / 600)
-        self.board_offset = round((window_height * 35) / 600)
+    # def on_window_resize(self, width: int, height: int):
+    #     global window_width, window_height
+    #     window_width = width
+    #     window_height = height
+    #
+    #     if height <= width:
+    #         self.width = height - 160
+    #     else:
+    #         self.width = width - 160
+    #
+    #     self.x = round((width - self.width) / 2)
+    #     self.y = round((height - self.width) / 2)
+    #     self.DIV = round(self.width / 6)
+    #
+    #     self.nodes[0].set_position(self.x, self.y)
+    #     self.nodes[1].set_position(self.x + self.DIV * 3, self.y)
+    #     self.nodes[2].set_position(self.x + self.DIV * 6, self.y)
+    #     self.nodes[3].set_position(self.x + self.DIV, self.y + self.DIV)
+    #     self.nodes[4].set_position(self.x + self.DIV * 3, self.y + self.DIV)
+    #     self.nodes[5].set_position(self.x + self.DIV * 5, self.y + self.DIV)
+    #     self.nodes[6].set_position(self.x + self.DIV * 2, self.y + self.DIV * 2)
+    #     self.nodes[7].set_position(self.x + self.DIV * 3, self.y + self.DIV * 2)
+    #     self.nodes[8].set_position(self.x + self.DIV * 4, self.y + self.DIV * 2)
+    #     self.nodes[9].set_position(self.x, self.y + self.DIV * 3)
+    #     self.nodes[10].set_position(self.x + self.DIV, self.y + self.DIV * 3)
+    #     self.nodes[11].set_position(self.x + self.DIV * 2, self.y + self.DIV * 3)
+    #     self.nodes[12].set_position(self.x + self.DIV * 4, self.y + self.DIV * 3)
+    #     self.nodes[13].set_position(self.x + self.DIV * 5, self.y + self.DIV * 3)
+    #     self.nodes[14].set_position(self.x + self.DIV * 6, self.y + self.DIV * 3)
+    #     self.nodes[15].set_position(self.x + self.DIV * 2, self.y + self.DIV * 4)
+    #     self.nodes[16].set_position(self.x + self.DIV * 3, self.y + self.DIV * 4)
+    #     self.nodes[17].set_position(self.x + self.DIV * 4, self.y + self.DIV * 4)
+    #     self.nodes[18].set_position(self.x + self.DIV, self.y + self.DIV * 5)
+    #     self.nodes[19].set_position(self.x + self.DIV * 3, self.y + self.DIV * 5)
+    #     self.nodes[20].set_position(self.x + self.DIV * 5, self.y + self.DIV * 5)
+    #     self.nodes[21].set_position(self.x, self.y + self.DIV * 6)
+    #     self.nodes[22].set_position(self.x + self.DIV * 3, self.y + self.DIV * 6)
+    #     self.nodes[23].set_position(self.x + self.DIV * 6, self.y + self.DIV * 6)
+    #
+    #     # Assuming that 600 is the default window height
+    #     Node.dot_radius = round((window_height * Node.DEFAULT_DOT_RADIUS) / 600)
+    #     Node.radius = round((window_height * Node.DEFAULT_RADIUS) / 600)
+    #     Piece.radius = round((window_height * Piece.DEFAULT_RADIUS) / 600)
+    #     self.line_thickness = round((window_height * 8) / 600)
+    #     self.board_offset = round((window_height * 35) / 600)
 
     def put_new_piece(self) -> bool:
         """Puts a new piece on to the board.
@@ -206,6 +206,7 @@ class Board:
         for node in self.nodes:
             if node.highlight and node.piece and self.picked_up_piece is None:
                 if node.piece.pick_up(self.turn):
+                    self.canvas.tag_raise(node.piece.oval)
                     self._change_nodes_color(node, "#00ff00", "#ff0000")
                     self.node_taken_piece = node
                     self.picked_up_piece = node.piece

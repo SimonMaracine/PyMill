@@ -26,8 +26,8 @@ class Node:
         self.remove_thingy_line1 = 0
         self.remove_thingy_line2 = 0
 
-        self.oval = self.canvas.create_oval(self.x - Node.dot_radius - 1, self.y - Node.dot_radius - 1, self.x + Node.dot_radius,
-                                self.y + Node.dot_radius, fill="black")
+        self.oval = self.canvas.create_oval(self.x - Node.dot_radius - 1, self.y - Node.dot_radius - 1,
+                                            self.x + Node.dot_radius, self.y + Node.dot_radius, fill="black")
 
     def __repr__(self):
         return f"{self.id}, {self.piece}"
@@ -38,6 +38,7 @@ class Node:
             if not self.highlight:
                 self.highlight_oval = self.canvas.create_oval(self.x - Node.radius - 2, self.y - Node.radius - 2,
                                                               self.x + Node.radius, self.y + Node.radius, width=2)
+                self.canvas.tag_lower(self.highlight_oval)
             self.highlight = True
 
             if not self.remove_thingy and must_remove_piece and mouse_over_opponent_piece:

@@ -5,7 +5,7 @@ from src.game.board import Board
 from src.constants import *
 
 
-class PymillHotseat(tk.Frame):
+class PyMillHotseat(tk.Frame):
 
     def __init__(self, top_level: tk.Toplevel, on_game_exit: Callable):
         super().__init__(top_level)
@@ -13,7 +13,7 @@ class PymillHotseat(tk.Frame):
         self.on_game_exit = on_game_exit
         self.pack(padx=10, pady=10, expand=True)
 
-        self.top_level.title("Pymill Hotseat")
+        self.top_level.title("PyMill Hotseat")
         self.top_level.wm_protocol("WM_DELETE_WINDOW", self.exit)
 
         self.canvas = tk.Canvas(self, width=800, height=800, background="#ffe48a")
