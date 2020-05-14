@@ -7,7 +7,7 @@ from os.path import join
 from PIL import Image, ImageTk
 
 from src.game.pymill_hotseat import PyMillHotseat
-from src.game.pymill_computer import pymill_computer
+from src.game.pymill_computer import PyMillComputer
 
 VERSION = "v0.2.0"
 
@@ -74,9 +74,12 @@ class PyMillMenu(tk.Frame):
             self.in_game = True
 
     def run_pymill_computer(self):
+        # if not self.in_game:
+        #     thread = threading.Thread(target=pymill_computer, daemon=False, args=(self.on_game_exit,))
+        #     thread.start()
+        #     self.in_game = True
         if not self.in_game:
-            thread = threading.Thread(target=pymill_computer, daemon=False, args=(self.on_game_exit,))
-            thread.start()
+            PyMillComputer(tk.Toplevel(self.root), self.on_game_exit)
             self.in_game = True
 
     def run_pymill_network(self):

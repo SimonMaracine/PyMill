@@ -92,25 +92,6 @@ class Board:
 
         self.history = {"ones": [], "twos": []}
 
-    # def render(self, surface: pygame.Surface):
-    #     self._draw_board(surface)
-    #
-    #     for node in self.nodes:
-    #         node.render(surface)
-    #         if node.piece:
-    #             if node.piece != self.picked_up_piece:
-    #                 node.piece.render(surface)
-    #             if node.remove_thingy and self._get_turn_color() != node.piece.color:
-    #                 node.render_remove_thingy(surface)
-    #
-    #     if self.picked_up_piece is not None:
-    #         self.picked_up_piece.render(surface)
-    #
-    #     if self.phase == PHASE1:
-    #         self._draw_player_pieces(surface, self.font_pieces)
-    #
-    #     self._draw_player_indicator(surface, self.font_indicator)
-
     def update(self, mouse_x: int, mouse_y: int):
         for node in self.nodes:
             try:
@@ -307,7 +288,7 @@ class Board:
         node = self.nodes[node_id]
 
         assert node.piece is None
-        node.add_piece(Piece(node.x, node.y, piece_color))
+        node.add_piece(Piece(node.x, node.y, piece_color, self.canvas))
         if piece_color == WHITE:
             self.white_pieces -= 1
         else:
@@ -337,7 +318,7 @@ class Board:
         node = self.nodes[source_node_id]
         assert node.piece is not None
         piece = node.piece
-        node.take_piece()
+        node.take_piece()  # TODO maybe with parameter True
 
         node = self.nodes[destination_node_id]
         assert node.piece is None  # TODO this failed twice on WHITE with 3 pieces
@@ -368,7 +349,7 @@ class Board:
         """
         node = self.nodes[node_id]
         assert node.piece is not None
-        node.take_piece()
+        node.take_piece(True)
         logger.info(f"Piece node {node.id} removed")
 
         self.must_remove_piece = False
