@@ -1,69 +1,51 @@
-import tkinter as tk
-from typing import Callable
-
-from src.game.minimax import ai_place_piece_at, ai_remove_piece, ai_move_piece
-from src.game.board import Board
+from src.game.game import Game
 from src.constants import *
+from src.game.minimax import ai_place_piece_at, ai_remove_piece, ai_move_piece
 
 
-class PyMillComputer(tk.Frame):
-
-    def __init__(self, top_level: tk.Toplevel, on_game_exit: Callable):
-        super().__init__(top_level)
-        self.top_level = top_level
-        self.on_game_exit = on_game_exit
-        self.pack(padx=10, pady=10, expand=True)
-
-        self.top_level.title("PyMill Computer")
-        self.top_level.wm_protocol("WM_DELETE_WINDOW", self.exit)
-
-        self.canvas = tk.Canvas(self, width=800, height=800, background="#ffe48a")
-        self.canvas.pack()
-
-        self.canvas.bind("<Button-1>", self.on_mouse_pressed)
-        self.canvas.bind("<ButtonRelease-1>", self.on_mouse_released)
-        self.canvas.bind("<Motion>", self.on_mouse_moved)
-
-        self.board = Board(self.canvas)
+class PyMillComputer(Game):
 
     def on_mouse_pressed(self, event):
         if self.board.mouse_over_any_node():
             self.board.node_pressed = True
-        if not self.board.must_remove_piece:
-            if self.board.phase == PHASE2:
-                self.board.pick_up_piece()
+        if not self.board.game_over:  # This is for when it's a tie
+            if not self.board.must_remove_piece:
+                if self.board.phase == PHASE2:
+                    self.board.pick_up_piece()
 
     def on_mouse_released(self, event):
-        if self.board.must_remove_piece:
-            if self.board.node_pressed:
-                self.board.remove_opponent_piece()
-        if self.board.phase == PHASE1:
-            if self.board.node_pressed:
-                self.board.put_new_piece()
-        else:
-            self.board.put_down_piece()
+        if not self.board.game_over:  # This is for when it's a tie
+            if self.board.must_remove_piece:
+                if self.board.node_pressed:
+                    self.board.remove_opponent_piece()
+            if self.board.phase == PHASE1:
+                if self.board.node_pressed:
+                    self.board.put_new_piece()
+            else:
+                self.board.put_down_piece()
 
         self.board.node_pressed = False
 
-        if self.board.turn == PLAYER2 and not self.board.game_over:  # TODO make the board update before going into calculations
+        self.canvas.update_idletasks()
+        self.make_computer_move()
+
+        self.check_for_game_over()
+
+    def on_mouse_moved(self, event):
+        self.board.update(event.x, event.y)
+
+    def make_computer_move(self):
+        if self.board.turn == PLAYER2 and not self.board.game_over:
             if self.board.phase == PHASE1:
                 print("Making a move...")
                 self.board.put_new_piece_alone(ai_place_piece_at(self.board.get_current_state()), BLACK)
                 if self.board.must_remove_piece:
                     self.board.remove_opponent_piece_alone(ai_remove_piece())
             else:
-                # if not board.game_over:
                 print("Making a move...")
                 self.board.change_piece_location(*ai_move_piece(self.board.get_current_state()))
                 if self.board.must_remove_piece:
                     self.board.remove_opponent_piece_alone(ai_remove_piece())
-
-    def on_mouse_moved(self, event):
-        self.board.update(event.x, event.y)
-
-    def exit(self):
-        self.top_level.destroy()
-        self.on_game_exit()
 
 
 # def pymill_computer(on_game_exit: Callable):

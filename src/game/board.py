@@ -96,8 +96,9 @@ class Board:
         for node in self.nodes:
             try:
                 node.update(mouse_x, mouse_y, self.must_remove_piece, self._get_turn_color() != node.piece.color)
-            except AttributeError:  # Dirty solution
+            except AttributeError:  # Dirty solution for when the node doesn't have a piece
                 node.update(mouse_x, mouse_y, self.must_remove_piece, False)
+
             if node.piece is not None:
                 node.piece.update(mouse_x, mouse_y)
 

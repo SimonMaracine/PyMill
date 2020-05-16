@@ -44,10 +44,10 @@ class Node:
             if not self.remove_thingy and must_remove_piece and mouse_over_opponent_piece:
                 self.remove_thingy_line1 = self.canvas.create_line(self.x - Node.radius // 2, self.y - Node.radius // 2,
                                                                    self.x + Node.radius // 2, self.y + Node.radius // 2,
-                                                                   width=2, fill="#c8bed2")
+                                                                   width=2, fill="#9f96a8")
                 self.remove_thingy_line2 = self.canvas.create_line(self.x + Node.radius // 2, self.y - Node.radius // 2,
                                                                    self.x - Node.radius // 2, self.y + Node.radius // 2,
-                                                                   width=2, fill="#c8bed2")
+                                                                   width=2, fill="#9f96a8")
             self.remove_thingy = True
         else:
             if self.highlight:
