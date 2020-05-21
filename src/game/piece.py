@@ -1,5 +1,11 @@
 import tkinter as tk
+from math import sqrt
+
 from src.constants import *
+
+
+def dist(point1: tuple, point2: tuple):
+    return sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
 
 
 class Piece:
@@ -16,6 +22,13 @@ class Piece:
         self.canvas = canvas
         self.picked_up = False
 
+        self.reached_position = True
+        self.velocity = (0, 0)
+        self.target = (0, 0)
+
+        self.remove_after_reached_position = False
+        self.remove_func = None
+
         self.oval = self.canvas.create_oval(self.x - Piece.radius - 2, self.y - Piece.radius - 2, self.x + Piece.radius,
                                             self.y + Piece.radius, fill="#ffe363" if self.color == WHITE else "black")
 
@@ -28,6 +41,24 @@ class Piece:
             self.y = mouse_y
             self.canvas.coords(self.oval, self.x - Piece.radius - 2, self.y - Piece.radius - 2, self.x + Piece.radius,
                                self.y + Piece.radius)
+
+        if not self.reached_position:
+            self.x += self.velocity[0]
+            self.y += self.velocity[1]
+            self.canvas.coords(self.oval, self.x - Piece.radius - 2, self.y - Piece.radius - 2, self.x + Piece.radius,
+                               self.y + Piece.radius)
+            if dist((self.x, self.y), (self.target[0], self.target[1])) < 5:
+                self.x = self.target[0]
+                self.y = self.target[1]
+                self.canvas.coords(self.oval, self.x - Piece.radius - 2, self.y - Piece.radius - 2, self.x + Piece.radius,
+                                   self.y + Piece.radius)  # Correct the position
+                self.reached_position = True
+                self.velocity = (0, 0)
+                self.target = (0, 0)
+
+                if self.remove_after_reached_position:  # Dirty hack part 2
+                    self.remove_func(True)
+                    self.remove_after_reached_position = False
 
     def pick_up(self, turn: int) -> bool:
         if (turn == PLAYER1 and self.color == WHITE) or (turn == PLAYER2 and self.color == BLACK):

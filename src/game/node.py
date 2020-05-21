@@ -37,7 +37,7 @@ class Node:
         if distance <= Node.radius:
             if not self.highlight:
                 self.highlight_oval = self.canvas.create_oval(self.x - Node.radius - 2, self.y - Node.radius - 2,
-                                                              self.x + Node.radius, self.y + Node.radius, width=2)
+                                                              self.x + Node.radius, self.y + Node.radius, width=3)
                 self.canvas.tag_lower(self.highlight_oval)
             self.highlight = True
 
@@ -63,8 +63,8 @@ class Node:
         assert piece is not None
 
         self.piece = piece
-        self.piece.x = self.x
-        self.piece.y = self.y
+        # self.piece.x = self.x
+        # self.piece.y = self.y
         self.canvas.coords(self.piece.oval, self.piece.x - self.piece.radius - 2, self.piece.y - self.piece.radius - 2,
                            self.piece.x + self.piece.radius, self.piece.y + self.piece.radius)
 
@@ -76,6 +76,10 @@ class Node:
             self.canvas.delete(self.remove_thingy_line1)
             self.canvas.delete(self.remove_thingy_line2)
         self.piece = None
+
+    def take_piece_after(self):  # Dirty hack
+        self.piece.remove_after_reached_position = True
+        self.piece.remove_func = self.take_piece
 
     def change_color(self, color: str):
         """Change color of the node. It is limited to red, green and black.

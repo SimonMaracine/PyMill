@@ -1,5 +1,6 @@
 import tkinter as tk
 from typing import Optional
+from math import sqrt
 
 from src.game.piece import Piece
 from src.game.node import Node
@@ -11,6 +12,24 @@ logger.setLevel(10)
 
 canvas_width = 800
 board_width = 600
+
+
+class Vec2:
+
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
+
+    def set_mag(self, mag: float):
+        assert self.x != 0 or self.y != 0
+        length = sqrt(self.x ** 2 + self.y ** 2)
+        self.x /= length  # FIXME length is somehow 0 when using set_mag in remove_opponent_piece
+        self.y /= length
+        self.x *= mag
+        self.y *= mag
+
+    def as_tuple(self) -> tuple:
+        return self.x, self.y
 
 
 class Board:
@@ -48,9 +67,6 @@ class Board:
             Node(self.DIV * 4, self.DIV * 7, canvas, 22),
             Node(self.DIV * 7, self.DIV * 7, canvas, 23)  # line
         )
-        for node in self.nodes:  # Correct the position of each node.
-            node.x += 1
-            node.y += 1
 
         self.phase = PHASE1
         self.turn = PLAYER1
@@ -85,7 +101,7 @@ class Board:
         self.node_pressed = False  # if a node is clicked
         self.turns_without_windmills = 0
 
-        self.MAX_TURNS_WO_MILLS = 50
+        self.MAX_TURNS_WO_MILLS = 100
 
         self.game_over = False
         self.winner = TIE  # Nobody is the winner
@@ -99,7 +115,7 @@ class Board:
             except AttributeError:  # Dirty solution for when the node doesn't have a piece
                 node.update(mouse_x, mouse_y, self.must_remove_piece, False)
 
-            if node.piece is not None:
+            if node.piece is not None and node.piece.reached_position:
                 node.piece.update(mouse_x, mouse_y)
 
     # def on_window_resize(self, width: int, height: int):
@@ -211,7 +227,7 @@ class Board:
                         node.take_piece(True)
                         self.must_remove_piece = False
                         if self._check_player_pieces(BLACK):
-                            self._game_over(tie=False)
+                            self._game_over(tie=False, winner=PLAYER1 if self.turn == PLAYER1 else PLAYER2)
                         self._switch_turn()
                         self._clear_history()  # Clear the history, because it will never repeat itself
                         can_remove = True
@@ -224,7 +240,7 @@ class Board:
                         node.take_piece(True)
                         self.must_remove_piece = False
                         if self._check_player_pieces(WHITE):
-                            self._game_over(tie=False)
+                            self._game_over(tie=False, winner=PLAYER1 if self.turn == PLAYER1 else PLAYER2)
                         self._switch_turn()
                         self._clear_history()  # Clear the history, because it will never repeat itself
                         can_remove = True
@@ -262,7 +278,7 @@ class Board:
                     # Do all of this only if there was a piece put down on a node
                     if self._check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK
                         if not self.must_remove_piece:                                       # because turn was already
-                            self._game_over(tie=False)                                       # switched
+                            self._game_over(tie=False, winner=PLAYER2 if self.turn == PLAYER1 else PLAYER1)  # switched
 
                     self._check_board_state()
                     self._check_turns_without_windmills()  # They call self._game_over by themself
@@ -286,10 +302,20 @@ class Board:
         assert 0 <= node_id <= 23
         assert self.phase == PHASE1
 
+        logger.debug(f"Putting a piece on node {node_id}")
         node = self.nodes[node_id]
 
         assert node.piece is None
-        node.add_piece(Piece(node.x, node.y, piece_color, self.canvas))
+        piece = Piece(canvas_width // 2 - 100, -100, piece_color, self.canvas)
+
+        piece.reached_position = False
+        piece.target = (node.x, node.y)
+        vel = Vec2(node.x - piece.x, node.y - piece.y)
+        vel.set_mag(8)
+        piece.velocity = vel.as_tuple()
+
+        node.add_piece(piece)
+
         if piece_color == WHITE:
             self.white_pieces -= 1
         else:
@@ -299,6 +325,10 @@ class Board:
         else:
             self.must_remove_piece = True
             logger.debug("Remove a piece!")
+
+        if self._check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK
+            if not self.must_remove_piece:                                       # because turn was already
+                self._game_over(tie=False, winner=PLAYER2 if self.turn == PLAYER1 else PLAYER1)  # switched
 
         if (self.white_pieces + self.black_pieces) == 0:
             self.phase = PHASE2
@@ -312,20 +342,30 @@ class Board:
             destination_node_id: The node on to which to put the piece.
 
         """
-        assert 0 <= source_node_id <= 23 and 0 <= destination_node_id <= 23
+        assert 0 <= source_node_id <= 23 or 0 <= destination_node_id <= 23
         assert self.phase == PHASE2
         assert source_node_id != destination_node_id
+
+        logger.debug(f"Moving piece from node {source_node_id} to node {destination_node_id}")
 
         node = self.nodes[source_node_id]
         assert node.piece is not None
         piece = node.piece
+
         node.take_piece()  # TODO maybe with parameter True
 
-        node = self.nodes[destination_node_id]
-        assert node.piece is None  # TODO this failed twice on WHITE with 3 pieces
-        node.add_piece(piece)
+        dest_node = self.nodes[destination_node_id]
 
-        if not self._check_is_windmill_formed(piece.color, node):
+        piece.reached_position = False
+        piece.target = (dest_node.x, dest_node.y)
+        vel = Vec2(dest_node.x - piece.x, dest_node.y - piece.y)
+        vel.set_mag(8)
+        piece.velocity = vel.as_tuple()
+
+        assert dest_node.piece is None  # TODO this failed twice on WHITE with 3 pieces
+        dest_node.add_piece(piece)
+
+        if not self._check_is_windmill_formed(piece.color, dest_node):
             self._switch_turn()
             self.turns_without_windmills += 1
         else:
@@ -334,7 +374,7 @@ class Board:
 
         if self._check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK because turn
             if not self.must_remove_piece:                                       # was already switched
-                self._game_over(tie=False)
+                self._game_over(tie=False, winner=PLAYER2 if self.turn == PLAYER1 else PLAYER1)
 
         self._check_board_state()
         self._check_turns_without_windmills()  # They call self._game_over by themself
@@ -350,12 +390,22 @@ class Board:
         """
         node = self.nodes[node_id]
         assert node.piece is not None
-        node.take_piece(True)
+
+        logger.debug(f"Removing piece node {node_id}")
+        piece = node.piece
+
+        piece.reached_position = False
+        piece.target = (canvas_width // 2 - 100, -100)
+        vel = Vec2(canvas_width // 2 - 100 - piece.x, -100 - piece.y)
+        vel.set_mag(8)
+        piece.velocity = vel.as_tuple()
+
+        node.take_piece_after()
         logger.info(f"Piece node {node.id} removed")
 
         self.must_remove_piece = False
         if self._check_player_pieces(BLACK if self.turn == PLAYER1 else WHITE):
-            self._game_over(tie=False)
+            self._game_over(tie=False, winner=PLAYER1 if self.turn == PLAYER1 else PLAYER2)
         self._switch_turn()
         self._clear_history()  # Clear the history, because it will never repeat itself
 
@@ -462,10 +512,10 @@ class Board:
         self.history["ones"].clear()
         self.history["twos"].clear()
 
-    def _game_over(self, tie: bool):
+    def _game_over(self, tie: bool, winner: int = TIE):
         self.game_over = True
         if not tie:
-            self.winner = PLAYER1 if self.turn == PLAYER1 else PLAYER2
+            self.winner = winner
             logger.info(f"Player {self.winner} won!")
         else:
             logger.info("Tie!")

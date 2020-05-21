@@ -26,6 +26,7 @@ class PyMillHotseat(Game):
         self.board.node_pressed = False
 
         self.check_for_game_over()
+        self.update_gui()
 
     def on_mouse_moved(self, event):
         self.board.update(event.x, event.y)

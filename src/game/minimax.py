@@ -5,6 +5,8 @@ from typing import Union
 # Assume maximizing player is WHITE and minimizing player is BLACK.
 # For now the AI is always BLACK.
 
+# TODO AI stops working properly when opponent has 4 pieces left
+
 NO_PIECE = 0
 WHITE = 1
 BLACK = 2
@@ -124,7 +126,7 @@ def ai_move_piece(position: list) -> tuple:
     print(f"Nr. of computations is {computation_count}")
     computation_count = 0
 
-    assert best_node_id_src != -1 and best_node_id_dest != -1  # TODO this assertion failed twice...
+    assert best_node_id_src != -1 and best_node_id_dest != -1  # TODO this assertion failed twice... and it should be or
     return best_node_id_src, best_node_id_dest
 
 
