@@ -1,8 +1,15 @@
+import tkinter as tk
+from typing import Callable
+
 from src.game.game import Game
 from src.constants import *
 
 
 class PyMillHotseat(Game):
+
+    def __init__(self, top_level: tk.Toplevel, on_game_exit: Callable):
+        super().__init__(top_level, on_game_exit)
+        self.top_level.title("PyMill Hotseat")
 
     def on_mouse_pressed(self, event):
         if self.board.mouse_over_any_node():

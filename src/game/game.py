@@ -15,7 +15,6 @@ class Game(ABC, tk.Frame):
         self.on_game_exit = on_game_exit
         self.pack(padx=10, pady=10, expand=True)
 
-        self.top_level.title("PyMill Hotseat")
         self.top_level.wm_protocol("WM_DELETE_WINDOW", self.exit)
 
         self.canvas = tk.Canvas(self, width=800, height=800, background="#ffe48a")

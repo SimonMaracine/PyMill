@@ -10,6 +10,7 @@ class PyMillComputer(Game):
 
     def __init__(self, top_level: tk.Toplevel, on_game_exit: Callable):
         super().__init__(top_level, on_game_exit)
+        self.top_level.title("PyMill Computer")
         self.update_piece_animation()
 
     def on_mouse_pressed(self, event):
