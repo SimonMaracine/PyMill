@@ -23,7 +23,7 @@ class Vec2:
     def set_mag(self, mag: float):
         assert self.x != 0 or self.y != 0
         length = sqrt(self.x ** 2 + self.y ** 2)
-        self.x /= length  # FIXME length is somehow 0 when using set_mag in remove_opponent_piece
+        self.x /= length
         self.y /= length
         self.x *= mag
         self.y *= mag
@@ -311,7 +311,7 @@ class Board:
         piece.reached_position = False
         piece.target = (node.x, node.y)
         vel = Vec2(node.x - piece.x, node.y - piece.y)
-        vel.set_mag(8)
+        vel.set_mag(12)
         piece.velocity = vel.as_tuple()
 
         node.add_piece(piece)
@@ -359,7 +359,7 @@ class Board:
         piece.reached_position = False
         piece.target = (dest_node.x, dest_node.y)
         vel = Vec2(dest_node.x - piece.x, dest_node.y - piece.y)
-        vel.set_mag(8)
+        vel.set_mag(12)
         piece.velocity = vel.as_tuple()
 
         assert dest_node.piece is None  # TODO this failed twice on WHITE with 3 pieces
@@ -397,7 +397,7 @@ class Board:
         piece.reached_position = False
         piece.target = (canvas_width // 2 - 100, -100)
         vel = Vec2(canvas_width // 2 - 100 - piece.x, -100 - piece.y)
-        vel.set_mag(8)
+        vel.set_mag(12)
         piece.velocity = vel.as_tuple()
 
         node.take_piece_after()

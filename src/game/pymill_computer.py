@@ -61,7 +61,7 @@ class PyMillComputer(Game):
         for node in self.board.nodes:
             if node.piece is not None and not node.piece.reached_position:
                 node.piece.update(0, 0)
-        self.after(10, self.update_piece_animation)
+        self.after(25, self.update_piece_animation)
 
 
 # def pymill_computer(on_game_exit: Callable):

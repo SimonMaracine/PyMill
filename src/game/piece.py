@@ -4,7 +4,7 @@ from math import sqrt
 from src.constants import *
 
 
-def dist(point1: tuple, point2: tuple):
+def dist(point1: tuple, point2: tuple) -> float:
     return sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
 
 
@@ -47,7 +47,7 @@ class Piece:
             self.y += self.velocity[1]
             self.canvas.coords(self.oval, self.x - Piece.radius - 2, self.y - Piece.radius - 2, self.x + Piece.radius,
                                self.y + Piece.radius)
-            if dist((self.x, self.y), (self.target[0], self.target[1])) < 5:
+            if dist((self.x, self.y), (self.target[0], self.target[1])) < 12.1:
                 self.x = self.target[0]
                 self.y = self.target[1]
                 self.canvas.coords(self.oval, self.x - Piece.radius - 2, self.y - Piece.radius - 2, self.x + Piece.radius,
