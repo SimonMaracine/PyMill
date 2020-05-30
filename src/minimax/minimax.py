@@ -126,7 +126,7 @@ def ai_move_piece(position: list) -> tuple:
     print(f"Nr. of computations is {computation_count}")
     computation_count = 0
 
-    assert best_node_id_src != -1 and best_node_id_dest != -1  # TODO this assertion failed twice... and it should be or
+    assert best_node_id_src != -1 or best_node_id_dest != -1  # TODO this assertion failed twice... and it should be or
     return best_node_id_src, best_node_id_dest
 
 
@@ -219,18 +219,19 @@ def _minimax_phase1(position: list, depth: int, alpha: float, beta: float, maxim
                 position[i] = WHITE  # It's WHITE's turn
                 if _check_is_windmill_formed(position, WHITE, i):
                     for j in _get_nodes_pieces_to_take(position, BLACK):
-                        position[j] = 0
+                        position[j] = NO_PIECE
                         eval = _minimax_phase1(position, depth - 1, alpha, beta, False)
-                        position[j] = 2
+                        position[j] = BLACK
                         max_eval = max(max_eval, eval)
-                        alpha = max(alpha, eval)
-                        if beta <= alpha:
+                        new_alpha = max(alpha, eval)
+                        if beta <= new_alpha:
                             position[i] = NO_PIECE  # Remove the piece before breaking
                             return max_eval
                 else:
                     eval = _minimax_phase1(position, depth - 1, alpha, beta, False)
                     max_eval = max(max_eval, eval)
-                    if beta <= alpha:
+                    new_alpha = max(alpha, eval)
+                    if beta <= new_alpha:
                         position[i] = NO_PIECE  # Remove the piece before breaking
                         return max_eval
                 position[i] = NO_PIECE
@@ -246,15 +247,15 @@ def _minimax_phase1(position: list, depth: int, alpha: float, beta: float, maxim
                         eval = _minimax_phase1(position, depth - 1, alpha, beta, True)
                         position[j] = WHITE
                         min_eval = min(min_eval, eval)
-                        beta = min(beta, eval)
-                        if beta <= alpha:
+                        new_beta = min(beta, eval)
+                        if new_beta <= alpha:
                             position[i] = NO_PIECE  # Remove the piece before breaking
                             return min_eval
                 else:
                     eval = _minimax_phase1(position, depth - 1, alpha, beta, True)
                     min_eval = min(min_eval, eval)
-                    beta = min(beta, eval)
-                    if beta <= alpha:
+                    new_beta = min(beta, eval)
+                    if new_beta <= alpha:
                         position[i] = NO_PIECE  # Remove the piece before breaking
                         return min_eval
                 position[i] = NO_PIECE
@@ -276,19 +277,19 @@ def _minimax_phase2(position: list, depth: int, alpha: float, beta: float, maxim
                         if _check_is_windmill_formed(position, WHITE, i):
                             for k in _get_nodes_pieces_to_take(position, BLACK):
                                 position[k] = NO_PIECE
-                                eval = _minimax_phase2(position, depth - 1, alpha, beta, True)
+                                eval = _minimax_phase2(position, depth - 1, alpha, beta, False)
                                 position[k] = BLACK
                                 max_eval = max(max_eval, eval)
-                                alpha = max(alpha, eval)
-                                if beta <= alpha:
+                                new_alpha = max(alpha, eval)
+                                if beta <= new_alpha:
                                     position[i] = WHITE  # Do the thing before breaking
                                     position[j] = NO_PIECE
                                     return max_eval
                         else:
                             eval = _minimax_phase2(position, depth - 1, alpha, beta, False)
                             max_eval = max(max_eval, eval)
-                            alpha = max(alpha, eval)
-                            if beta <= alpha:
+                            new_alpha = max(alpha, eval)
+                            if beta <= new_alpha:
                                 position[i] = WHITE  # Do the thing before breaking
                                 position[j] = NO_PIECE
                                 return max_eval
@@ -309,16 +310,16 @@ def _minimax_phase2(position: list, depth: int, alpha: float, beta: float, maxim
                                 eval = _minimax_phase2(position, depth - 1, alpha, beta, True)
                                 position[k] = WHITE
                                 min_eval = min(min_eval, eval)
-                                beta = min(beta, eval)
-                                if beta <= alpha:
+                                new_beta = min(beta, eval)
+                                if new_beta <= alpha:
                                     position[i] = BLACK  # Do the thing before breaking
                                     position[j] = NO_PIECE
                                     return min_eval
                         else:
                             eval = _minimax_phase2(position, depth - 1, alpha, beta, True)
                             min_eval = min(min_eval, eval)
-                            beta = min(beta, eval)
-                            if beta <= alpha:
+                            new_beta = min(beta, eval)
+                            if new_beta <= alpha:
                                 position[i] = BLACK  # Do the thing before breaking
                                 position[j] = NO_PIECE
                                 return min_eval
