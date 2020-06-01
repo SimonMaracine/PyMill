@@ -96,7 +96,7 @@ def ai_move_piece(position: list) -> tuple:
     start = default_timer()
     for i in NODE_INDICES:
         if position[i] == BLACK:
-            for j in _where_can_go(position, i, 2):  # TODO doesn't seem to return... 'position' wasn't correct
+            for j in _where_can_go(position, i, 2):
                 if position[j] == NO_PIECE:
                     position[j] = BLACK
                     position[i] = NO_PIECE
@@ -126,7 +126,7 @@ def ai_move_piece(position: list) -> tuple:
     print(f"Nr. of computations is {computation_count}")
     computation_count = 0
 
-    assert best_node_id_src != -1 or best_node_id_dest != -1  # TODO this assertion failed twice... and it should be or
+    assert best_node_id_src != -1 or best_node_id_dest != -1
     return best_node_id_src, best_node_id_dest
 
 
@@ -445,7 +445,6 @@ def _where_can_go(position: list, node_id: int, player: int, phase1_evaluation: 
             return {14: position[14], 22: position[22]}
     else:
         nodes = {i: node for i, node in enumerate(position)}
-        print("WHAT")  # FIXME whaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaat
         del nodes[node_id]
         return nodes
 

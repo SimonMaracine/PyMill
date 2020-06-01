@@ -362,7 +362,7 @@ class Board:
         vel.set_mag(12)
         piece.velocity = vel.as_tuple()
 
-        assert dest_node.piece is None  # TODO this failed twice on WHITE with 3 pieces
+        assert dest_node.piece is None
         dest_node.add_piece(piece)
 
         if not self._check_is_windmill_formed(piece.color, dest_node):
