@@ -150,12 +150,14 @@ def _get_evaluation_of_position_phase1(position: list) -> int:
 
     for i, node in enumerate(position):
         if node == WHITE:
-            positions = _where_can_go(position, i, 1)
+            positions = _where_can_go(position, i, 1, phase1_evaluation=True)
+            assert len(positions) < 5
             for node_ in positions.values():
                 if node_ == NO_PIECE:
                     evaluation += weights["free_move"]
         elif node == BLACK:
-            positions = _where_can_go(position, i, 2)
+            positions = _where_can_go(position, i, 2, phase1_evaluation=True)
+            assert len(positions) < 5
             for node_ in positions.values():
                 if node_ == NO_PIECE:
                     evaluation -= weights["free_move"]
@@ -381,7 +383,7 @@ def _check_is_windmill_formed(position: list, color: int, node: int) -> bool:
     return False
 
 
-def _where_can_go(position: list, node_id: int, player: int) -> dict:
+def _where_can_go(position: list, node_id: int, player: int, phase1_evaluation: bool = False) -> dict:
     """
     Args:
         position (list): The state of the game.
@@ -392,7 +394,7 @@ def _where_can_go(position: list, node_id: int, player: int) -> dict:
         dict: Contains the id of the nodes as the key and the node itself (0, 1 or 2) as the value.
 
     """
-    if player == 1 and not _can_jump(position, 1) or player == 2 and not _can_jump(position, 2):
+    if (player == 1 and not _can_jump(position, 1) or player == 2 and not _can_jump(position, 2)) or phase1_evaluation:
         if node_id == 0:
             return {1: position[1], 9: position[9]}
         elif node_id == 1:
@@ -443,6 +445,7 @@ def _where_can_go(position: list, node_id: int, player: int) -> dict:
             return {14: position[14], 22: position[22]}
     else:
         nodes = {i: node for i, node in enumerate(position)}
+        print("WHAT")  # FIXME whaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaat
         del nodes[node_id]
         return nodes
 

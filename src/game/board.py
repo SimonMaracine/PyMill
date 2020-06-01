@@ -465,16 +465,6 @@ class Board:
         self.canvas.create_line(self.DIV * 4, self.DIV, self.DIV * 4, self.DIV * 3, width=8)
         self.canvas.create_line(self.DIV * 4, self.DIV * 5, self.DIV * 4, self.DIV * 7, width=8)
 
-    # def _draw_player_pieces(self, surface: pygame.Surface, font: pygame.font.Font):
-    #     player1_text = font.render("x {}".format(self.white_pieces), True, (0, 0, 0))
-    #     player2_text = font.render("x {}".format(self.black_pieces), True, (0, 0, 0))
-    #     surface.blit(player1_text, (20, window_height // 2 - 30))
-    #     surface.blit(player2_text, (window_width - 20 - player2_text.get_width(), window_height // 2 - 30))
-    #
-    # def _draw_player_indicator(self, surface: pygame.Surface, font: pygame.font.Font):
-    #     text = font.render("WHITE'S TURN" if self.turn == PLAYER1 else "BLACK'S TURN", True, (0, 0, 0))
-    #     surface.blit(text, (self.x, window_height - 35))
-
     def _switch_turn(self):
         if self.turn == PLAYER1:
             self.turn = PLAYER2
@@ -482,7 +472,7 @@ class Board:
             self.turn = PLAYER1
 
     def _check_board_state(self):  # TODO doesn't work well; it is game over too early; problem is when this method is called
-        """Get the current state of the board and check if it's game over.
+        """Get the current state of the board and check if it's game over. FIXME it was tie when it shouldn't be
 
         """
         current_state = tuple(self.get_current_state())

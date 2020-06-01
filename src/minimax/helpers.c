@@ -1,5 +1,5 @@
 #include <assert.h>
-#include "data_structures.h"
+#include "helpers.h"
 
 void List_initialize(List* list) {
 	list->count = 0;
@@ -16,7 +16,7 @@ int List_item_in_list(List* list, int item) {
 	int item_in_list = 0;
 
 	for (int i = 0; i < list->count; i++) {
-		if (list->values[i] == item)
+		if (list->items[i] == item)
 			item_in_list = 1;
 	}
 
@@ -43,7 +43,7 @@ void Dict_del_pair(Dict* dict, int key) {
 			length_until_deleted_key = i;
 	}
 
-	assert(length_until_deleted_key != 0)  // TODO delete this later
+	assert(length_until_deleted_key != 0);  // TODO delete this later
 
 	for (int i = length_until_deleted_key; i < dict->count - 1; i++) {
 		dict->keys[i] = dict->keys[i + 1];

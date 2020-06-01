@@ -3,7 +3,8 @@ from typing import Callable
 
 from src.game.game import Game
 from src.constants import *
-from src.minimax.minimax import ai_place_piece_at, ai_remove_piece, ai_move_piece
+# from src.minimax.minimax import ai_place_piece_at, ai_remove_piece, ai_move_piece
+from minimax import ai_place_piece_at, ai_remove_piece, ai_move_piece
 
 
 class PyMillComputer(Game):

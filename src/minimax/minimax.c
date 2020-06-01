@@ -14,6 +14,20 @@
 #define WEIGHT_PIECE 24
 #define WEIGHT_FREE_MOVE 1
 
+int ai_place_piece_at(int*);
+int ai_remove_piece();
+Tuple ai_move_piece(int*);
+int _get_evaluation_of_position_phase1(int*);
+int _get_evaluation_of_position_phase2(int*);
+int _minimax_phase1(int*, int, int, int, int);
+int _minimax_phase2(int*, int, int, int, int);
+int _check_is_windmill_formed(int*, int, int);
+Dict _where_can_go(int*, int, int, int);
+List _get_nodes_pieces_to_take(int*, int);
+Tuple _get_number_of_windmills(int*);
+int _is_game_over(int*);
+int _can_jump(int*, int);
+
 int _best_node_id_to_take = -1;
 int computation_count = 0;
 
@@ -72,12 +86,12 @@ int ai_remove_piece() {
 
 Tuple ai_move_piece(int* position) {
 	int best_evaluation = INT_MAX;
-	int best_nodes_id_src = -1;
-	int best_nodes_id_dest = -1;
+	int best_node_id_src = -1;
+	int best_node_id_dest = -1;
 
 	for (int i = 0; i < 24; i++) {
 		if (position[i] == BLACK) {
-			Dict where_can_go = _where_can_go(position, i, 2);
+			Dict where_can_go = _where_can_go(position, i, 2, 0);
 			for (int j = 0; j < where_can_go.count; j++) {
 				int j_ = where_can_go.keys[j];
 				if (position[j_] == NO_PIECE) {
@@ -97,16 +111,16 @@ Tuple ai_move_piece(int* position) {
 								best_eval_piece_to_take = evaluation;
 							}
 							if (evaluation < best_evaluation) {
-								best_nodes_id_src = i;
-								best_nodes_id_dest = j_;
+								best_node_id_src = i;
+								best_node_id_dest = j_;
 								best_evaluation = evaluation;
 							}
 						}
 					} else {
 						evaluation = _minimax_phase2(position, 3, INT_MIN, INT_MAX, 1);
 						if (evaluation < best_evaluation) {
-							best_nodes_id_src = i;
-							best_nodes_id_dest = j_;
+							best_node_id_src = i;
+							best_node_id_dest = j_;
 							best_evaluation = evaluation;
 						}
 					}
@@ -149,14 +163,14 @@ int _get_evaluation_of_position_phase1(int* position) {
 
 	for (int i = 0; i < 24; i++) {
 		if (position[i] == WHITE) {
-			Dict positions = _where_can_go(position, i, 1);
+			Dict positions = _where_can_go(position, i, 1, 1);
 
 			for (int j = 0; j < positions.count; j++) {
 				if (positions.values[j] == NO_PIECE)
 					evaluation += WEIGHT_FREE_MOVE;
 			}
 		} else if (position[i] == BLACK) {
-			Dict positions = _where_can_go(position, i, 2);
+			Dict positions = _where_can_go(position, i, 2, 1);
 
 			for (int j = 0; j < positions.count; j++) {
 				if (positions.values[j] == NO_PIECE)
@@ -203,14 +217,14 @@ int _get_evaluation_of_position_phase2(int* position) {
 
 	for (int i = 0; i < 24; i++) {
 		if (position[i] == WHITE) {
-			Dict positions = _where_can_go(position, i, 1);
+			Dict positions = _where_can_go(position, i, 1, 0);
 
 			for (int j = 0; j < positions.count; j++) {
 				if (positions.values[j] == NO_PIECE)
 					evaluation += WEIGHT_FREE_MOVE;
 			}
 		} else if (position[i] == BLACK) {
-			Dict positions = _where_can_go(position, i, 2);
+			Dict positions = _where_can_go(position, i, 2, 0);
 
 			for (int j = 0; j < positions.count; j++) {
 				if (positions.values[j] == NO_PIECE)
@@ -303,7 +317,7 @@ int _minimax_phase2(int* position, int depth, int alpha, int beta, int maximizin
 		int max_eval = INT_MIN;
 		for (int i = 0; i < 24; i++) {
 			if (position[i] == WHITE) {
-				Dict where_can_go = _where_can_go(position, i, 1);
+				Dict where_can_go = _where_can_go(position, i, 1, 0);
 				for (int j = 0; j < where_can_go.count; j++) {
 					int j_ = where_can_go.keys[j];
 					if (position[j_] == NO_PIECE) {
@@ -331,7 +345,7 @@ int _minimax_phase2(int* position, int depth, int alpha, int beta, int maximizin
 							if (beta <= new_alpha) {
 								position[i] = WHITE;
 								position[j_] = NO_PIECE;
-								return max_eval
+								return max_eval;
 							}
 						}
 						position[i] = WHITE;
@@ -345,7 +359,7 @@ int _minimax_phase2(int* position, int depth, int alpha, int beta, int maximizin
 		int min_eval = INT_MAX;
 		for (int i = 0; i < 24; i++) {
 			if (position[i] == BLACK) {
-				Dict where_can_go = _where_can_go(position, i, 2);
+				Dict where_can_go = _where_can_go(position, i, 2, 0);
 				for (int j = 0; j < where_can_go.count; j++) {
 					int j_ = where_can_go.keys[j];
 					if (position[j_] == NO_PIECE) {
@@ -441,8 +455,8 @@ int _check_is_windmill_formed(int* position, int color, int node) {
 }
 
 
-Dict _where_can_go(int* position, int node_id, int player) {
-	if (player == 1 && !_can_jump(position, 1) || player == 2 && !_can_jump(position, 2)) {
+Dict _where_can_go(int* position, int node_id, int player, int phase1_evaluation) {
+	if ((player == 1 && !_can_jump(position, 1) || player == 2 && !_can_jump(position, 2)) || phase1_evaluation) {
 		Dict d;
 		Dict_initialize(&d);
 
@@ -537,7 +551,7 @@ Dict _where_can_go(int* position, int node_id, int player) {
 			return d;
 		} else if (node_id == 19) {
 			Dict_put_pair(&d, 16, position[16]);
-			Dict_put_pair(&d, 18, position[20]);
+			Dict_put_pair(&d, 18, position[18]);
 			Dict_put_pair(&d, 20, position[20]);
 			Dict_put_pair(&d, 22, position[22]);
 			return d;
@@ -564,7 +578,7 @@ Dict _where_can_go(int* position, int node_id, int player) {
 		Dict_initialize(&nodes);
 
 		for (int i = 0; i < 24; i++)
-			Dict_put_pair(&nodes, i, nodes[i]);
+			Dict_put_pair(&nodes, i, position[i]);
 
 		Dict_del_pair(&nodes, node_id);
 		return nodes;
@@ -792,9 +806,9 @@ int _is_game_over(int* position) {
 	int black_pieces = 0;
 	int white_pieces = 0;
 	for (int i = 0; i < 24; i++) {
-		if (node == WHITE)
+		if (position[i] == WHITE)
 			white_pieces++;
-		else if (node == BLACK)
+		else if (position[i] == BLACK)
 			black_pieces++;
 	}
 
@@ -803,17 +817,17 @@ int _is_game_over(int* position) {
 
 	for (int i = 0; i < 24; i++) {
 		if (position[i] == WHITE) {
-			Dict white_can_go = _where_can_go(position, i, 1);
+			Dict white_can_go = _where_can_go(position, i, 1, 0);
 
-			for (int i = 0; i < white_can_go.count; i++) {
-				if (white_can_go.values[i] == NO_PIECE)
+			for (int j = 0; j < white_can_go.count; j++) {
+				if (white_can_go.values[j] == NO_PIECE)
 					return 0;
 			}
 		} else if (position[i] == BLACK) {
-			Dict black_can_go = _where_can_go(position, i, 2);
+			Dict black_can_go = _where_can_go(position, i, 2, 0);
 
-			for (int i = 0; i < black_can_go.count; i++) {
-				if (black_can_go.values[i] == NO_PIECE)
+			for (int j = 0; j < black_can_go.count; j++) {
+				if (black_can_go.values[j] == NO_PIECE)
 					return 0;
 			}
 		}
@@ -851,22 +865,20 @@ int _can_jump(int* position, int player) {
 
 
 static PyObject* py_ai_place_piece_at(PyObject* self, PyObject* position) {
-	PyObject* position_list;
-	int position[24];
+	int position_array[24];
 
 	for (int i = 0; i < 24; i++) {
-		PyObject* item = PyList_GetItem(position_list, i);  // Borowed reference
+		PyObject* item = PyList_GetItem(position, i);  // Borowed reference
 		long item_as_number = PyLong_AsLong(item);
 
 		if (item_as_number < 0 && PyErr_Occurred()) {  // Might not be needed
-			Py_DECREF(position_list);
 			return NULL;
 		}
 
-		position[i] = (int) item_as_number;
+		position_array[i] = (int) item_as_number;
 	}
 
-	int node = ai_place_piece_at(position);
+	int node = ai_place_piece_at(position_array);
 
 	return PyLong_FromLong((long) node);
 }
@@ -880,28 +892,25 @@ static PyObject* py_ai_remove_piece(PyObject* self) {
 
 
 static PyObject* py_ai_move_piece(PyObject* self, PyObject* position) {
-	PyObject* position_list;
 	PyObject* nodes_tuple;
-	int position[24];
+	int position_array[24];
 
 	for (int i = 0; i < 24; i++) {
-		PyObject* item = PyList_GetItem(position_list, i);  // Borowed reference
+		PyObject* item = PyList_GetItem(position, i);  // Borowed reference
 		long item_as_number = PyLong_AsLong(item);
 
 		if (item_as_number < 0 && PyErr_Occurred()) {  // Might not be needed
-			Py_DECREF(position_list);
 			return NULL;
 		}
 
-		position[i] = (int) item_as_number;
+		position_array[i] = (int) item_as_number;
 	}
 
-	Tuple nodes = ai_move_piece(position);
+	Tuple nodes = ai_move_piece(position_array);
 
 	nodes_tuple = PyTuple_New(2);
 	if (nodes_tuple == NULL) {  // Might not be needed
-		Py_DECREF(position_list);
-		PyErr_SetString(PyExc_RunTimeError, "Could not create tuple");
+		PyErr_SetString(PyExc_RuntimeError, "Could not create tuple");
 		return NULL;
 	}
 
