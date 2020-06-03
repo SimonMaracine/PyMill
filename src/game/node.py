@@ -6,7 +6,7 @@ class Node:
     """Class representing a node object used by the Board."""
 
     DEFAULT_RADIUS = 35
-    DEFAULT_DOT_RADIUS = 16
+    DEFAULT_DOT_RADIUS = 18
 
     radius = DEFAULT_RADIUS
     dot_radius = DEFAULT_DOT_RADIUS
@@ -44,10 +44,10 @@ class Node:
             if not self.remove_thingy and must_remove_piece and mouse_over_opponent_piece:
                 self.remove_thingy_line1 = self.canvas.create_line(self.x - Node.radius // 2, self.y - Node.radius // 2,
                                                                    self.x + Node.radius // 2, self.y + Node.radius // 2,
-                                                                   width=2, fill="#9f96a8")
+                                                                   width=3, fill="#9f96a8")
                 self.remove_thingy_line2 = self.canvas.create_line(self.x + Node.radius // 2, self.y - Node.radius // 2,
                                                                    self.x - Node.radius // 2, self.y + Node.radius // 2,
-                                                                   width=2, fill="#9f96a8")
+                                                                   width=3, fill="#9f96a8")
             self.remove_thingy = True
         else:
             if self.highlight:

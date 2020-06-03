@@ -17,7 +17,7 @@ class Game(ABC, tk.Frame):
 
         self.top_level.wm_protocol("WM_DELETE_WINDOW", self.exit)
 
-        self.canvas = tk.Canvas(self, width=800, height=800, background="#ffe48a")
+        self.canvas = tk.Canvas(self, width=700, height=700, background="#ffe48a")
         self.canvas.grid(row=0, column=0, columnspan=3)
 
         self.canvas.bind("<Button-1>", self.on_mouse_pressed)

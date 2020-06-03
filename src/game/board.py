@@ -10,8 +10,7 @@ from src.log import get_logger
 logger = get_logger(__name__)
 logger.setLevel(10)
 
-canvas_width = 800
-board_width = 600
+canvas_width = 700
 
 
 class Vec2:
@@ -37,35 +36,36 @@ class Board:
 
     def __init__(self, canvas: tk.Canvas):
         self.canvas = canvas
-        self.DIV = canvas_width // 8
+        self.DIV = 100
+        self.PAD = 50
 
         self._draw_board()
 
         self.nodes = (
-            Node(self.DIV, self.DIV, canvas, 0),
-            Node(self.DIV * 4, self.DIV, canvas, 1),
-            Node(self.DIV * 7, self.DIV, canvas, 2),  # line
-            Node(self.DIV * 2, self.DIV * 2, canvas, 3),
-            Node(self.DIV * 4, self.DIV * 2, canvas, 4),
-            Node(self.DIV * 6, self.DIV * 2, canvas, 5),  # line
-            Node(self.DIV * 3, self.DIV * 3, canvas, 6),
-            Node(self.DIV * 4, self.DIV * 3, canvas, 7),
-            Node(self.DIV * 5, self.DIV * 3, canvas, 8),  # line
-            Node(self.DIV, self.DIV * 4, canvas, 9),
-            Node(self.DIV * 2, self.DIV * 4, canvas, 10),
-            Node(self.DIV * 3, self.DIV * 4, canvas, 11),  # line
-            Node(self.DIV * 5, self.DIV * 4, canvas, 12),
-            Node(self.DIV * 6, self.DIV * 4, canvas, 13),
-            Node(self.DIV * 7, self.DIV * 4, canvas, 14),  # line
-            Node(self.DIV * 3, self.DIV * 5, canvas, 15),
-            Node(self.DIV * 4, self.DIV * 5, canvas, 16),
-            Node(self.DIV * 5, self.DIV * 5, canvas, 17),  # line
-            Node(self.DIV * 2, self.DIV * 6, canvas, 18),
-            Node(self.DIV * 4, self.DIV * 6, canvas, 19),
-            Node(self.DIV * 6, self.DIV * 6, canvas, 20),  # line
-            Node(self.DIV, self.DIV * 7, canvas, 21),
-            Node(self.DIV * 4, self.DIV * 7, canvas, 22),
-            Node(self.DIV * 7, self.DIV * 7, canvas, 23)  # line
+            Node(0 + self.PAD, 0 + self.PAD, canvas, 0),
+            Node(self.DIV * 3 + self.PAD, 0 + self.PAD, canvas, 1),
+            Node(self.DIV * 6 + self.PAD, 0 + self.PAD, canvas, 2),  # line
+            Node(self.DIV + self.PAD, self.DIV + self.PAD, canvas, 3),
+            Node(self.DIV * 3 + self.PAD, self.DIV + self.PAD, canvas, 4),
+            Node(self.DIV * 5 + self.PAD, self.DIV + self.PAD, canvas, 5),  # line
+            Node(self.DIV * 2 + self.PAD, self.DIV * 2 + self.PAD, canvas, 6),
+            Node(self.DIV * 3 + self.PAD, self.DIV * 2 + self.PAD, canvas, 7),
+            Node(self.DIV * 4 + self.PAD, self.DIV * 2 + self.PAD, canvas, 8),  # line
+            Node(0 + self.PAD, self.DIV * 3 + self.PAD, canvas, 9),
+            Node(self.DIV + self.PAD, self.DIV * 3 + self.PAD, canvas, 10),
+            Node(self.DIV * 2 + self.PAD, self.DIV * 3 + self.PAD, canvas, 11),  # line
+            Node(self.DIV * 4 + self.PAD, self.DIV * 3 + self.PAD, canvas, 12),
+            Node(self.DIV * 5 + self.PAD, self.DIV * 3 + self.PAD, canvas, 13),
+            Node(self.DIV * 6 + self.PAD, self.DIV * 3 + self.PAD, canvas, 14),  # line
+            Node(self.DIV * 2 + self.PAD, self.DIV * 4 + self.PAD, canvas, 15),
+            Node(self.DIV * 3 + self.PAD, self.DIV * 4 + self.PAD, canvas, 16),
+            Node(self.DIV * 4 + self.PAD, self.DIV * 4 + self.PAD, canvas, 17),  # line
+            Node(self.DIV + self.PAD, self.DIV * 5 + self.PAD, canvas, 18),
+            Node(self.DIV * 3 + self.PAD, self.DIV * 5 + self.PAD, canvas, 19),
+            Node(self.DIV * 5 + self.PAD, self.DIV * 5 + self.PAD, canvas, 20),  # line
+            Node(0 + self.PAD, self.DIV * 6 + self.PAD, canvas, 21),
+            Node(self.DIV * 3 + self.PAD, self.DIV * 6 + self.PAD, canvas, 22),
+            Node(self.DIV * 6 + self.PAD, self.DIV * 6 + self.PAD, canvas, 23)  # line
         )
 
         self.phase = PHASE1
@@ -342,7 +342,7 @@ class Board:
             destination_node_id: The node on to which to put the piece.
 
         """
-        assert 0 <= source_node_id <= 23 or 0 <= destination_node_id <= 23
+        assert 0 <= source_node_id <= 23 and 0 <= destination_node_id <= 23  # FIXME this failed unexpectedly
         assert self.phase == PHASE2
         assert source_node_id != destination_node_id
 
@@ -391,7 +391,6 @@ class Board:
         node = self.nodes[node_id]
         assert node.piece is not None
 
-        logger.debug(f"Removing piece node {node_id}")
         piece = node.piece
 
         piece.reached_position = False
@@ -456,14 +455,28 @@ class Board:
         return False
 
     def _draw_board(self):
-        self.canvas.create_rectangle(self.DIV, self.DIV, self.DIV * 7, self.DIV * 7, width=8)
-        self.canvas.create_rectangle(self.DIV * 2, self.DIV * 2, self.DIV * 6, self.DIV * 6, width=8)
-        self.canvas.create_rectangle(self.DIV * 3, self.DIV * 3, self.DIV * 5, self.DIV * 5, width=8)
+        # self.canvas.create_rectangle(self.DIV, self.DIV, self.DIV * 7, self.DIV * 7, width=9)
+        # self.canvas.create_rectangle(self.DIV * 2, self.DIV * 2, self.DIV * 6, self.DIV * 6, width=9)
+        # self.canvas.create_rectangle(self.DIV * 3, self.DIV * 3, self.DIV * 5, self.DIV * 5, width=9)
+        #
+        # self.canvas.create_line(self.DIV, self.DIV * 4, self.DIV * 3, self.DIV * 4, width=9)
+        # self.canvas.create_line(self.DIV * 5, self.DIV * 4, self.DIV * 7, self.DIV * 4, width=9)
+        # self.canvas.create_line(self.DIV * 4, self.DIV, self.DIV * 4, self.DIV * 3, width=9)
+        # self.canvas.create_line(self.DIV * 4, self.DIV * 5, self.DIV * 4, self.DIV * 7, width=9)
 
-        self.canvas.create_line(self.DIV, self.DIV * 4, self.DIV * 3, self.DIV * 4, width=8)
-        self.canvas.create_line(self.DIV * 5, self.DIV * 4, self.DIV * 7, self.DIV * 4, width=8)
-        self.canvas.create_line(self.DIV * 4, self.DIV, self.DIV * 4, self.DIV * 3, width=8)
-        self.canvas.create_line(self.DIV * 4, self.DIV * 5, self.DIV * 4, self.DIV * 7, width=8)
+        self.canvas.create_rectangle(0 + self.PAD, 0 + self.PAD, self.DIV * 7 - self.PAD, self.DIV * 7 - self.PAD, width=9)
+        self.canvas.create_rectangle(self.DIV + self.PAD, self.DIV + self.PAD, self.DIV * 6 - self.PAD,
+                                     self.DIV * 6 - self.PAD, width=9)
+        self.canvas.create_rectangle(self.DIV * 2 + self.PAD, self.DIV * 2 + self.PAD, self.DIV * 5 - self.PAD,
+                                     self.DIV * 5 - self.PAD, width=9)
+
+        self.canvas.create_line(0 + self.PAD, self.DIV * 3 + self.PAD, self.DIV * 2 + self.PAD, self.DIV * 3 + self.PAD,
+                                width=9)
+        self.canvas.create_line(self.DIV * 4 + self.PAD, self.DIV * 3 + self.PAD, self.DIV * 6 + self.PAD,
+                                self.DIV * 3 + self.PAD, width=9)
+        self.canvas.create_line(self.DIV * 3 + self.PAD, self.PAD, self.DIV * 3 + self.PAD, self.DIV * 2 + self.PAD, width=9)
+        self.canvas.create_line(self.DIV * 3 + self.PAD, self.DIV * 4 + self.PAD, self.DIV * 3 + self.PAD,
+                                self.DIV * 6 + self.PAD, width=9)
 
     def _switch_turn(self):
         if self.turn == PLAYER1:
