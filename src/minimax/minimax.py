@@ -43,7 +43,7 @@ def ai_place_piece_at(position: list) -> int:
                 best_eval_piece_to_take = inf
                 for j in _get_nodes_pieces_to_take(position, WHITE):
                     position[j] = NO_PIECE
-                    evaluation = _minimax_phase1(position, 3, -inf, inf, True)
+                    evaluation = _minimax_phase1(position, 4, -inf, inf, True)
                     position[j] = WHITE
                     if evaluation < best_eval_piece_to_take:
                         _best_node_id_to_take = j
@@ -52,7 +52,7 @@ def ai_place_piece_at(position: list) -> int:
                         best_node_id = i
                         best_evaluation = evaluation
             else:
-                evaluation = _minimax_phase1(position, 3, -inf, inf, True)  # It's maximizing player now, because we just put
+                evaluation = _minimax_phase1(position, 4, -inf, inf, True)  # It's maximizing player now, because we just put
                 if evaluation < best_evaluation:                            # a black piece
                     best_node_id = i
                     best_evaluation = evaluation

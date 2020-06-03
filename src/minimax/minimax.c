@@ -2,9 +2,14 @@
 #include <Python.h>
 
 #include <stdio.h>
-#include <assert.h>
 #include <limits.h>
 #include "helpers.h"
+
+#if 1
+    #undef NDEBUG
+#endif
+
+#include <assert.h>
 
 #define NO_PIECE 0
 #define WHITE 1
@@ -46,7 +51,7 @@ int ai_place_piece_at(int* position) {
 				for (int j = 0; j < pieces_to_take.count; j++) {
 					int j_ = pieces_to_take.items[j];
 					position[j_] = NO_PIECE;
-					evaluation = _minimax_phase1(position, 3, INT_MIN, INT_MAX, 1);
+					evaluation = _minimax_phase1(position, 4, INT_MIN, INT_MAX, 1);
 					position[j_] = WHITE;
 					if (evaluation < best_eval_piece_to_take) {
 						_best_node_id_to_take = j_;
@@ -58,7 +63,7 @@ int ai_place_piece_at(int* position) {
 					}
 				}
 			} else {
-				evaluation = _minimax_phase1(position, 3, INT_MIN, INT_MAX, 1);
+				evaluation = _minimax_phase1(position, 4, INT_MIN, INT_MAX, 1);
 				if (evaluation < best_evaluation) {
 					best_node_id = i;
 					best_evaluation = evaluation;
@@ -104,7 +109,7 @@ Tuple ai_move_piece(int* position) {
 						for (int k = 0; k < pieces_to_take.count; k++) {
 							int k_ = pieces_to_take.items[k];
 							position[k_] = NO_PIECE;
-							evaluation = _minimax_phase2(position, 3, INT_MIN, INT_MAX, 1);
+							evaluation = _minimax_phase2(position, 4, INT_MIN, INT_MAX, 1);
 							position[k_] = WHITE;
 							if (evaluation < best_eval_piece_to_take) {
 								_best_node_id_to_take = k_;
@@ -117,7 +122,7 @@ Tuple ai_move_piece(int* position) {
 							}
 						}
 					} else {
-						evaluation = _minimax_phase2(position, 3, INT_MIN, INT_MAX, 1);
+						evaluation = _minimax_phase2(position, 4, INT_MIN, INT_MAX, 1);
 						if (evaluation < best_evaluation) {
 							best_node_id_src = i;
 							best_node_id_dest = j_;
@@ -134,7 +139,7 @@ Tuple ai_move_piece(int* position) {
 	printf("Nr. of computations is %d\n", computation_count);
 	computation_count = 0;
 
-	assert(best_node_id_src != -1 || best_node_id_dest != -1);
+	assert(best_node_id_src != -1 && best_node_id_dest != -1);
 	Tuple t;
 	t.a = best_node_id_src;
 	t.b = best_node_id_dest;
