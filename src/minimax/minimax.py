@@ -7,6 +7,8 @@ from typing import Union
 
 # TODO AI stops working properly when opponent has 4 pieces left
 
+# TODO on win make the score -infinite
+
 NO_PIECE = 0
 WHITE = 1
 BLACK = 2

@@ -1,6 +1,5 @@
 """Main game module. It must be imported from the game folder and its main() executed."""
 
-import threading
 import tkinter as tk
 from os.path import join
 
@@ -8,6 +7,7 @@ from PIL import Image, ImageTk
 
 from src.game.pymill_hotseat import PyMillHotseat
 from src.game.pymill_computer import PyMillComputer
+from src.game.networking_game_start import NetworkingGameStart
 
 VERSION = "v0.2.0"
 
@@ -20,7 +20,7 @@ class PyMillMenu(tk.Frame):
         self.pack(padx=20, pady=20, expand=True)
 
         self.root.option_add("*tearOff", False)
-        self.root.minsize(width=640, height=480)
+        self.root.minsize(width=640, height=480)  # TODO maybe not needed
         self.root.title("PyMill")
 
         self.in_game = False
@@ -47,7 +47,7 @@ class PyMillMenu(tk.Frame):
         btn2.bind("<Enter>", lambda event: self.change_label_text("Play with the computer"))
         btn2.bind("<Leave>", lambda event: self.change_label_text(""))
 
-        btn3 = tk.Button(frm_buttons, image=self.img_player_vs_player_net, command=None)
+        btn3 = tk.Button(frm_buttons, image=self.img_player_vs_player_net, command=self.run_pymill_network)
         btn3.grid(column=2, row=0, padx=4)
         btn3.bind("<Enter>", lambda event: self.change_label_text("Play with a friend over the network"))
         btn3.bind("<Leave>", lambda event: self.change_label_text(""))
@@ -65,25 +65,19 @@ class PyMillMenu(tk.Frame):
         self.in_game = False
 
     def run_pymill_hotseat(self):
-        # if not self.in_game:
-        #     thread = threading.Thread(target=pymill_hotseat, daemon=False, args=(self.on_game_exit,))
-        #     thread.start()
-        #     self.in_game = True
         if not self.in_game:
             PyMillHotseat(tk.Toplevel(self.root), self.on_game_exit)
             self.in_game = True
 
     def run_pymill_computer(self):
-        # if not self.in_game:
-        #     thread = threading.Thread(target=pymill_computer, daemon=False, args=(self.on_game_exit,))
-        #     thread.start()
-        #     self.in_game = True
         if not self.in_game:
             PyMillComputer(tk.Toplevel(self.root), self.on_game_exit)
             self.in_game = True
 
     def run_pymill_network(self):
-        pass
+        if not self.in_game:
+            NetworkingGameStart(tk.Toplevel(self.root), self.on_game_exit)
+            self.in_game = True
 
 
 def main():

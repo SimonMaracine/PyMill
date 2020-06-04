@@ -276,7 +276,7 @@ class Board:
                         logger.info("Remove a piece!")
 
                     # Do all of this only if there was a piece put down on a node
-                    if self._check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK
+                    if self._check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK,
                         if not self.must_remove_piece:                                       # because turn was already
                             self._game_over(tie=False, winner=PLAYER2 if self.turn == PLAYER1 else PLAYER1)  # switched
 
@@ -326,7 +326,7 @@ class Board:
             self.must_remove_piece = True
             logger.debug("Remove a piece!")
 
-        if self._check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK
+        if self._check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK,
             if not self.must_remove_piece:                                       # because turn was already
                 self._game_over(tie=False, winner=PLAYER2 if self.turn == PLAYER1 else PLAYER1)  # switched
 
@@ -342,7 +342,7 @@ class Board:
             destination_node_id: The node on to which to put the piece.
 
         """
-        assert 0 <= source_node_id <= 23 and 0 <= destination_node_id <= 23  # FIXME this failed unexpectedly
+        assert 0 <= source_node_id <= 23 and 0 <= destination_node_id <= 23, f"{source_node_id}, {destination_node_id}"  # FIXME this failed unexpectedly
         assert self.phase == PHASE2
         assert source_node_id != destination_node_id
 
