@@ -28,6 +28,7 @@ class Piece:
 
         self.remove_after_reached_position = False
         self.remove_func = None
+        self.pending_remove = False
 
         self.oval = self.canvas.create_oval(self.x - Piece.radius - 2, self.y - Piece.radius - 2, self.x + Piece.radius,
                                             self.y + Piece.radius, fill="#ffe363" if self.color == WHITE else "black")

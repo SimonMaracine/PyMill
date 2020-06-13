@@ -164,14 +164,15 @@ class Board:
     #     self.line_thickness = round((window_height * 8) / 600)
     #     self.board_offset = round((window_height * 35) / 600)
 
-    def put_new_piece(self) -> bool:
+    def put_new_piece(self) -> int:
         """Puts a new piece on to the board.
 
         Returns:
-            bool: True if the turn was changed, False otherwise. For pymill_network.
+            int: The id of the node where the piece was put or -1.
 
         """
-        changed_turn = False
+        node_id = -1
+
         for node in self.nodes:
             if node.highlight and not node.piece:
                 if self.turn == PLAYER1:
@@ -180,25 +181,27 @@ class Board:
                     self.white_pieces -= 1
                     if not self._check_is_windmill_formed(WHITE, node):
                         self._switch_turn()
-                        changed_turn = True
                     else:
                         self.must_remove_piece = True
                         logger.debug("Remove a piece!")
+                    node_id = node.id
                 else:
                     new_piece = Piece(node.x, node.y, BLACK, self.canvas)
                     node.add_piece(new_piece)
                     self.black_pieces -= 1
                     if not self._check_is_windmill_formed(BLACK, node):
                         self._switch_turn()
-                        changed_turn = True
                     else:
                         self.must_remove_piece = True
                         logger.debug("Remove a piece!")
+                    node_id = node.id
                 break
+
         if (self.white_pieces + self.black_pieces) == 0:
             self.phase = PHASE2
             logger.info("PHASE 2")
-        return changed_turn
+
+        return node_id
 
     def pick_up_piece(self):
         for node in self.nodes:
@@ -210,14 +213,14 @@ class Board:
                     self.picked_up_piece = node.piece
                 break
 
-    def remove_opponent_piece(self) -> bool:
+    def remove_opponent_piece(self) -> int:
         """Removes a piece from opponent.
 
         Returns:
-            bool: True if the player can actually remove the piece, False otherwise.
+            int: The id of the node whose piece was taken or -1, if no piece was taken.
 
         """
-        can_remove = False
+        node_id = -1
 
         for node in self.nodes:
             if self.turn == PLAYER1:
@@ -227,10 +230,10 @@ class Board:
                         node.take_piece(True)
                         self.must_remove_piece = False
                         if self._check_player_pieces(BLACK):
-                            self._game_over(tie=False, winner=PLAYER1 if self.turn == PLAYER1 else PLAYER2)
+                            self._game_over(tie=False, winner=PLAYER1)
                         self._switch_turn()
                         self._clear_history()  # Clear the history, because it will never repeat itself
-                        can_remove = True
+                        node_id = node.id
                     else:
                         logger.info("You cannot take piece from windmill!")
             else:
@@ -240,23 +243,26 @@ class Board:
                         node.take_piece(True)
                         self.must_remove_piece = False
                         if self._check_player_pieces(WHITE):
-                            self._game_over(tie=False, winner=PLAYER1 if self.turn == PLAYER1 else PLAYER2)
+                            self._game_over(tie=False, winner=PLAYER2)
                         self._switch_turn()
                         self._clear_history()  # Clear the history, because it will never repeat itself
-                        can_remove = True
+                        node_id = node.id
                     else:
                         logger.info("You cannot take piece from windmill!")
-        self.node_pressed = False
-        return can_remove
 
-    def put_down_piece(self) -> bool:
+        self.node_pressed = False
+        return node_id
+
+    def put_down_piece(self) -> tuple:
         """Puts down a picked up piece.
 
         Returns:
-            bool: True if the turn was changed, False otherwise. For pymill_network.
+            tuple: The id of the nodes or -1.
 
         """
-        changed_turn = False
+        src_node_id = -1
+        dest_node_id = -1
+
         if self.picked_up_piece is not None:
             for node in self._where_can_go(self.node_taken_piece):
                 if node.highlight and not node.piece:
@@ -265,15 +271,16 @@ class Board:
                     self._change_nodes_color(self.node_taken_piece, "#000000", "#000000")
                     self.node_taken_piece.piece.release(node)
                     self.node_taken_piece.take_piece()
+                    src_node_id = self.node_taken_piece.id
                     self.node_taken_piece = None
                     self.picked_up_piece = None
                     if not self._check_is_windmill_formed(WHITE if self.turn == PLAYER1 else BLACK, node):
                         self._switch_turn()
                         self.turns_without_windmills += 1
-                        changed_turn = True
                     else:
                         self.must_remove_piece = True
                         logger.info("Remove a piece!")
+                    dest_node_id = node.id
 
                     # Do all of this only if there was a piece put down on a node
                     if self._check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK,
@@ -289,7 +296,7 @@ class Board:
             self.picked_up_piece.release(self.node_taken_piece)
             self.picked_up_piece = None
 
-        return changed_turn
+        return src_node_id, dest_node_id
 
     def put_new_piece_alone(self, node_id: int, piece_color: tuple):
         """Puts a new piece on that node. For computer and networking versions of the game.
@@ -326,9 +333,9 @@ class Board:
             self.must_remove_piece = True
             logger.debug("Remove a piece!")
 
-        if self._check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK,
-            if not self.must_remove_piece:                                       # because turn was already
-                self._game_over(tie=False, winner=PLAYER2 if self.turn == PLAYER1 else PLAYER1)  # switched
+        if self._check_player_pieces(WHITE if self.turn == PLAYER1 else BLACK):  # inverse WHITE and BLACK, because turn was
+            if not self.must_remove_piece:                                       # already switched
+                self._game_over(tie=False, winner=PLAYER2 if self.turn == PLAYER1 else PLAYER1)
 
         if (self.white_pieces + self.black_pieces) == 0:
             self.phase = PHASE2
@@ -400,6 +407,7 @@ class Board:
         piece.velocity = vel.as_tuple()
 
         node.take_piece_after()
+        piece.pending_remove = True
         logger.info(f"Piece node {node.id} removed")
 
         self.must_remove_piece = False
@@ -567,7 +575,7 @@ class Board:
         """
         pieces = 0
         for node in self.nodes:
-            if node.piece and node.piece.color == color:
+            if node.piece and node.piece.color == color and not node.piece.pending_remove:
                 pieces += 1
         logger.debug(f"{'Player 1' if color == WHITE else 'Player 2'} pieces remaining: {pieces}")
         return pieces
