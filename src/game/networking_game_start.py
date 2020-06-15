@@ -60,8 +60,8 @@ class NetworkingGameStart(tk.Frame):
         lbl_ip.grid(row=1, column=0)
 
     def host(self):
-        # ip = socket.gethostbyname(socket.gethostname())
-        ip = "127.0.0.1"
+        ip = socket.gethostbyname(socket.gethostname())
+        # ip = "127.0.0.1"
         port = int(self.ent_port.get())
 
         server = Server(ip, port)  # Server just started
