@@ -11,8 +11,8 @@ logger.setLevel(10)
 class Client:
 
     def __init__(self, id: int):
-        self.socket = None
         self.id = id
+        self._socket = None
         self._connected = False
 
     def __del__(self):
@@ -20,23 +20,23 @@ class Client:
 
     def connect(self, ip: str, port: int):
         if not self._connected:
-            self.socket = socket.socket()
+            self._socket = socket.socket()
 
-            self.socket.connect((ip, port))  # fail
+            self._socket.connect((ip, port))  # fail
 
             logger.info(f"Connected to ({ip}, {port})")
 
             self._connected = True
 
-            self.socket.send(str(self.id).encode())  # fail
+            self._socket.send(str(self.id).encode())  # fail
 
     def send_event(self, event: int, *args):
         message = Message(self.id, event, args)
         serialized_message = pickle.dumps(message)
-        self.socket.send(serialized_message)  # fail
+        self._socket.send(serialized_message)  # fail
 
     def receive_event(self) -> Message:
-        serialized_message = self.socket.recv(512)  # fail
+        serialized_message = self._socket.recv(512)  # fail
         message = pickle.loads(serialized_message)  # fail
 
         return message

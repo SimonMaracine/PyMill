@@ -10,10 +10,11 @@ from src.constants import *
 
 class PyMillNetwork(Game):
 
-    def __init__(self, top_level: tk.Toplevel, on_game_exit: Callable, client: Client, server: Server = None):
+    def __init__(self, top_level: tk.Toplevel, on_game_exit: Callable, is_first: bool, client: Client,
+                 server: Server = None):
         super().__init__(top_level, on_game_exit)
         self.client = client
-        self.server = server  # Keep a reference to the server to close it after finishing game TODO clean up server
+        self.server = server  # Keep a reference to the server to close it after finishing game TODO clean up server and client
         self.top_level.title("PyMill Network")
 
         self.lock = threading.Lock()
@@ -24,44 +25,47 @@ class PyMillNetwork(Game):
 
         self.update_piece_animation()
 
-        # self.player = TODO restrict player from doing something while it's other's turn
+        self.player = PLAYER1 if is_first else PLAYER2  # To stop player from making a move when he/she shouldn't
 
     def on_mouse_pressed(self, event):
-        if self.board.mouse_over_any_node():
-            self.board.node_pressed = True
-        if not self.board.game_over:  # This is for when it's a tie
-            if not self.board.must_remove_piece:
-                if self.board.phase == PHASE2:
-                    self.board.pick_up_piece()
+        if self.board.turn == self.player:
+            if self.board.mouse_over_any_node():
+                self.board.node_pressed = True
+            if not self.board.game_over:  # This is for when it's a tie
+                if not self.board.must_remove_piece:
+                    if self.board.phase == PHASE2:
+                        self.board.pick_up_piece()
 
     def on_mouse_released(self, event):
-        if not self.board.game_over:  # This is for when it's a tie
-            if self.board.must_remove_piece:
-                if self.board.node_pressed:
-                    node_id = self.board.remove_opponent_piece()
-                    if node_id != -1:
-                        self.client.send_event(REMOVE_PIECE, node_id)
-            if self.board.phase == PHASE1:
-                if self.board.node_pressed:
-                    node_id = self.board.put_new_piece()
-                    if node_id != -1:
-                        self.client.send_event(PLACE_PIECE, node_id)
-            else:
-                src_node_id, dest_node_id = self.board.put_down_piece()
-                if src_node_id != -1 and dest_node_id != -1:
-                    self.client.send_event(MOVE_PIECE, src_node_id, dest_node_id)
+        if self.board.turn == self.player:
+            if not self.board.game_over:  # This is for when it's a tie
+                if self.board.must_remove_piece:
+                    if self.board.node_pressed:
+                        node_id = self.board.remove_opponent_piece()
+                        if node_id != -1:
+                            self.client.send_event(REMOVE_PIECE, node_id)
+                if self.board.phase == PHASE1:
+                    if self.board.node_pressed:
+                        node_id = self.board.put_new_piece()
+                        if node_id != -1:
+                            self.client.send_event(PLACE_PIECE, node_id)
+                else:
+                    src_node_id, dest_node_id = self.board.put_down_piece()
+                    if src_node_id != -1 and dest_node_id != -1:
+                        self.client.send_event(MOVE_PIECE, src_node_id, dest_node_id)
 
-        self.board.node_pressed = False
+            self.board.node_pressed = False
 
-        self.check_for_game_over()
-        self.update_gui()
+            self.check_for_game_over()
+            self.update_gui()
 
     def on_mouse_moved(self, event):
-        self.board.update(event.x, event.y)
+        if self.board.turn == self.player or self.board.mouse_over_any_node():
+            self.board.update(event.x, event.y)
 
     def listen_for_events(self):
         # Listen for events in a separate thread, but do the action in main thread in update_board_from_server
-        while True:  # TODO check when the PyMillNetwork is closed
+        while True:  # TODO check when PyMillNetwork is closed to stop this thread
             message = self.client.receive_event()
             with self.lock:
                 self.message = message

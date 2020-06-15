@@ -463,15 +463,6 @@ class Board:
         return False
 
     def _draw_board(self):
-        # self.canvas.create_rectangle(self.DIV, self.DIV, self.DIV * 7, self.DIV * 7, width=9)
-        # self.canvas.create_rectangle(self.DIV * 2, self.DIV * 2, self.DIV * 6, self.DIV * 6, width=9)
-        # self.canvas.create_rectangle(self.DIV * 3, self.DIV * 3, self.DIV * 5, self.DIV * 5, width=9)
-        #
-        # self.canvas.create_line(self.DIV, self.DIV * 4, self.DIV * 3, self.DIV * 4, width=9)
-        # self.canvas.create_line(self.DIV * 5, self.DIV * 4, self.DIV * 7, self.DIV * 4, width=9)
-        # self.canvas.create_line(self.DIV * 4, self.DIV, self.DIV * 4, self.DIV * 3, width=9)
-        # self.canvas.create_line(self.DIV * 4, self.DIV * 5, self.DIV * 4, self.DIV * 7, width=9)
-
         self.canvas.create_rectangle(0 + self.PAD, 0 + self.PAD, self.DIV * 7 - self.PAD, self.DIV * 7 - self.PAD, width=9)
         self.canvas.create_rectangle(self.DIV + self.PAD, self.DIV + self.PAD, self.DIV * 6 - self.PAD,
                                      self.DIV * 6 - self.PAD, width=9)
