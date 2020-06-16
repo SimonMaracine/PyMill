@@ -1,5 +1,6 @@
 import socket
 import tkinter as tk
+from tkinter import messagebox
 from typing import Callable
 
 from src.networking.server import Server
@@ -26,7 +27,7 @@ class NetworkingGameStart(tk.Frame):
         frm_your_ip_address = tk.Frame(self)
         frm_your_ip_address.grid(row=0, column=1)
 
-        frm_connect = tk.Frame(self, relief=tk.RIDGE, borderwidth=3, padx=50, pady=20)
+        frm_connect = tk.Frame(self, relief=tk.RIDGE, borderwidth=3, padx=26, pady=20)
         frm_connect.grid(row=1, column=0)
 
         self.frm_host = tk.Frame(self, relief=tk.RIDGE, borderwidth=3, padx=20, pady=20)
@@ -36,11 +37,10 @@ class NetworkingGameStart(tk.Frame):
         tk.Label(frm_entries, text="Port").grid(row=1, column=0)
 
         self.ent_ip = tk.Entry(frm_entries, width=16)
-        self.ent_port = tk.Entry(frm_entries, width=5)
+        self.ent_port = tk.Entry(frm_entries, width=6)
         self.ent_ip.grid(row=0, column=1)
         self.ent_port.grid(row=1, column=1, sticky=tk.W)
 
-        self.ent_ip.insert(0, "127.0.0.1")
         self.ent_port.insert(0, "5555")
 
         tk.Button(frm_connect, text="Connect", command=self.connect).grid(row=0, column=0)
@@ -61,8 +61,14 @@ class NetworkingGameStart(tk.Frame):
 
     def host(self):
         ip = socket.gethostbyname(socket.gethostname())
-        # ip = "127.0.0.1"
         port = int(self.ent_port.get())
+
+        if port < 1024:
+            messagebox.showerror("Invalid Port", "Privileged ports cannot be used.", parent=self.top_level)
+            return
+        if port > 65535:
+            messagebox.showerror("Invalid Port", "This port doesn't exist.", parent=self.top_level)
+            return
 
         server = Server(ip, port)  # Server just started
         client = Client(0)

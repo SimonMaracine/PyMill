@@ -19,9 +19,15 @@ class Server:
 
         self._send_to_client = -1
 
-        self._server_socket = socket.socket()  # Listening socket
+        self._server_socket = socket.socket()  # Listening socket TODO clean up the socket
 
-        self._server_socket.bind((self.ip, self.port))  # fail
+        try:
+            self._server_socket.bind((self.ip, self.port))  # fail
+        except socket.gaierror:  # Invalid ip address
+            raise
+        except OSError:  # Address already in use or some other error
+            raise
+
         self._server_socket.settimeout(30)
         self._server_socket.listen(3)
 
@@ -33,9 +39,17 @@ class Server:
 
     def _listen(self):
         for _ in range(2):
-            connection, address = self._server_socket.accept()  # fail
+            try:
+                connection, address = self._server_socket.accept()  # fail
+            except socket.timeout:  # TODO clean up!
+                raise
+            except ConnectionRefusedError:  # The socket was not bound
+                raise
 
-            client_id = int(connection.recv(64).decode())  # fail
+            try:
+                client_id = int(connection.recv(64).decode())  # fail
+            except ValueError:  # Connection sent nothing
+                raise
             threading.Thread(target=self._serve_client, daemon=True, args=(connection, client_id)).start()
 
             logger.info(f"Client {address} connected to server")

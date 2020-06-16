@@ -22,7 +22,12 @@ class Client:
         if not self._connected:
             self._socket = socket.socket()
 
-            self._socket.connect((ip, port))  # fail
+            try:
+                self._socket.connect((ip, port))  # fail
+            except socket.gaierror:  # Invalid ip address
+                raise
+            except ConnectionRefusedError:  # No socket on that address or some other error
+                raise
 
             logger.info(f"Connected to ({ip}, {port})")
 
