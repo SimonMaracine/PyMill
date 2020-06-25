@@ -10,7 +10,7 @@ from src.constants import *
 class Game(ABC, tk.Frame):
 
     def __init__(self, top_level: tk.Toplevel, on_game_exit: Callable):
-        super().__init__(top_level)
+        super().__init__(top_level)  # This calls Frame's __init__
         self.top_level = top_level
         self.on_game_exit = on_game_exit
         self.pack(padx=10, pady=10, expand=True)

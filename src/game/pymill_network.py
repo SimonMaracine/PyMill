@@ -1,5 +1,6 @@
 import threading
 import tkinter as tk
+from tkinter import messagebox
 from typing import Callable
 
 from src.networking.server import Server
@@ -19,6 +20,8 @@ class PyMillNetwork(Game):
 
         self.lock = threading.Lock()
         self.message = None
+
+        self.listen_events = True
 
         threading.Thread(target=self.listen_for_events, daemon=True).start()
         self.update_board_from_server()
@@ -65,8 +68,20 @@ class PyMillNetwork(Game):
 
     def listen_for_events(self):
         # Listen for events in a separate thread, but do the action in main thread in update_board_from_server
-        while True:  # TODO check when PyMillNetwork is closed to stop this thread
-            message = self.client.receive_event()
+        while self.listen_events:
+            try:
+                message = self.client.receive_event()
+            except EOFError:  # What the socket received was nothing
+                try:
+                    self.client.close()  # Close the client, because the other client and the server were closed
+                except OSError:  # This was the client which was closed with the server
+                    pass
+                self.listen_events = False
+                try:
+                    messagebox.showerror("Connection Lost", "The player has closed the connection.", parent=self.top_level)
+                except tk.TclError:  # This was the client which was closed with the server
+                    pass
+                continue
             with self.lock:
                 self.message = message
 
@@ -86,8 +101,12 @@ class PyMillNetwork(Game):
                     print("REMOVE PIECE")
                     self.message = None
                 elif self.message.action == CLOSE_CONNECTION:
-                    print("CLOSE CONNECTION REQUESTED")
+                    self.client.close()
+                    self.server.close()  # Close the client and the server, because the other client has disconnected
+                    self.listen_events = False
+                    print("CLOSE CONNECTION")
                     self.message = None
+                    messagebox.showerror("Connection Lost", "The player has closed the connection.", parent=self.top_level)
 
                 self.check_for_game_over()
                 self.update_gui()
@@ -99,3 +118,11 @@ class PyMillNetwork(Game):
             if node.piece is not None and not node.piece.reached_position:
                 node.piece.update(0, 0)
         self.after(25, self.update_piece_animation)
+
+    def exit(self):
+        super().exit()
+        if not self.client.closed:  # The client might have been closed already in update_board_from_server
+            self.client.close()
+        if self.server is not None:
+            self.server.close()
+        self.listen_events = False

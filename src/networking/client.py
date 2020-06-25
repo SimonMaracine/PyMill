@@ -13,27 +13,31 @@ class Client:
     def __init__(self, id: int):
         self.id = id
         self._socket = None
-        self._connected = False
+
+        self.closed = False
 
     def __del__(self):
-        print("Socket destroyed")
+        print("Client object destroyed")
 
     def connect(self, ip: str, port: int):
-        if not self._connected:
-            self._socket = socket.socket()
+        """
+        Don't call this twice.
 
-            try:
-                self._socket.connect((ip, port))  # fail
-            except socket.gaierror:  # Invalid ip address
-                raise
-            except ConnectionRefusedError:  # No socket on that address or some other error
-                raise
+        """
+        self._socket = socket.socket()
 
-            logger.info(f"Connected to ({ip}, {port})")
+        try:
+            self._socket.connect((ip, port))  # fail
+        except socket.gaierror:  # Invalid ip address
+            self._socket.close()
+            raise
+        except ConnectionRefusedError:  # No socket on that address or some other error
+            self._socket.close()
+            raise
 
-            self._connected = True
+        logger.info(f"Connected to ({ip}, {port})")
 
-            self._socket.send(str(self.id).encode())  # fail
+        self._socket.send(str(self.id).encode())  # fail
 
     def send_event(self, event: int, *args):
         message = Message(self.id, event, args)
@@ -45,3 +49,12 @@ class Client:
         message = pickle.loads(serialized_message)  # fail
 
         return message
+
+    def close(self):
+        """
+        Don't call this twice. self.close is for this purpose.
+
+        """
+        self._socket.shutdown(socket.SHUT_RDWR)  # Only this stops the socket from recv-ing for some reason
+        self._socket.close()
+        self.closed = True

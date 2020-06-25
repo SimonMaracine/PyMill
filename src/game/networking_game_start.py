@@ -52,15 +52,21 @@ class NetworkingGameStart(tk.Frame):
         self.var_time_countdown = tk.IntVar(self.frm_host, value=self.time)
         self.lbl_time = tk.Label(self.frm_host, text="0")
         self.lbl_time.grid(row=1, column=0)
+        self.hosting = False
 
         lbl_your_ip_address = tk.Label(frm_your_ip_address, text="Your IP adddress:")
         lbl_your_ip_address.grid(row=0, column=0)
 
-        lbl_ip = tk.Label(frm_your_ip_address, text=socket.gethostbyname(socket.gethostname()))
+        self.ip = socket.gethostbyname(socket.gethostname())
+        if self.ip[0:3] == "127":  # TODO check that this is always the case
+            messagebox.showerror("No Internet", "You are not connected to the internet.", parent=self.top_level)
+
+        lbl_ip = tk.Label(frm_your_ip_address, text=self.ip)
         lbl_ip.grid(row=1, column=0)
 
     def host(self):
-        ip = socket.gethostbyname(socket.gethostname())
+        self.hosting = True
+
         port = int(self.ent_port.get())
 
         if port < 1024:
@@ -70,13 +76,13 @@ class NetworkingGameStart(tk.Frame):
             messagebox.showerror("Invalid Port", "This port doesn't exist.", parent=self.top_level)
             return
 
-        server = Server(ip, port)  # Server just started
+        server = Server(self.ip, port)  # Server just started
         client = Client(0)
 
-        client.connect(ip, port)
+        client.connect(self.ip, port)
 
         self.check_both_clients_connected(server, client)
-        self.time_countdown()
+        self.time_countdown(server, client)
 
     def connect(self):
         ip = self.ent_ip.get()
@@ -92,11 +98,13 @@ class NetworkingGameStart(tk.Frame):
         if server.finished_listening:
             self.exit()
             PyMillNetwork(tk.Toplevel(), self.on_game_exit, True, client, server)
+            self.hosting = False
         # This else fixes the method from calling itself forever
         else:
-            self.after(200, self.check_both_clients_connected, server, client)
+            if self.hosting:
+                self.after(200, self.check_both_clients_connected, server, client)
 
-    def time_countdown(self):
+    def time_countdown(self, server: Server, client: Client):
         # If the time was out, restart it
         if self.time == 0:
             self.time = NetworkingGameStart.HOST_TIME
@@ -108,10 +116,16 @@ class NetworkingGameStart(tk.Frame):
         self.var_time_countdown.set(self.time)
 
         if self.time > 0:
-            self.after(999, self.time_countdown)
+            self.after(999, self.time_countdown, server, client)
+            print("time countdown")
         else:
             self.time = 0
-            self.lbl_time["text"] = 0  # TODO clean up the server and the client here
+            self.lbl_time["text"] = 0
+
+            # Clean up server and client
+            self.hosting = False
+            server.close()
+            client.close()
 
     def exit(self):
         self.top_level.destroy()
