@@ -65,31 +65,43 @@ class NetworkingGameStart(tk.Frame):
         lbl_ip.grid(row=1, column=0)
 
     def host(self):
-        self.hosting = True
+        if not self.hosting:
+            port = int(self.ent_port.get())
 
-        port = int(self.ent_port.get())
+            if port < 1024:
+                messagebox.showerror("Invalid Port", "Privileged ports (<1024) cannot be used.", parent=self.top_level)
+                return
+            if port > 65535:
+                messagebox.showerror("Invalid Port", f"Port {port} doesn't exist.", parent=self.top_level)
+                return
 
-        if port < 1024:
-            messagebox.showerror("Invalid Port", "Privileged ports cannot be used.", parent=self.top_level)
-            return
-        if port > 65535:
-            messagebox.showerror("Invalid Port", "This port doesn't exist.", parent=self.top_level)
-            return
+            try:
+                server = Server(self.ip, port)  # Server just started
+            except OSError as err:
+                print(err)
+                if str(err).find("Errno 98") != -1:
+                    messagebox.showerror("Address Error", "This address is already in use. Pick another port.",
+                                         parent=self.top_level)
+                    return
+            client = Client(0)  # FIXME the client and the server don't get garbage collected when pymill_network exits
 
-        server = Server(self.ip, port)  # Server just started
-        client = Client(0)
+            client.connect(self.ip, port)
 
-        client.connect(self.ip, port)
+            self.hosting = True
 
-        self.check_both_clients_connected(server, client)
-        self.time_countdown(server, client)
+            self.check_both_clients_connected(server, client)
+            self.time_countdown(server, client)
 
     def connect(self):
         ip = self.ent_ip.get()
         port = int(self.ent_port.get())
 
         client = Client(1)
-        client.connect(ip, port)
+        try:
+            client.connect(ip, port)
+        except ConnectionRefusedError:
+            messagebox.showerror("Connect Error", "Could not find the server on that address.", parent=self.top_level)
+            return
 
         self.exit()
         PyMillNetwork(tk.Toplevel(), self.on_game_exit, False, client)

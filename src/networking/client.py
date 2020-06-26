@@ -12,9 +12,9 @@ class Client:
 
     def __init__(self, id: int):
         self.id = id
-        self._socket = None
-
         self.closed = False
+
+        self._socket = None
 
     def __del__(self):
         print("Client object destroyed")
