@@ -78,7 +78,6 @@ class NetworkingGameStart(tk.Frame):
             try:
                 server = Server(self.ip, port)  # Server just started
             except OSError as err:
-                print(err)
                 if str(err).find("Errno 98") != -1:
                     messagebox.showerror("Address Error", "This address is already in use. Pick another port.",
                                          parent=self.top_level)

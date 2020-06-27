@@ -106,6 +106,6 @@ class Server:
             try:
                 sock.shutdown(socket.SHUT_RDWR)
                 sock.close()
-            except OSError as err:
-                print(err)
+            except OSError:
+                pass
         # TODO maybe close the server_socket too

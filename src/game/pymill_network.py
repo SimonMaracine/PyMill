@@ -15,7 +15,7 @@ class PyMillNetwork(Game):
                  server: Server = None):
         super().__init__(top_level, on_game_exit)
         self.client = client
-        self.server = server  # Keep a reference to the server to close it after finishing game TODO clean up server and client
+        self.server = server  # Keep a reference to the server to close it after finishing game
         self.top_level.title("PyMill Network")
 
         self.lock = threading.Lock()
