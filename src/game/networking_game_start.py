@@ -64,7 +64,7 @@ class NetworkingGameStart(tk.Frame):
         lbl_ip = tk.Label(frm_your_ip_address, text=self.ip)
         lbl_ip.grid(row=1, column=0)
 
-    def host(self):
+    def host(self):  # TODO make the hosting work again after closing NetworkingGameStart
         if not self.hosting:
             port = int(self.ent_port.get())
 
@@ -128,7 +128,6 @@ class NetworkingGameStart(tk.Frame):
 
         if self.time > 0:
             self.after(999, self.time_countdown, server, client)
-            print("time countdown")
         else:
             self.time = 0
             self.lbl_time["text"] = 0

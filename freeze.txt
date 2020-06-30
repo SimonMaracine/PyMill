@@ -1,0 +1,11 @@
+To freeze the program using PyInstaller:
+
+python -m venv .
+source bin/activate || Scripts\activate
+pip install -r requirements.txt
+cd src/minimax
+python setup.py install
+pip install PyInstaller
+cd .. x2
+python -OO -m PyInstaller PyMill.py --onefile --windowed --hidden-import=PIL._tkinter_finder
+
