@@ -36,11 +36,13 @@ class PyMillComputer(Game):
         self.board.node_pressed = False
 
         self.update_gui()
+        self.top_level.config(cursor="watch")  # Change the cursor to busy
         self.canvas.update_idletasks()
         self.make_computer_move()
 
         self.check_for_game_over()
         self.update_gui()
+        self.top_level.config(cursor="")
 
     def on_mouse_moved(self, event):
         self.board.update(event.x, event.y)
