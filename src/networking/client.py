@@ -34,6 +34,9 @@ class Client:
         except ConnectionRefusedError:  # No socket on that address or some other error
             self._socket.close()
             raise
+        except OSError:  # Invalid address
+            self._socket.close()
+            raise
 
         logger.info(f"Connected to ({ip}, {port})")
 

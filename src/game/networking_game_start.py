@@ -99,7 +99,10 @@ class NetworkingGameStart(tk.Frame):
         try:
             client.connect(ip, port)
         except ConnectionRefusedError:
-            messagebox.showerror("Connect Error", "Could not find the server on that address.", parent=self.top_level)
+            messagebox.showerror("Connection Error", "Could not find the server on that address.", parent=self.top_level)
+            return
+        except OSError:
+            messagebox.showerror("Connection Error", "The address is invalid.", parent=self.top_level)
             return
 
         self.exit()
