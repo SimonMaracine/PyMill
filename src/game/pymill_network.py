@@ -1,3 +1,4 @@
+import pickle
 import threading
 import tkinter as tk
 from tkinter import messagebox
@@ -81,6 +82,8 @@ class PyMillNetwork(Game):
                     messagebox.showerror("Connection Lost", "The player has closed the connection.", parent=self.top_level)
                 except tk.TclError:  # This was the client which was closed with the server
                     pass
+                continue
+            except pickle.UnpicklingError:
                 continue
             with self.lock:
                 self.message = message
