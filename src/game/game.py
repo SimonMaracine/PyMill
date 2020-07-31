@@ -15,14 +15,21 @@ class Game(ABC, tk.Frame):
         self.on_game_exit = on_game_exit
         self.pack(padx=10, pady=10, expand=True)
 
+        self.canvas_width = 700
+
         self.top_level.wm_protocol("WM_DELETE_WINDOW", self.exit)
 
-        self.canvas = tk.Canvas(self, width=700, height=700, background="#ffe48a")
+        self.canvas = tk.Canvas(self, width=self.canvas_width, height=self.canvas_width, background="#ffe48a")  # , highlightthickness=0)
         self.canvas.grid(row=0, column=0, columnspan=3)
+        self.canvas.addtag_all("all")
 
         self.canvas.bind("<Button-1>", self.on_mouse_pressed)
         self.canvas.bind("<ButtonRelease-1>", self.on_mouse_released)
         self.canvas.bind("<Motion>", self.on_mouse_moved)
+
+        self.bind("<Configure>", self.on_resize)
+
+        self.dont_resize = True
 
         self.var_player1_pieces_left = tk.StringVar(self, "White pieces: 9")
         self.lbl_player1_pieces_left = tk.Label(self, textvariable=self.var_player1_pieces_left, font="TkDefaultFont 10 bold")
@@ -35,7 +42,7 @@ class Game(ABC, tk.Frame):
         self.var_current_player = tk.StringVar(self, "White's turn")
         tk.Label(self, textvariable=self.var_current_player, font="TkDefaultFont 10 bold").grid(row=1, column=1)
 
-        self.board = Board(self.canvas)
+        self.board = Board(self.canvas, self.canvas_width)
         self.game_over = False
 
     @abstractmethod
@@ -49,6 +56,29 @@ class Game(ABC, tk.Frame):
     @abstractmethod
     def on_mouse_moved(self, event):
         pass
+
+    def on_resize(self, event):
+        smallest = min(event.width, event.height - 20)
+
+        try:
+            scale = smallest / self.canvas_width
+        except ZeroDivisionError:
+            return
+
+        self.canvas_width = smallest
+        self.board.canvas_width = smallest
+        if not self.dont_resize:
+            self.canvas.config(width=smallest, height=smallest)
+        self.config(width=smallest, height=smallest)
+        self.dont_resize = False
+
+        if scale == 0:
+            return
+
+        # Rescale all the objects tagged with the "all" tag
+        self.canvas.scale("all", 0, 0, scale, scale)
+
+        self.board.on_window_resize(smallest)
 
     def check_for_game_over(self):
         if not self.game_over and self.board.game_over:

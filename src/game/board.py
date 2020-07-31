@@ -10,8 +10,6 @@ from src.log import get_logger
 logger = get_logger(__name__)
 logger.setLevel(10)
 
-canvas_width = 700
-
 
 class Vec2:
 
@@ -34,8 +32,9 @@ class Vec2:
 class Board:
     """Game board object."""
 
-    def __init__(self, canvas: tk.Canvas):
+    def __init__(self, canvas: tk.Canvas, canvas_width: int):
         self.canvas = canvas
+        self.canvas_width = canvas_width
         self.DIV = 100
         self.PAD = 50
 
@@ -118,51 +117,39 @@ class Board:
             if node.piece is not None and node.piece.reached_position:
                 node.piece.update(mouse_x, mouse_y)
 
-    # def on_window_resize(self, width: int, height: int):
-    #     global window_width, window_height
-    #     window_width = width
-    #     window_height = height
-    #
-    #     if height <= width:
-    #         self.width = height - 160
-    #     else:
-    #         self.width = width - 160
-    #
-    #     self.x = round((width - self.width) / 2)
-    #     self.y = round((height - self.width) / 2)
-    #     self.DIV = round(self.width / 6)
-    #
-    #     self.nodes[0].set_position(self.x, self.y)
-    #     self.nodes[1].set_position(self.x + self.DIV * 3, self.y)
-    #     self.nodes[2].set_position(self.x + self.DIV * 6, self.y)
-    #     self.nodes[3].set_position(self.x + self.DIV, self.y + self.DIV)
-    #     self.nodes[4].set_position(self.x + self.DIV * 3, self.y + self.DIV)
-    #     self.nodes[5].set_position(self.x + self.DIV * 5, self.y + self.DIV)
-    #     self.nodes[6].set_position(self.x + self.DIV * 2, self.y + self.DIV * 2)
-    #     self.nodes[7].set_position(self.x + self.DIV * 3, self.y + self.DIV * 2)
-    #     self.nodes[8].set_position(self.x + self.DIV * 4, self.y + self.DIV * 2)
-    #     self.nodes[9].set_position(self.x, self.y + self.DIV * 3)
-    #     self.nodes[10].set_position(self.x + self.DIV, self.y + self.DIV * 3)
-    #     self.nodes[11].set_position(self.x + self.DIV * 2, self.y + self.DIV * 3)
-    #     self.nodes[12].set_position(self.x + self.DIV * 4, self.y + self.DIV * 3)
-    #     self.nodes[13].set_position(self.x + self.DIV * 5, self.y + self.DIV * 3)
-    #     self.nodes[14].set_position(self.x + self.DIV * 6, self.y + self.DIV * 3)
-    #     self.nodes[15].set_position(self.x + self.DIV * 2, self.y + self.DIV * 4)
-    #     self.nodes[16].set_position(self.x + self.DIV * 3, self.y + self.DIV * 4)
-    #     self.nodes[17].set_position(self.x + self.DIV * 4, self.y + self.DIV * 4)
-    #     self.nodes[18].set_position(self.x + self.DIV, self.y + self.DIV * 5)
-    #     self.nodes[19].set_position(self.x + self.DIV * 3, self.y + self.DIV * 5)
-    #     self.nodes[20].set_position(self.x + self.DIV * 5, self.y + self.DIV * 5)
-    #     self.nodes[21].set_position(self.x, self.y + self.DIV * 6)
-    #     self.nodes[22].set_position(self.x + self.DIV * 3, self.y + self.DIV * 6)
-    #     self.nodes[23].set_position(self.x + self.DIV * 6, self.y + self.DIV * 6)
-    #
-    #     # Assuming that 600 is the default window height
-    #     Node.dot_radius = round((window_height * Node.DEFAULT_DOT_RADIUS) / 600)
-    #     Node.radius = round((window_height * Node.DEFAULT_RADIUS) / 600)
-    #     Piece.radius = round((window_height * Piece.DEFAULT_RADIUS) / 600)
-    #     self.line_thickness = round((window_height * 8) / 600)
-    #     self.board_offset = round((window_height * 35) / 600)
+    def on_window_resize(self, width: int):
+        self.DIV = width / 7
+        self.PAD = width / 14  # true division, because it builds up an error offset
+
+        self.nodes[0].set_position(0 + self.PAD, 0 + self.PAD)
+        self.nodes[1].set_position(self.DIV * 3 + self.PAD, 0 + self.PAD)
+        self.nodes[2].set_position(self.DIV * 6 + self.PAD, 0 + self.PAD)
+        self.nodes[3].set_position(self.DIV + self.PAD, self.DIV + self.PAD)
+        self.nodes[4].set_position(self.DIV * 3 + self.PAD, self.DIV + self.PAD)
+        self.nodes[5].set_position(self.DIV * 5 + self.PAD, self.DIV + self.PAD)
+        self.nodes[6].set_position(self.DIV * 2 + self.PAD, self.DIV * 2 + self.PAD)
+        self.nodes[7].set_position(self.DIV * 3 + self.PAD, self.DIV * 2 + self.PAD)
+        self.nodes[8].set_position(self.DIV * 4 + self.PAD, self.DIV * 2 + self.PAD)
+        self.nodes[9].set_position(0 + self.PAD, self.DIV * 3 + self.PAD)
+        self.nodes[10].set_position(self.DIV + self.PAD, self.DIV * 3 + self.PAD)
+        self.nodes[11].set_position(self.DIV * 2 + self.PAD, self.DIV * 3 + self.PAD)
+        self.nodes[12].set_position(self.DIV * 4 + self.PAD, self.DIV * 3 + self.PAD)
+        self.nodes[13].set_position(self.DIV * 5 + self.PAD, self.DIV * 3 + self.PAD)
+        self.nodes[14].set_position(self.DIV * 6 + self.PAD, self.DIV * 3 + self.PAD)
+        self.nodes[15].set_position(self.DIV * 2 + self.PAD, self.DIV * 4 + self.PAD)
+        self.nodes[16].set_position(self.DIV * 3 + self.PAD, self.DIV * 4 + self.PAD)
+        self.nodes[17].set_position(self.DIV * 4 + self.PAD, self.DIV * 4 + self.PAD)
+        self.nodes[18].set_position(self.DIV + self.PAD, self.DIV * 5 + self.PAD)
+        self.nodes[19].set_position(self.DIV * 3 + self.PAD, self.DIV * 5 + self.PAD)
+        self.nodes[20].set_position(self.DIV * 5 + self.PAD, self.DIV * 5 + self.PAD)
+        self.nodes[21].set_position(0 + self.PAD, self.DIV * 6 + self.PAD)
+        self.nodes[22].set_position(self.DIV * 3 + self.PAD, self.DIV * 6 + self.PAD)
+        self.nodes[23].set_position(self.DIV * 6 + self.PAD, self.DIV * 6 + self.PAD)
+
+        # Assuming that 700 is the default canvas width
+        Node.dot_radius = (width * Node.DEFAULT_DOT_RADIUS) / 700
+        Node.radius = (width * Node.DEFAULT_RADIUS) / 700
+        Piece.radius = (width * Piece.DEFAULT_RADIUS) / 700
 
     def put_new_piece(self) -> int:
         """Puts a new piece on to the board.
@@ -313,7 +300,7 @@ class Board:
         node = self.nodes[node_id]
 
         assert node.piece is None
-        piece = Piece(canvas_width // 2 - 100, -100, piece_color, self.canvas)
+        piece = Piece(self.canvas_width // 2 - 100, -100, piece_color, self.canvas)
 
         piece.reached_position = False
         piece.target = (node.x, node.y)
@@ -401,8 +388,8 @@ class Board:
         piece = node.piece
 
         piece.reached_position = False
-        piece.target = (canvas_width // 2 - 100, -100)
-        vel = Vec2(canvas_width // 2 - 100 - piece.x, -100 - piece.y)
+        piece.target = (self.canvas_width // 2 - 100, -100)
+        vel = Vec2(self.canvas_width // 2 - 100 - piece.x, -100 - piece.y)
         vel.set_mag(12)
         piece.velocity = vel.as_tuple()
 

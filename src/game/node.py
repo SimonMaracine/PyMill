@@ -97,7 +97,7 @@ class Node:
         self.color = col
         self.canvas.itemconfig(self.oval, fill=color)
 
-    def set_position(self, x: int, y: int):
+    def set_position(self, x: float, y: float):
         self.x = x
         self.y = y
         if self.piece is not None:
