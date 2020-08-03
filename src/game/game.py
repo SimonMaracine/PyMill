@@ -58,7 +58,7 @@ class Game(ABC, tk.Frame):
         pass
 
     def on_resize(self, event):
-        smallest = min(event.width, event.height - 20)
+        smallest = min(event.width, event.height - 22)
 
         try:
             scale = smallest / self.canvas_width
