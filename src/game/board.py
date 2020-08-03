@@ -147,7 +147,6 @@ class Board:
         self.nodes[23].set_position(self.DIV * 6 + self.PAD, self.DIV * 6 + self.PAD)
 
         # Assuming that 700 is the default canvas width
-        Node.dot_radius = (width * Node.DEFAULT_DOT_RADIUS) / 700
         Node.radius = (width * Node.DEFAULT_RADIUS) / 700
         Piece.radius = (width * Piece.DEFAULT_RADIUS) / 700
 

@@ -6,10 +6,9 @@ class Node:
     """Class representing a node object used by the Board."""
 
     DEFAULT_RADIUS = 35
-    DEFAULT_DOT_RADIUS = 18
 
     radius = DEFAULT_RADIUS
-    dot_radius = DEFAULT_DOT_RADIUS
+    dot_radius = 18
     highlight_color = (200, 190, 210)
 
     def __init__(self, x: int, y: int, canvas: tk.Canvas, id_: int):
